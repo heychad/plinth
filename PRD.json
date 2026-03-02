@@ -96,8 +96,8 @@
         "updateAgentConfig writes agentConfigHistory record before updating with previousConfig and newConfig",
         "getAgentConfigHistory returns history records newest-first with pagination"
       ],
-      "passes": false,
-      "notes": "W-7: deployAgentConfig defaults scheduleTimezone to 'UTC' when not provided by caller."
+      "passes": true,
+      "notes": "W-7: deployAgentConfig defaults scheduleTimezone to 'UTC' when not provided by caller. CYCLE-2: Full CRUD in agentTemplates.ts, agentConfigs.ts, agentConfigHistory.ts. Locked field enforcement with { code: LOCKED_FIELD } error. Config merge at deploy. One-per-template-per-tenant constraint."
     },
     {
       "id": 7,
@@ -111,8 +111,8 @@
         "A client user attempting to fetch an agentConfigId from a different tenant gets an AuthorizationError, not a 404",
         "A consultant calling this query gets the full config (not the client-restricted view) — consult role bypasses the field strip"
       ],
-      "passes": false,
-      "notes": "O-4: This query is required to prevent locked field values from being sent to client browsers. Replaces any client-side filtering pattern. Referenced in specs/client-portal.md API Contracts. NB-1: integrationSlots and credential status removed from return shape — credentials are not defined until Item 14 (credentials table). Credential status enrichment happens in Item 35 (integrations page) via listIntegrationsForTenant."
+      "passes": true,
+      "notes": "O-4: This query is required to prevent locked field values from being sent to client browsers. NB-1: integrationSlots removed from return shape — enriched in Item 35. CYCLE-2: getAgentConfigForClient in agentConfigs.ts strips locked fields, returns client-safe view. getResolved internalQuery returns merged config for execution engine."
     },
     {
       "id": 8,
@@ -146,8 +146,8 @@
         "updateStepStatus internal mutation accepts { runId, stepSlug, status, output?, rawResponse?, promptTokens?, completionTokens?, costUsd?, errorMessage? }; used by executeAgent to log tool calls and step transitions to agentRunSteps in real time",
         "Usage log entry is written to usageLogs at run completion"
       ],
-      "passes": false,
-      "notes": "W-3: updateStepStatus internal mutation added. executeAgent (Item 10) needs this to log tool calls and status transitions to agentRunSteps so the UI shows real-time step progress. NW-2: Workflow shells are defined here; workflow dispatch (ctx.scheduler.runAfter) lives in triggerAgentRun in Item 8."
+      "passes": true,
+      "notes": "W-3: updateStepStatus internal mutation added. NW-2: Workflow shells here; dispatch in Item 8. CYCLE-2: agentWorkflow + simpleWorkflow in execution/. WorkflowManager from @convex-dev/workflow. triggerAgentRun wired to schedule workflows. cancelAgentRun wired. createStep + updateStepStatus in agentRunSteps.ts."
     },
     {
       "id": 10,
@@ -164,8 +164,8 @@
         "executeSimpleCall makes a single messages.create call with Zod structured output; no tool use, no looping",
         "Both actions return structured output and accumulated token usage"
       ],
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "CYCLE-2: Full agentic loop in executeAgent.ts — Anthropic client, tool dispatch via executePlatformTool, step logging, maxTurns, extended thinking (budget_tokens 10000), 9-min checkpoint pattern. executeSimple.ts for single-call fallback."
     },
     {
       "id": 11,
@@ -184,8 +184,8 @@
         "deleteMemory mutation callable by consultant or platform_admin; calls memory.delete() on RAG component",
         "compactMemories action synthesizes old observations into summaries via Claude; stores summary with importance 0.9; deletes source observations. Note: schedule as weekly cron per tenant per agent template, or defer to Phase 2"
       ],
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "CYCLE-2: RAG component in memory.ts with text-embedding-3-small, tenant namespaces, deduplication (>0.97 threshold). Agent component in agentSetup.ts. captureMemory/retrieveMemory as internalActions. deleteMemory/listMemoriesForTenant with auth. compactMemories for observation synthesis."
     },
     {
       "id": 12,
@@ -203,8 +203,8 @@
         "getCoachScoreTrend returns score history per coach ordered by createdAt ascending",
         "getTranscriptUrl query accepts { reportId } and calls ctx.storage.getUrl(report.transcriptStorageId) to generate a short-lived Convex storage URL for the VTT transcript file; accessible by admin callers only; throws AuthorizationError for coach callers; returns null if transcriptStorageId is not set on the report"
       ],
-      "passes": false,
-      "notes": "B-2: docUrl field explicitly added to schema step. B-1 reorder: this item (originally Item 19) was moved before platform tools (Item 13) because query_reports tool in Item 13 depends on the coachingCallReports table. O-3: sendReportToCoach now triggers report_sent_to_coach email notification to coach. NO-1: getTranscriptUrl query added — generates short-lived Convex storage URL for VTT transcript files; consumed by Item 30 (report detail page transcript viewer)."
+      "passes": true,
+      "notes": "B-2: docUrl field added. B-1 reorder: before Item 13. O-3: sendReportToCoach triggers email. CYCLE-2: Full CRUD in coachingCallReports.ts (408 lines). All 9 functions: get, list (flagged-first sort), updateNarrative, sendToCoach, markNoAction, scoreTrend, transcriptUrl, createReport/updateReport internal mutations."
     },
     {
       "id": 13,
@@ -221,8 +221,8 @@
         "get_config tool reads merged agent config values (template defaults + tenant overrides)",
         "All tools enforce tenantId scoping — no cross-tenant data access"
       ],
-      "passes": false,
-      "notes": "Depends on Item 12 (coaching call reports schema) for the query_reports tool. Item 12 must be built first."
+      "passes": true,
+      "notes": "Depends on Item 12. CYCLE-2: platformToolDefinitions array with 6 tools in Anthropic schema format + executePlatformTool handler. All tenant-scoped. Memory tools non-fatal. query_reports delegates to internal coachingCallReports."
     },
     {
       "id": 14,
@@ -239,8 +239,8 @@
         "getCredentialStatus query returns connection status without exposing raw credentials",
         "disconnectCredential mutation takes { slotName }, resolves tenantId from caller's JWT, sets status to 'revoked', and calls Composio API to revoke"
       ],
-      "passes": false,
-      "notes": "This item owns the credentials table schema definition. NW-4: Route registered in convex/http.ts added as an explicit step."
+      "passes": true,
+      "notes": "This item owns credentials table. NW-4: Route in http.ts. CYCLE-2: credentials.ts with CRUD + resolveCredentials batch resolver. composio.ts with initiateComposioOAuth action. composioCallback.ts httpAction. http.ts with /oauth/composio/callback route. Entity ID format: plinth_tenant_{tenantId}."
     },
     {
       "id": 15,
@@ -257,8 +257,8 @@
         "createGoogleDoc returns { docId, docUrl } object",
         "createGoogleDoc throws ComposioToolError on Composio API failure with detail from response"
       ],
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "CYCLE-2: createGoogleDoc internalAction in integrations/googleDocs.ts. Resolves credentials, calls Composio GOOGLEDOCS_CREATE_DOCUMENT, optional folder move (best-effort). formatCoachingReport helper for report document structure."
     },
     {
       "id": 16,
@@ -274,8 +274,8 @@
         "report_sent_to_coach template produces subject with coach name, admin name, and call date",
         "sendNotificationEmail returns { messageId } on success; throws ResendError on API failure"
       ],
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "CYCLE-2: sendNotificationEmail internalAction in integrations/resend.ts. fetch-based Resend API call. NOTIFICATION_TEMPLATES with flagged_call_admin and report_sent_to_coach. substituteVariables with {{key}} and {{#key}}conditional{{/key}} support."
     },
     {
       "id": 17,

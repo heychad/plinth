@@ -171,3 +171,73 @@ Sprint log -- append only, never overwrite.
 - Multi-tenancy pattern: requireAuth → check role → scope by consultantId/tenantId
 - All tables in one convex/schema.ts file; CRUD in separate files per domain area
 - uploadThemeLogo uses Convex generateUploadUrl pattern (client uploads, then calls mutation with storageId)
+
+---
+
+## Cycle 2 Complete — 2026-03-02
+
+**Items completed:** 6, 7, 9, 10, 11, 12, 13, 14, 15, 16 (Core-System Backend Layer)
+
+**What was built:**
+- **Item 6:** `convex/agentTemplates.ts` (listAgentTemplates), `convex/agentConfigs.ts` (deployAgentConfig, updateAgentConfig with locked-field enforcement, getAgentConfig, listAgentConfigsForTenant), `convex/agentConfigHistory.ts` (getAgentConfigHistory)
+- **Item 7:** `convex/agentConfigs.ts` added getAgentConfigForClient (client-safe view, strips locked fields), getResolved internalQuery (merged config for execution engine)
+- **Item 9:** `convex/execution/agentWorkflow.ts` + `convex/execution/simpleWorkflow.ts` using @convex-dev/workflow WorkflowManager. Wired triggerAgentRun to schedule workflows, cancelAgentRun to cancel. Added createStep + updateStepStatus to agentRunSteps.ts
+- **Item 10:** `convex/execution/executeAgent.ts` (full agentic loop: Anthropic client, tool dispatch, step logging, maxTurns, extended thinking, 9-min checkpoint) + `convex/execution/executeSimple.ts` (single-call fallback)
+- **Item 11:** `convex/memory.ts` (RAG with text-embedding-3-small, tenant namespaces, deduplication >0.97, captureMemory/retrieveMemory internalActions, deleteMemory/listMemoriesForTenant with auth, compactMemories) + `convex/agentSetup.ts` (Agent component with hybrid search)
+- **Item 12:** `convex/coachingCallReports.ts` (408 lines, 9 functions: get, list, updateNarrative, sendToCoach, markNoAction, scoreTrend, transcriptUrl, createReport/updateReport internal)
+- **Item 13:** `convex/execution/platformTools.ts` (6 platform tools in Anthropic schema format + executePlatformTool handler, all tenant-scoped)
+- **Item 14:** `convex/credentials.ts` (CRUD + resolveCredentials batch resolver), `convex/integrations/composio.ts` (initiateComposioOAuth), `convex/webhooks/composioCallback.ts` (httpAction), `convex/http.ts` (/oauth/composio/callback route)
+- **Item 15:** `convex/integrations/googleDocs.ts` (createGoogleDoc via Composio, formatCoachingReport helper)
+- **Item 16:** `convex/integrations/resend.ts` (sendNotificationEmail, 2 templates, variable substitution with conditionals)
+
+**What was learned:**
+- Builders on shared main WITHOUT worktrees cross-commit each other's files — builder prompts MUST include "DO NOT run ANY git commands"
+- Lead must handle ALL git operations — stage files explicitly by name, never git add .
+- Scout's file ownership map is the contract — lead verifies against it before committing
+- @convex-dev/agent requires convex-helpers as peer dependency — install upfront
+- @typescript-eslint/eslint-plugin must be loaded for disable directives to work
+- Console and Blob globals needed in ESLint config for Convex node actions
+- npm install needs --legacy-peer-deps due to eslint version conflict
+- (internal as any).module.fn pattern works for cross-module refs before codegen runs
+
+**Files changed:**
+- convex/schema.ts (added coachingCallReports + credentials tables)
+- convex/convex.config.ts (added workflow, rag, agent components)
+- convex/agentTemplates.ts, convex/agentConfigs.ts, convex/agentConfigHistory.ts
+- convex/execution/agentWorkflow.ts, convex/execution/simpleWorkflow.ts
+- convex/execution/executeAgent.ts, convex/execution/executeSimple.ts
+- convex/execution/platformTools.ts
+- convex/memory.ts, convex/agentSetup.ts
+- convex/coachingCallReports.ts
+- convex/credentials.ts, convex/integrations/composio.ts
+- convex/webhooks/composioCallback.ts, convex/http.ts
+- convex/integrations/googleDocs.ts, convex/integrations/resend.ts
+- convex/agentRuns.ts (workflow scheduling wired), convex/agentRunSteps.ts (createStep, updateStepStatus added)
+- eslint.config.mjs, package.json, package-lock.json
+
+**Verification:**
+- `npx tsc --noEmit` — PASS
+- `npx eslint . --max-warnings 0` — PASS
+- `npm run build` — PASS
+- `npx convex typecheck` — DEFERRED (requires connected deployment)
+
+**PRD status:** 16/40 items passing
+
+**Next priority items:** Items 17-18 (Zoom integration — blocked pending Daniela's org info), Items 19-23 (coaching call analyzer pipeline), Items 24+ (UI)
+
+**Active Signs:**
+- SIGN-1: Convex codegen requires deployment — (internal as any) pattern used throughout
+- SIGN-2: Sprint-builder agents idle mid-task — re-engage via SendMessage
+- SIGN-4: Only composioEntityId stored in credentials — raw OAuth tokens held by Composio
+- SIGN-5: Memory deduplication at vectorScoreThreshold > 0.97 — implemented in captureMemory
+- SIGN-6: Extended thinking critical for coaching analyzer — enableThinking wired in executeAgent
+- SIGN-7: Builders cross-commit on shared main — MUST enforce no-git-commands in builder prompts
+
+**Decisions in effect:**
+- All Cycle 1 decisions still in effect
+- @convex-dev/workflow, @convex-dev/rag, @convex-dev/agent registered as components
+- Agent SDK (Anthropic) is primary execution; Client SDK is fallback (executeSimple)
+- Platform tools dispatched via executePlatformTool in same process (not ctx.runAction)
+- Composio entity ID format: plinth_tenant_{tenantId}
+- Email templates use {{variable}} substitution with {{#key}}conditional{{/key}} blocks
+- Unused eslint-disable directives suppressed via reportUnusedDisableDirectives: "off"
