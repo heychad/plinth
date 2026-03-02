@@ -264,4 +264,69 @@ export default defineSchema({
     errorMessage: v.optional(v.string()),
     createdAt: v.number(),
   }).index("by_runId", ["runId"]),
+
+  // ─── Item 12: coaching-call-analyzer ──────────────────────────────────────
+
+  coachingCallReports: defineTable({
+    tenantId: v.id("tenants"),
+    agentRunId: v.id("agentRuns"),
+    coachId: v.string(),
+    coachName: v.optional(v.string()),
+    studentId: v.optional(v.string()),
+    studentName: v.optional(v.string()),
+    callNumber: v.union(
+      v.number(),
+      v.literal("onboarding"),
+      v.literal("bonus")
+    ),
+    zoomMeetingId: v.optional(v.string()),
+    recordedAt: v.optional(v.number()),
+    durationMinutes: v.optional(v.number()),
+    transcriptStorageId: v.string(),
+    parsedTranscript: v.optional(v.string()),
+    overallScore: v.number(),
+    dimensionScores: v.any(),
+    highlights: v.array(v.string()),
+    concerns: v.array(v.string()),
+    narrative: v.string(),
+    coachTalkPercent: v.optional(v.number()),
+    flagged: v.boolean(),
+    status: v.union(
+      v.literal("draft"),
+      v.literal("reviewed"),
+      v.literal("sent"),
+      v.literal("no_action")
+    ),
+    editedNarrative: v.optional(v.string()),
+    releasedToCoach: v.boolean(),
+    sentAt: v.optional(v.number()),
+    rawAnalysisJson: v.any(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_tenantId_status", ["tenantId", "status"])
+    .index("by_tenantId_coachId", ["tenantId", "coachId"])
+    .index("by_tenantId_flagged", ["tenantId", "flagged"])
+    .index("by_agentRunId", ["agentRunId"]),
+
+  // ─── Item 14: output-integrations ─────────────────────────────────────────
+
+  credentials: defineTable({
+    tenantId: v.id("tenants"),
+    slotName: v.string(),
+    provider: v.string(),
+    composioEntityId: v.optional(v.string()),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("active"),
+      v.literal("expired"),
+      v.literal("revoked"),
+      v.literal("error")
+    ),
+    connectedAt: v.optional(v.number()),
+    lastUsedAt: v.optional(v.number()),
+    errorMessage: v.optional(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_tenantId_slotName", ["tenantId", "slotName"]),
 });
