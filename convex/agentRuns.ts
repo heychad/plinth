@@ -1,7 +1,10 @@
-import { query, mutation, internalMutation } from "./_generated/server";
+import { query, mutation, internalMutation, internalQuery } from "./_generated/server";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
 import { requireAuth } from "./auth";
+import { workflowManager } from "./execution/agentWorkflow";
+import { simpleWorkflowManager } from "./execution/simpleWorkflow";
+import { internal } from "./_generated/api";
 
 export const triggerAgentRun = mutation({
   args: {
@@ -82,7 +85,27 @@ export const triggerAgentRun = mutation({
       updatedAt: now,
     });
 
-    // TODO: Schedule workflow (Item 9)
+    // Schedule the appropriate workflow based on the template's executionMode
+    let workflowId: string;
+    if (template.executionMode === "simple") {
+      workflowId = await simpleWorkflowManager.start(
+        ctx,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (internal as any).execution.simpleWorkflow.simpleWorkflow,
+        { runId }
+      );
+    } else {
+      // Default: "autonomous" mode using Agent SDK
+      workflowId = await workflowManager.start(
+        ctx,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (internal as any).execution.agentWorkflow.agentWorkflow,
+        { runId }
+      );
+    }
+
+    // Store the workflowId on the run record for status tracking and cancellation
+    await ctx.db.patch(runId, { workflowId });
 
     return runId;
   },
@@ -192,7 +215,17 @@ export const cancelAgentRun = mutation({
 
     const now = Date.now();
 
-    // TODO: Cancel workflow (Item 9)
+    // Cancel the Convex workflow if one is running
+    if (run.workflowId) {
+      try {
+        // Try agent workflow manager first; if the run used simple mode the
+        // cancel call is identical (both point to the same component).
+        await workflowManager.cancel(ctx, run.workflowId as any);
+      } catch {
+        // If cancellation fails (e.g. already completed), we still mark
+        // the run as cancelled in our DB.
+      }
+    }
 
     await ctx.db.patch(args.runId, {
       status: "cancelled",
@@ -263,5 +296,18 @@ export const updateRunStatus = internalMutation({
     }
 
     await ctx.db.patch(args.runId, patch);
+  },
+});
+
+/**
+ * Internal query: fetch a single agentRun by ID.
+ * Used by workflow handlers to read run state at the start of execution.
+ */
+export const getById = internalQuery({
+  args: {
+    runId: v.id("agentRuns"),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.runId);
   },
 });
