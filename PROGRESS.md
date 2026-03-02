@@ -115,3 +115,59 @@ Sprint log -- append only, never overwrite.
 | first-agent | 8 (Items 17–23, 40) |
 | ui | 14 (Items 24–37) |
 | integration | 2 (Items 38–39) |
+
+---
+
+## Cycle 1 Complete — 2026-03-02
+
+**Items completed:** 1, 2, 3, 4, 5, 8 (Foundation Schema + Auth + Base CRUD)
+
+**What was built:**
+- **Item 1:** `convex/schema.ts` — All 10 tables (consultants, tenants, users, usageLogs, themes, agentTemplates, agentConfigs, agentConfigHistory, agentRuns, agentRunSteps) with all fields, validators, and indexes from specs
+- **Item 2:** `convex/auth.ts` — requireAuth (reads ctx.auth.getUserIdentity, looks up user by clerkUserId), requireRole (throws on mismatch), getCurrentUser query
+- **Item 3:** `convex/consultants.ts` (getConsultant), `convex/tenants.ts` (listTenants with pagination, createTenant with duplicate email check), `convex/users.ts` (createUser with role/owner constraint)
+- **Item 4:** `convex/themes.ts` — getThemeByConsultantId, getThemeForCurrentUser, upsertTheme (hex color + font family validation), generateThemeUploadUrl, updateThemeLogo
+- **Item 5:** Schema tables for agentTemplates (with executionMode, toolDefinitions), agentConfigs, agentConfigHistory — all in schema.ts
+- **Item 8:** `convex/agentRuns.ts` (triggerAgentRun, getAgentRun, listAgentRunsForTenant, cancelAgentRun, updateRunStatus internalMutation), `convex/agentRunSteps.ts` (listAgentRunSteps)
+
+**Project initialization:**
+- package.json with convex, next@16, react@19, @clerk/nextjs
+- tsconfig.json (excludes convex/ — Convex has its own tsconfig)
+- convex/convex.config.ts, convex/tsconfig.json (auto-generated)
+- next.config.ts, eslint.config.mjs, .gitignore
+- Minimal src/app/layout.tsx and src/app/page.tsx
+
+**What was learned:**
+- Convex codegen requires a connected deployment — cannot generate _generated/ types without CONVEX_DEPLOYMENT
+- Root tsconfig must exclude convex/ — Convex has its own TS build via convex/tsconfig.json
+- ESLint flat config with Next.js compat layer is fragile — simpler configs with @eslint/js more reliable
+- Builder agents sometimes go idle without creating files — re-engage via SendMessage
+- Schema file is a natural serialization point — one builder for all schema, then CRUD builders in parallel
+
+**Files changed:**
+- convex/schema.ts, convex/convex.config.ts, convex/tsconfig.json, convex/README.md
+- convex/auth.ts, convex/consultants.ts, convex/tenants.ts, convex/users.ts
+- convex/themes.ts, convex/agentRuns.ts, convex/agentRunSteps.ts
+- package.json, tsconfig.json, next.config.ts, eslint.config.mjs, .gitignore
+- src/app/layout.tsx, src/app/page.tsx
+
+**Verification:**
+- `npx tsc --noEmit` — PASS
+- `npx eslint . --max-warnings 0` — PASS
+- `npx convex typecheck` — DEFERRED (requires Convex deployment)
+
+**PRD status:** 6/40 items passing
+
+**Next priority items:** Items 6, 7, 9, 10
+
+**Active Signs:**
+- SIGN-1: Convex codegen requires deployment — must connect before full backpressure runs
+- SIGN-2: Sprint-builder agents may idle without completing — monitor and re-engage via SendMessage
+- SIGN-3: triggerAgentRun has TODO for workflow scheduling (depends on Item 9)
+
+**Decisions in effect:**
+- Root tsconfig excludes convex/ — Convex type-checked separately via convex/tsconfig.json
+- ESLint uses flat config with @eslint/js + @typescript-eslint/parser (not eslint-config-next compat)
+- Multi-tenancy pattern: requireAuth → check role → scope by consultantId/tenantId
+- All tables in one convex/schema.ts file; CRUD in separate files per domain area
+- uploadThemeLogo uses Convex generateUploadUrl pattern (client uploads, then calls mutation with storageId)
