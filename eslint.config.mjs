@@ -40,6 +40,8 @@ export default [
         Response: "readonly",
         Headers: "readonly",
         URL: "readonly",
+        Buffer: "readonly",
+        setTimeout: "readonly",
       },
     },
   },

@@ -329,4 +329,33 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.number(),
   }).index("by_tenantId_slotName", ["tenantId", "slotName"]),
+
+  // ─── Items 17, 18, 38: zoom-integration ──────────────────────────────────
+
+  zoomCredentials: defineTable({
+    tenantId: v.id("tenants"),
+    accountId: v.string(),
+    clientId: v.string(),
+    clientSecret: v.string(), // encrypted
+    webhookSecretToken: v.string(), // encrypted
+    accessToken: v.optional(v.string()), // encrypted, cached
+    accessTokenExpiresAt: v.optional(v.number()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  }).index("by_tenantId", ["tenantId"]),
+
+  zoomWebhookEvents: defineTable({
+    tenantId: v.id("tenants"),
+    zoomMeetingId: v.string(),
+    eventType: v.string(),
+    zoomUserId: v.string(),
+    rawPayload: v.any(),
+    processed: v.boolean(),
+    processedAt: v.optional(v.number()),
+    agentRunId: v.optional(v.id("agentRuns")),
+    error: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_zoomMeetingId", ["zoomMeetingId"])
+    .index("by_tenantId_processed", ["tenantId", "processed"]),
 });
