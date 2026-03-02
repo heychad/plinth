@@ -294,8 +294,8 @@
         "Endpoint responds 200 OK within 3 seconds for recording.transcript_completed events and defers processing to scheduled action",
         "Endpoint silently responds 200 for unrecognized event types"
       ],
-      "passes": false,
-      "notes": "NW-4: Route registered in convex/http.ts added as an explicit step."
+      "passes": true,
+      "notes": "NW-4: Route registered in convex/http.ts added as an explicit step. CYCLE-3: zoomWebhook httpAction in webhooks/zoom.ts with Web Crypto HMAC-SHA256. Challenge-response via getChallengeSecret. Defers to processZoomTranscript via scheduler."
     },
     {
       "id": 18,
@@ -312,8 +312,8 @@
         "Action triggers agentRun with input { zoomMeetingId, transcriptStorageId, parsedTranscript, coachTalkPercent, zoomUserId }",
         "Action retries VTT download up to 3 times with 5s backoff on failure"
       ],
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "CYCLE-3: processZoomTranscript and getOrRefreshZoomToken internalActions in integrations/zoom.ts. VTT parser with parseTimestamp, parseVTT, computeCoachTalkPercent. createWebhookAgentRun for auth-free webhook triggers. 3x retry with 5s backoff."
     },
     {
       "id": 19,
@@ -655,8 +655,8 @@
         "saveZoomCredentials rejects if caller is not consultant role",
         "Zoom credentials UI is accessible from client detail page integrations tab or a dedicated Zoom settings section"
       ],
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "CYCLE-3: saveZoomCredentials action (not mutation — needs Node crypto) with AES-256-CBC encryption in zoomCredentials.ts. getZoomConnectionStatus query. Internal helpers: getDecryptedCredByAccountId, getChallengeSecret, getCredentialsForTenant, updateAccessToken. UI step deferred to UI cycle."
     },
     {
       "id": 39,

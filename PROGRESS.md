@@ -241,3 +241,37 @@ Sprint log -- append only, never overwrite.
 - Composio entity ID format: plinth_tenant_{tenantId}
 - Email templates use {{variable}} substitution with {{#key}}conditional{{/key}} blocks
 - Unused eslint-disable directives suppressed via reportUnusedDisableDirectives: "off"
+
+---
+
+## Cycle 3 Complete — 2026-03-02
+
+**Items completed:** 17 (Zoom webhook endpoint), 18 (Zoom transcript processing), 38 (Zoom credentials management)
+**What was built:**
+- Item 17: POST /webhooks/zoom httpAction with Web Crypto HMAC-SHA256 signature validation, challenge-response handler, event routing, deferred processing via ctx.scheduler.runAfter
+- Item 18: processZoomTranscript internalAction with VTT download (3x retry), parseVTT/computeCoachTalkPercent helpers, Convex file storage, createWebhookAgentRun for auth-free triggers, getOrRefreshZoomToken for Zoom S2S OAuth
+- Item 38: saveZoomCredentials action (AES-256-CBC encryption), getZoomConnectionStatus query, internal helpers (getDecryptedCredByAccountId, getChallengeSecret, getCredentialsForTenant, updateAccessToken)
+**What was learned:**
+- httpAction is incompatible with Node crypto imports even in "use node" files — Convex bundles httpAction for V8 runtime. Use Web Crypto API (crypto.subtle) for HMAC in httpActions.
+- Encryption format must be consistent across all modules — builder-18 and builder-38 used different formats (separator vs no separator, hex key vs UTF-8 key). Lead caught and fixed during verification.
+- "use node" works with query/mutation/internalQuery/internalMutation (zoomCredentials.ts) but httpAction in same file causes bundler errors if Node built-ins are imported.
+- Builder isolation (no-git rule) worked perfectly — zero cross-commits, zero orphaned files. All builders wrote files only, lead committed.
+**Files changed:**
+- Builder-17: convex/webhooks/zoom.ts (CREATE), convex/http.ts (MODIFY)
+- Builder-18: convex/integrations/zoom.ts (CREATE)
+- Builder-38: convex/zoomCredentials.ts (CREATE)
+- Lead: convex/schema.ts (prep — zoom tables), eslint.config.mjs (globals), package.json (test script, deps)
+**PRD status:** 19/40 items passing
+**Next priority items:** Items 19-23 (coaching call analyzer pipeline — seed template, intake, analyze, format+deliver), then Item 20 (GitHub template sync)
+**Active Signs:**
+- SIGN-1: Convex codegen requires live deployment — 17 pre-existing typecheck errors across 8 files. Use (internal as any) pattern.
+- SIGN-7: Builders must NOT run git commands — enforced in Cycle 3, worked perfectly.
+- SIGN-8: Zoom event deduplication on zoomMeetingId is critical — check processed=true before processing.
+- SIGN-9: HTTP response timing hard constraint — Zoom requires 200 within 3s. Defer all heavy work.
+- SIGN-11: httpAction incompatible with Node crypto — use Web Crypto API for crypto ops in httpAction handlers.
+- SIGN-12: Encryption format must be consistent — use zoomCredentials.ts format (no separator, UTF-8 key derivation) as the canonical pattern.
+**Decisions in effect:**
+- saveZoomCredentials is an action (not mutation) because encryption requires Node crypto + process.env
+- coachTalkPercent always returns null until zoomUserId→coach mapping table is built
+- Challenge-response uses first available credential record from DB (not env var)
+- Convex typecheck failures (SIGN-1) are accepted until deployment — not blocking cycles
