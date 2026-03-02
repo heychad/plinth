@@ -1,3 +1,5 @@
+"use node";
+
 import { v } from "convex/values";
 import {
   internalAction,
@@ -220,11 +222,12 @@ export const createGoogleDoc = internalAction({
     const entity = composio.getEntity(credential.composioEntityId);
 
     // 4. Call Composio tool: GOOGLEDOCS_CREATE_DOCUMENT
+    // Composio uses "title" + "body" for the document content
     const createResult = await entity.execute({
       actionName: "GOOGLEDOCS_CREATE_DOCUMENT",
       params: {
         title,
-        content,
+        body: content,
       },
     });
 
@@ -255,7 +258,7 @@ export const createGoogleDoc = internalAction({
         actionName: "GOOGLEDRIVE_MOVE_FILE",
         params: {
           file_id: docId,
-          new_parent_id: folderId,
+          folder_id: folderId,
         },
       });
       // Move failures are non-fatal — doc is created; folder placement is nice-to-have
