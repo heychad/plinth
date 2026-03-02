@@ -62,7 +62,7 @@ export const saveZoomCredentials = action({
     webhookSecretToken: v.string(),
   },
   handler: async (ctx, args) => {
-    const auth = await ctx.runQuery(internal.zoomCredentials.getCallerAuth, {});
+    const auth = await ctx.runQuery((internal as any).zoomCredentials.getCallerAuth, {});
     if (!auth) {
       throw new Error("Not authenticated");
     }
@@ -71,7 +71,7 @@ export const saveZoomCredentials = action({
       throw new Error("Only consultants can manage Zoom credentials");
     }
 
-    const tenant = await ctx.runQuery(internal.zoomCredentials.getTenantById, {
+    const tenant = await ctx.runQuery((internal as any).zoomCredentials.getTenantById, {
       tenantId: args.tenantId,
     });
     if (!tenant) {
@@ -85,7 +85,7 @@ export const saveZoomCredentials = action({
     const encryptedClientSecret = encrypt(args.clientSecret);
     const encryptedWebhookSecretToken = encrypt(args.webhookSecretToken);
 
-    return await ctx.runMutation(internal.zoomCredentials.upsertZoomCredentials, {
+    return await ctx.runMutation((internal as any).zoomCredentials.upsertZoomCredentials, {
       tenantId: args.tenantId,
       accountId: args.accountId,
       clientId: args.clientId,
@@ -225,8 +225,7 @@ export const getCredentialsForTenant = internalQuery({
 });
 
 /**
- * Look up zoomCredentials by accountId.
- * Used by webhook handler to resolve tenant from incoming Zoom event.
+ * Look up zoomCredentials by accountId (raw, encrypted doc).
  * No index on accountId — filter scan is acceptable (small table).
  */
 export const getZoomCredentialsByAccountId = internalQuery({
@@ -238,6 +237,41 @@ export const getZoomCredentialsByAccountId = internalQuery({
       .query("zoomCredentials")
       .filter((q) => q.eq(q.field("accountId"), args.accountId))
       .first();
+  },
+});
+
+/**
+ * Look up zoomCredentials by accountId and return with decrypted webhookSecretToken.
+ * Used by the webhook httpAction (V8 runtime) which cannot use Node crypto directly.
+ */
+export const getDecryptedCredByAccountId = internalQuery({
+  args: {
+    accountId: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const cred = await ctx.db
+      .query("zoomCredentials")
+      .filter((q) => q.eq(q.field("accountId"), args.accountId))
+      .first();
+    if (!cred) return null;
+    return {
+      tenantId: cred.tenantId,
+      webhookSecretToken: decrypt(cred.webhookSecretToken),
+    };
+  },
+});
+
+/**
+ * Get any tenant's decrypted webhookSecretToken for the Zoom challenge-response.
+ * During initial webhook URL validation, Zoom doesn't include accountId,
+ * so we use the first available credential record.
+ */
+export const getChallengeSecret = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    const cred = await ctx.db.query("zoomCredentials").first();
+    if (!cred) return null;
+    return decrypt(cred.webhookSecretToken);
   },
 });
 

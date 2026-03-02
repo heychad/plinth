@@ -1,24 +1,22 @@
-"use node";
-
-import { httpAction, internalMutation, internalQuery } from "../_generated/server";
+import { httpAction, internalMutation } from "../_generated/server";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
-import { createHmac, createDecipheriv } from "crypto";
 
-// ─── Encryption helper (must match zoomCredentials.ts format) ────────────────
-function getEncryptionKey(): Buffer {
-  const key = process.env.ENCRYPTION_KEY;
-  if (!key) throw new Error("ENCRYPTION_KEY environment variable is not set");
-  return Buffer.from(key, "utf8").subarray(0, 32);
-}
+// ─── Web Crypto HMAC-SHA256 (V8-compatible, no Node crypto needed) ───────────
 
-function decrypt(encryptedHex: string): string {
-  const keyBuf = getEncryptionKey();
-  const iv = Buffer.from(encryptedHex.slice(0, 32), "hex");
-  const decipher = createDecipheriv("aes-256-cbc", keyBuf, iv);
-  let decrypted = decipher.update(encryptedHex.slice(32), "hex", "utf8");
-  decrypted += decipher.final("utf8");
-  return decrypted;
+async function hmacSha256(secret: string, message: string): Promise<string> {
+  const enc = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(message));
+  return Array.from(new Uint8Array(sig))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 /**
@@ -48,7 +46,9 @@ export const zoomWebhook = httpAction(async (ctx, request) => {
   const eventType = payload.event as string | undefined;
 
   // ── Challenge-response (no signature required for this event) ────────────
-  // Zoom sends this to validate the endpoint URL
+  // Zoom sends this to validate the endpoint URL during initial setup.
+  // At this point Zoom doesn't include accountId, so we look up any stored
+  // webhook secret from the DB.
   if (eventType === "endpoint.url_validation") {
     const plainToken = (payload.payload as Record<string, unknown>)
       ?.plainToken as string | undefined;
@@ -56,15 +56,17 @@ export const zoomWebhook = httpAction(async (ctx, request) => {
       return new Response("Missing plainToken", { status: 400 });
     }
 
-    // For challenge-response we need the webhook secret token.
-    // Zoom doesn't tell us which account this is for during validation,
-    // so we use the environment variable ZOOM_WEBHOOK_SECRET_TOKEN if set,
-    // or look for any active zoomCredentials record.
-    // Per Zoom docs: the secret used is the one configured in the app.
-    const secretToken = process.env.ZOOM_WEBHOOK_SECRET_TOKEN ?? "";
-    const encryptedToken = createHmac("sha256", secretToken)
-      .update(plainToken)
-      .digest("hex");
+    // Get the webhook secret from DB (first available credential record)
+    const secretToken = await ctx.runQuery(
+      (internal as any).zoomCredentials.getChallengeSecret,
+      {}
+    );
+
+    if (!secretToken) {
+      return new Response("No Zoom credentials configured", { status: 500 });
+    }
+
+    const encryptedToken = await hmacSha256(secretToken, plainToken);
 
     return new Response(
       JSON.stringify({ plainToken, encryptedToken }),
@@ -84,9 +86,9 @@ export const zoomWebhook = httpAction(async (ctx, request) => {
     return new Response("Missing accountId in payload", { status: 400 });
   }
 
-  // Look up the zoomCredentials record for this accountId to get the secret
+  // Look up the decrypted zoomCredentials for this accountId
   const zoomCred = await ctx.runQuery(
-    (internal as any).webhooks.zoom.getZoomCredByAccountId,
+    (internal as any).zoomCredentials.getDecryptedCredByAccountId,
     { accountId: zoomAccountId }
   );
 
@@ -96,12 +98,9 @@ export const zoomWebhook = httpAction(async (ctx, request) => {
   }
 
   // Validate signature: v0:{timestamp}:{raw_body} → HMAC-SHA256 → v0={hex}
-  // webhookSecretToken is stored encrypted — decrypt before HMAC
-  const secretToken = decrypt(zoomCred.webhookSecretToken);
   const message = `v0:${timestamp}:${rawBody}`;
-  const expectedSig = "v0=" + createHmac("sha256", secretToken)
-    .update(message)
-    .digest("hex");
+  const expectedHash = await hmacSha256(zoomCred.webhookSecretToken, message);
+  const expectedSig = `v0=${expectedHash}`;
 
   if (signature !== expectedSig) {
     return new Response("Signature mismatch", { status: 400 });
@@ -172,20 +171,6 @@ export const zoomWebhook = httpAction(async (ctx, request) => {
 
   // ── All other events: acknowledge silently ────────────────────────────────
   return new Response("OK", { status: 200 });
-});
-
-/**
- * Internal query: look up a zoomCredentials record by Zoom accountId.
- * Used by the webhook handler to resolve tenantId and get webhookSecretToken.
- */
-export const getZoomCredByAccountId = internalQuery({
-  args: { accountId: v.string() },
-  handler: async (ctx, { accountId }) => {
-    // No index on accountId — scan all records and filter
-    // (zoomCredentials is expected to be a small table per deployment)
-    const all = await ctx.db.query("zoomCredentials").collect();
-    return all.find((c) => c.accountId === accountId) ?? null;
-  },
 });
 
 /**

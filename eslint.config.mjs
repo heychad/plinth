@@ -42,6 +42,8 @@ export default [
         URL: "readonly",
         Buffer: "readonly",
         setTimeout: "readonly",
+        TextEncoder: "readonly",
+        crypto: "readonly",
       },
     },
   },
