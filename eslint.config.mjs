@@ -1,7 +1,13 @@
 import js from "@eslint/js";
 import tsParser from "@typescript-eslint/parser";
+import tsPlugin from "@typescript-eslint/eslint-plugin";
 
 export default [
+  {
+    linterOptions: {
+      reportUnusedDisableDirectives: "off",
+    },
+  },
   js.configs.recommended,
   {
     files: ["**/*.ts", "**/*.tsx"],
@@ -11,6 +17,9 @@ export default [
         ecmaVersion: "latest",
         sourceType: "module",
       },
+    },
+    plugins: {
+      "@typescript-eslint": tsPlugin,
     },
     rules: {
       "no-unused-vars": "off",
@@ -23,7 +32,9 @@ export default [
     languageOptions: {
       globals: {
         process: "readonly",
+        console: "readonly",
         fetch: "readonly",
+        Blob: "readonly",
         AbortSignal: "readonly",
         Request: "readonly",
         Response: "readonly",
