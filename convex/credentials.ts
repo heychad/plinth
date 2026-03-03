@@ -154,7 +154,7 @@ export const resolveCredentials = internalAction({
 
     for (const slotName of args.slotNames) {
       const credential = await ctx.runQuery(
-        internal.credentials.getCredentialBySlot,
+        (internal as any).credentials.getCredentialBySlot,
         { tenantId: args.tenantId, slotName }
       );
 

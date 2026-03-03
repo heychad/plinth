@@ -88,7 +88,7 @@ export const captureMemory = internalAction({
         namespace,
         text: args.content,
         importance: args.importance,
-        filterValues,
+        filterValues: filterValues as any,
       });
     } catch (error) {
       // Non-fatal — memory failure must never block an agent run
@@ -150,7 +150,7 @@ export const retrieveMemory = internalAction({
         limit: args.limit ?? 5,
       };
       if (filters.length > 0) {
-        searchOpts.filters = filters;
+        searchOpts.filters = filters as any;
       }
 
       const { results, text, entries } = await memory.search(ctx, searchOpts);
@@ -305,7 +305,7 @@ export const compactMemories = internalAction({
         const isObservation = (entry.filterValues as Array<{ name: string; value: unknown }>)
           ?.some((fv) => fv.name === "type" && fv.value === "observation");
         const createdAt =
-          typeof entry.createdAt === "number" ? entry.createdAt : 0;
+          typeof (entry as any).createdAt === "number" ? (entry as any).createdAt : 0;
         return isObservation && createdAt < cutoffMs;
       });
 
@@ -318,7 +318,7 @@ export const compactMemories = internalAction({
       const anthropic = new Anthropic();
 
       const observationTexts = oldEntries
-        .map((e, i) => `${i + 1}. ${e.text ?? ""}`)
+        .map((e, i) => `${i + 1}. ${(e as any).text ?? ""}`)
         .join("\n");
 
       const response = await anthropic.messages.create({

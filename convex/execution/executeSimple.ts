@@ -92,7 +92,9 @@ export const executeSimple = internalAction({
         errorMessage: errMsg,
       });
 
-      throw new Error(`Anthropic API error: ${errMsg}`, { cause: err });
+      const apiErr = new Error(`Anthropic API error: ${errMsg}`);
+      (apiErr as any).cause = err;
+      throw apiErr;
     }
 
     const inputTokens = response.usage.input_tokens;

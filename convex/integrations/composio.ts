@@ -26,7 +26,7 @@ export const initiateComposioOAuth = action({
     }
 
     const authInfo = await ctx.runQuery(
-      internal.integrations.composio.getAuthInfoForAction,
+      (internal as any).integrations.composio.getAuthInfoForAction,
       { clerkUserId: identity.subject, tenantId: args.tenantId }
     );
 
@@ -43,7 +43,7 @@ export const initiateComposioOAuth = action({
     const entityId = `plinth_tenant_${args.tenantId}`;
 
     // Create/update credential record with status "pending" before initiating OAuth
-    await ctx.runMutation(internal.credentials.upsertCredential, {
+    await ctx.runMutation((internal as any).credentials.upsertCredential, {
       tenantId: args.tenantId,
       slotName: args.slotName,
       provider: args.provider,

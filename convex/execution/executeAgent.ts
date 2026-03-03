@@ -97,7 +97,7 @@ export const executeAgent = internalAction({
       (t) => ({
         name: t.name,
         description: t.description,
-        input_schema: t.input_schema as Anthropic.Tool.InputSchema,
+        input_schema: t.input_schema as unknown as Anthropic.Tool.InputSchema,
       })
     );
 
@@ -195,14 +195,14 @@ export const executeAgent = internalAction({
       let response: Anthropic.Message;
       try {
         response = await client.messages.create(
-          requestParams as Anthropic.MessageCreateParamsNonStreaming
+          requestParams as unknown as Anthropic.MessageCreateParamsNonStreaming
         );
       } catch (err: unknown) {
         const errMsg =
           err instanceof Error ? err.message : "Unknown Anthropic API error";
-        throw new Error(`Anthropic API error on turn ${turn}: ${errMsg}`, {
-          cause: err,
-        });
+        const apiErr = new Error(`Anthropic API error on turn ${turn}: ${errMsg}`);
+        (apiErr as any).cause = err;
+        throw apiErr;
       }
 
       const inputTokens = response.usage.input_tokens;

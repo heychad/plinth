@@ -42,7 +42,7 @@ export const composioCallback = httpAction(async (ctx, request) => {
       const tenantId = entityId.replace("plinth_tenant_", "") as Id<"tenants">;
       try {
         await ctx.runMutation(
-          internal.webhooks.composioCallback.setCredentialStatus,
+          (internal as any).webhooks.composioCallback.setCredentialStatus,
           {
             tenantId,
             slotName,
@@ -93,7 +93,7 @@ export const composioCallback = httpAction(async (ctx, request) => {
 
   try {
     await ctx.runMutation(
-      internal.webhooks.composioCallback.setCredentialStatus,
+      (internal as any).webhooks.composioCallback.setCredentialStatus,
       {
         tenantId,
         slotName,

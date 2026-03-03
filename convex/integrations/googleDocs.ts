@@ -199,7 +199,7 @@ export const createGoogleDoc = internalAction({
   ): Promise<{ docId: string; docUrl: string }> => {
     // 1. Resolve credentials for slotName "google_docs"
     const credential = await ctx.runQuery(
-      internal.integrations.googleDocs.getCredentialBySlot,
+      (internal as any).integrations.googleDocs.getCredentialBySlot,
       { tenantId, slotName: "google_docs" }
     );
 
@@ -266,7 +266,7 @@ export const createGoogleDoc = internalAction({
 
     // 6. Update credential.lastUsedAt
     await ctx.runMutation(
-      internal.integrations.googleDocs.touchCredentialLastUsed,
+      (internal as any).integrations.googleDocs.touchCredentialLastUsed,
       { credentialId: credential._id }
     );
 

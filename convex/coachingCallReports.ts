@@ -120,7 +120,7 @@ export const listCoachingReports = query({
       dbQuery = ctx.db
         .query("coachingCallReports")
         .withIndex("by_tenantId_status", (q) =>
-          q.eq("tenantId", args.tenantId).eq("status", args.status!)
+          q.eq("tenantId", args.tenantId).eq("status", args.status! as "draft" | "reviewed" | "sent" | "no_action")
         );
     } else {
       // Default: all for tenant, sorted desc by createdAt via status index with full scan
