@@ -74,7 +74,7 @@
       "steps": [
         "Schema defines agentTemplates with slug, displayName, description, category union, version, isActive, isPipeline, executionMode ('autonomous'|'simple'), estimatedDurationSeconds, systemPrompt, integrationSlots, inputSchema, defaultLockedFields, defaultCustomizableFields, defaultConfig, pipelineSteps, toolDefinitions (array of custom tool definitions: name, description, inputSchema, handlerRef), createdBy (Id<'users'>)",
         "Schema defines agentConfigs with tenantId, templateId, displayName, status union (building|testing|deployed|paused|archived), config, lockedFields, customizableFields, modelOverride, scheduleCron, scheduleTimezone, deployedAt, deployedBy (Id<'users'>), version, updatedByType ('admin'|'client'|'template_sync')",
-        "Schema defines agentConfigHistory with agentConfigId, tenantId, changedByUserId (Id<'users'>), previousConfig, newConfig, changedByType, changeSummary, createdAt (number, Unix timestamp \u2014 required)",
+        "Schema defines agentConfigHistory with agentConfigId, tenantId, changedByUserId (Id<'users'>), previousConfig, newConfig, changedByType, changeSummary, createdAt (number, Unix timestamp — required)",
         "Indexes exist: agentTemplates.by_slug, agentTemplates.by_category_isActive, agentConfigs.by_tenantId, agentConfigs.by_templateId, agentConfigs.by_tenantId_templateId (composite unique), agentConfigHistory.by_agentConfigId",
         "npx convex dev --typecheck succeeds with all config tables"
       ],
@@ -102,17 +102,17 @@
     {
       "id": 7,
       "category": "foundation",
-      "description": "getAgentConfigForClient query: returns AgentConfigClientView for the calling client user, stripping locked field values and exposing only customizableFields. Critical multi-tenancy guard \u2014 locked field values must not be sent to client browsers.",
+      "description": "getAgentConfigForClient query: returns AgentConfigClientView for the calling client user, stripping locked field values and exposing only customizableFields. Critical multi-tenancy guard — locked field values must not be sent to client browsers.",
       "spec": "specs/client-portal.md",
       "steps": [
         "getAgentConfigForClient query accepts { agentConfigId } and validates caller is a client user in the tenant that owns the agentConfigId; throws AuthorizationError if tenantId mismatch",
-        "Query returns AgentConfigClientView: { displayName, status, template.displayName, template.description, template.inputSchema, config (only customizableFields values \u2014 no locked field values), customizableFields } \u2014 does NOT include integrationSlots or credential status (credential status is provided separately by listIntegrationsForTenant in Item 35)",
-        "Locked field values are excluded from the returned config object \u2014 the lockedFields array itself is also excluded from the response",
+        "Query returns AgentConfigClientView: { displayName, status, template.displayName, template.description, template.inputSchema, config (only customizableFields values — no locked field values), customizableFields } — does NOT include integrationSlots or credential status (credential status is provided separately by listIntegrationsForTenant in Item 35)",
+        "Locked field values are excluded from the returned config object — the lockedFields array itself is also excluded from the response",
         "A client user attempting to fetch an agentConfigId from a different tenant gets an AuthorizationError, not a 404",
-        "A consultant calling this query gets the full config (not the client-restricted view) \u2014 consult role bypasses the field strip"
+        "A consultant calling this query gets the full config (not the client-restricted view) — consult role bypasses the field strip"
       ],
       "passes": true,
-      "notes": "O-4: This query is required to prevent locked field values from being sent to client browsers. NB-1: integrationSlots removed from return shape \u2014 enriched in Item 35. CYCLE-2: getAgentConfigForClient in agentConfigs.ts strips locked fields, returns client-safe view. getResolved internalQuery returns merged config for execution engine."
+      "notes": "O-4: This query is required to prevent locked field values from being sent to client browsers. NB-1: integrationSlots removed from return shape — enriched in Item 35. CYCLE-2: getAgentConfigForClient in agentConfigs.ts strips locked fields, returns client-safe view. getResolved internalQuery returns merged config for execution engine."
     },
     {
       "id": 8,
@@ -131,7 +131,7 @@
         "cancelAgentRun sets status to 'cancelled'; throws if run is already in terminal state"
       ],
       "passes": true,
-      "notes": "NW-2: triggerAgentRun workflow dispatch step added \u2014 triggerAgentRun schedules the selected workflow via ctx.scheduler.runAfter and stores workflowId on the agentRun document. This is the authoritative location for workflow dispatch; Item 9 (Workflows setup) defines the workflow shells and Item 10 (executeAgent) is the action called by those workflows. CYCLE-1: Schema + all CRUD in agentRuns.ts and agentRunSteps.ts. Workflow scheduling is TODO (depends on Item 9)."
+      "notes": "NW-2: triggerAgentRun workflow dispatch step added — triggerAgentRun schedules the selected workflow via ctx.scheduler.runAfter and stores workflowId on the agentRun document. This is the authoritative location for workflow dispatch; Item 9 (Workflows setup) defines the workflow shells and Item 10 (executeAgent) is the action called by those workflows. CYCLE-1: Schema + all CRUD in agentRuns.ts and agentRunSteps.ts. Workflow scheduling is TODO (depends on Item 9)."
     },
     {
       "id": 9,
@@ -165,7 +165,7 @@
         "Both actions return structured output and accumulated token usage"
       ],
       "passes": true,
-      "notes": "CYCLE-2: Full agentic loop in executeAgent.ts \u2014 Anthropic client, tool dispatch via executePlatformTool, step logging, maxTurns, extended thinking (budget_tokens 10000), 9-min checkpoint pattern. executeSimple.ts for single-call fallback."
+      "notes": "CYCLE-2: Full agentic loop in executeAgent.ts — Anthropic client, tool dispatch via executePlatformTool, step logging, maxTurns, extended thinking (budget_tokens 10000), 9-min checkpoint pattern. executeSimple.ts for single-call fallback."
     },
     {
       "id": 11,
@@ -193,7 +193,7 @@
       "description": "Coaching call reports schema and CRUD: coachingCallReports document with all fields (including docUrl), indexes, and queries/mutations for report review workflow (get, list, updateNarrative, sendToCoach, markNoAction, getScoreTrend, getTranscriptUrl). sendReportToCoach triggers report_sent_to_coach email notification.",
       "spec": "specs/coaching-call-analyzer.md",
       "steps": [
-        "Schema defines coachingCallReports with overallScore, dimensionScores, highlights, concerns, narrative, editedNarrative, flagged, status union (draft|reviewed|sent|no_action), releasedToCoach, docUrl (string \u2014 Google Doc URL written by the Format step and read by the UI), all other fields from spec (coachId, coachName, studentId, studentName, callNumber, zoomMeetingId, recordedAt, durationMinutes, transcriptStorageId, parsedTranscript, coachTalkPercent, rawAnalysisJson, sentAt, createdAt, updatedAt)",
+        "Schema defines coachingCallReports with overallScore, dimensionScores, highlights, concerns, narrative, editedNarrative, flagged, status union (draft|reviewed|sent|no_action), releasedToCoach, docUrl (string — Google Doc URL written by the Format step and read by the UI), all other fields from spec (coachId, coachName, studentId, studentName, callNumber, zoomMeetingId, recordedAt, durationMinutes, transcriptStorageId, parsedTranscript, coachTalkPercent, rawAnalysisJson, sentAt, createdAt, updatedAt)",
         "Indexes exist: by_tenantId_status, by_tenantId_coachId, by_tenantId_flagged, by_agentRunId",
         "getCoachingReport returns full report for admin; omits rawAnalysisJson and transcriptStorageId for coach callers",
         "listCoachingReports supports filters by status, coachId, flagged, callNumber with default sort flagged+draft first",
@@ -219,7 +219,7 @@
         "store_file tool writes to Convex file storage and returns storageId",
         "query_reports tool queries coachingCallReports by tenantId with optional filters (depends on coachingCallReports table defined in Item 12)",
         "get_config tool reads merged agent config values (template defaults + tenant overrides)",
-        "All tools enforce tenantId scoping \u2014 no cross-tenant data access"
+        "All tools enforce tenantId scoping — no cross-tenant data access"
       ],
       "passes": true,
       "notes": "Depends on Item 12. CYCLE-2: platformToolDefinitions array with 6 tools in Anthropic schema format + executePlatformTool handler. All tenant-scoped. Memory tools non-fatal. query_reports delegates to internal coachingCallReports."
@@ -357,16 +357,16 @@
       "description": "Coaching call analyzer pipeline: Intake step only. Reads transcript from run input (webhook path uses transcriptStorageId already stored by Item 18; manual path downloads/parses). Determines callNumber and creates initial coachingCallReport document.",
       "spec": "specs/coaching-call-analyzer.md",
       "steps": [
-        "On the webhook-triggered path, Intake reads transcriptStorageId from agentRun.input.transcriptStorageId \u2014 it does NOT re-download the VTT because Item 18 (processZoomTranscript) already downloaded and stored it",
+        "On the webhook-triggered path, Intake reads transcriptStorageId from agentRun.input.transcriptStorageId — it does NOT re-download the VTT because Item 18 (processZoomTranscript) already downloaded and stored it",
         "On the manual path, Intake accepts transcript text directly from agentRun.input.transcriptText; stores raw text to Convex file storage and records storageId",
         "VTT parsing (strip timestamps, preserve speaker labels) runs on the manual path only; webhook path receives pre-parsed parsedTranscript from agentRun.input",
         "coachTalkPercent is read from agentRun.input.coachTalkPercent (webhook path) or computed from VTT timestamps (manual path); set to null if coach speaker cannot be identified",
-        "callNumber is determined from agentRun.input.callNumber; null if not provided (does not perform GHL lookup \u2014 call number must come from run input or be set manually by admin)",
+        "callNumber is determined from agentRun.input.callNumber; null if not provided (does not perform GHL lookup — call number must come from run input or be set manually by admin)",
         "Intake writes initial coachingCallReport document with transcriptStorageId, coachTalkPercent, callNumber, coachId, coachName, studentName from run input",
         "Transcripts < 500 words skip the pipeline: create report with status 'no_action' and note 'Transcript too short for coaching analysis'; pipeline exits here"
       ],
       "passes": true,
-      "notes": "S-2 split: this is the Intake step only (was originally combined with Analyze in a single item). W-1: On webhook path, Intake reads transcriptStorageId from agentRun.input, NOT from a fresh Zoom download. B-4: GHL contact lookup removed \u2014 callNumber comes from run input or is null. Cycle 4 green."
+      "notes": "S-2 split: this is the Intake step only (was originally combined with Analyze in a single item). W-1: On webhook path, Intake reads transcriptStorageId from agentRun.input, NOT from a fresh Zoom download. B-4: GHL contact lookup removed — callNumber comes from run input or is null. Cycle 4 green."
     },
     {
       "id": 22,
@@ -377,12 +377,12 @@
         "Analyze step looks up curriculum entry for callNumber from agentConfig.config.curriculum; if callNumber is null or not found, uses a generic rubric anchor for the call type",
         "Analyze step builds prompt with transcript + call-specific curriculum entry + rubric dimension anchors",
         "Analyze step calls Claude (claude-sonnet-4-6) with messages.parse() using AnalysisResultSchema Zod structured output",
-        "AnalysisResultSchema defines coachTalkPercent as z.number().min(0).max(100).nullable() \u2014 it can be null when the coach speaker cannot be identified from the VTT",
+        "AnalysisResultSchema defines coachTalkPercent as z.number().min(0).max(100).nullable() — it can be null when the coach speaker cannot be identified from the VTT",
         "Analyze step validates all dimension scores present and sum <= total maxScore; caps any dimension score exceeding maxScore at that dimension's maxScore",
         "Analyze step computes overallScore = sum of dimension scores; sets flagged = overallScore < agentConfig.config.notificationThreshold"
       ],
       "passes": true,
-      "notes": "S-2 split: this is the Analyze step only (split from original combined Intake+Analyze item). B-3: coachTalkPercent uses .nullable() in AnalysisResultSchema per spec \u2014 null when coach speaker cannot be identified. Cycle 4 green."
+      "notes": "S-2 split: this is the Analyze step only (split from original combined Intake+Analyze item). B-3: coachTalkPercent uses .nullable() in AnalysisResultSchema per spec — null when coach speaker cannot be identified. Cycle 4 green."
     },
     {
       "id": 23,
@@ -458,7 +458,7 @@
     {
       "id": 27,
       "category": "ui",
-      "description": "Client detail page (/clients/{tenantId}) \u2014 Part A: page header with business info, Agents tab with deployed agent list and Deploy New Agent modal.",
+      "description": "Client detail page (/clients/{tenantId}) — Part A: page header with business info, Agents tab with deployed agent list and Deploy New Agent modal.",
       "spec": "specs/consultant-dashboard.md",
       "userStory": "As a consultant, I click on a client in my roster and see their detail page. In the Agents tab I see all their deployed agents with status badges and run counts. I click 'Deploy New Agent' and select from the template library. The new agent appears with status 'building'.",
       "steps": [
@@ -475,7 +475,7 @@
     {
       "id": 28,
       "category": "ui",
-      "description": "Client detail page (/clients/{tenantId}) \u2014 Part B: Integrations tab, Recent Runs tab, and Reports tab (coaching clients only).",
+      "description": "Client detail page (/clients/{tenantId}) — Part B: Integrations tab, Recent Runs tab, and Reports tab (coaching clients only).",
       "spec": "specs/consultant-dashboard.md",
       "userStory": "As a consultant, on a client's detail page I switch to the Integrations tab and see which OAuth connections are active. I see the Recent Runs tab with the last 20 agent runs. For coaching clients I see the Reports tab with inline Review and Send to Coach actions.",
       "steps": [
@@ -530,7 +530,7 @@
       "spec": "specs/consultant-dashboard.md",
       "userStory": "As a consultant, I go to Settings > Theme and see my current branding. I change my primary color, upload a new logo, and pick a font. The live preview panel updates in real-time as I adjust. I click Save Theme and my client portal immediately reflects the new branding on next page load. In the Notifications tab I can set the score threshold for flagged call alerts per coaching program.",
       "steps": [
-        "/settings page has Profile, Theme, and Notifications tabs; all tabs are rendered within the single /settings route \u2014 Notifications is NOT a separate /settings/notifications route",
+        "/settings page has Profile, Theme, and Notifications tabs; all tabs are rendered within the single /settings route — Notifications is NOT a separate /settings/notifications route",
         "Theme tab shows inputs for platformName, logo upload (drag-and-drop, max 2MB), color pickers for 5 colors, font dropdown with 5 options",
         "Live preview panel shows mock client portal header with current CSS variable settings, updating in real-time as user edits",
         "'Save Theme' calls upsertTheme mutation; success shows confirmation",
@@ -539,7 +539,7 @@
         "Notifications tab shows score threshold slider/input per coaching program deployment; save updates agentConfig.config.notificationThreshold"
       ],
       "passes": true,
-      "notes": "NW-1: /settings/notifications is NOT a separate route \u2014 it is a tab within the /settings page. CYCLE-6: 3-tab settings page. Profile tab with displayName edit (added updateConsultant mutation). Theme tab: 5 color pickers with hex validation, font dropdown, logo drag-drop upload (2MB max), live preview panel. Notifications tab: per-program threshold input. Consultant nav bar added to layout."
+      "notes": "NW-1: /settings/notifications is NOT a separate route — it is a tab within the /settings page. CYCLE-6: 3-tab settings page. Profile tab with displayName edit (added updateConsultant mutation). Theme tab: 5 color pickers with hex validation, font dropdown, logo drag-drop upload (2MB max), live preview panel. Notifications tab: per-program threshold input. Consultant nav bar added to layout."
     },
     {
       "id": 32,
@@ -557,7 +557,7 @@
         "Empty state shows onboarding message when no agents are deployed yet"
       ],
       "passes": true,
-      "notes": "S-3 split: Part A \u2014 /app home page only. O-5: runCount and lastRunAt per-agent exposed in AgentConfigSummary and displayed on home page cards. CYCLE-5: getClientHome query added to agentConfigs.ts. Client layout with sidebar nav. Home page with branded header, agent status grid (Active/Setting Up/Paused badges), Run Now button on deployed only, quick stats bar."
+      "notes": "S-3 split: Part A — /app home page only. O-5: runCount and lastRunAt per-agent exposed in AgentConfigSummary and displayed on home page cards. CYCLE-5: getClientHome query added to agentConfigs.ts. Client layout with sidebar nav. Home page with branded header, agent status grid (Active/Setting Up/Paused badges), Run Now button on deployed only, quick stats bar."
     },
     {
       "id": 33,
@@ -567,7 +567,7 @@
       "userStory": "As a client, I click an agent card and see its description, my customizable settings, and a form to trigger a run. I edit a customizable setting inline and save it. I fill in the run form and click Run Agent to start a run.",
       "steps": [
         "/app/agents/{agentConfigId} page loads config using getAgentConfigForClient query (Item 7); does not show locked field values",
-        "Agent info section shows displayName, templateDisplayName, status badge, template description; integration slot status is loaded separately from listIntegrationsForTenant (Item 35 query) \u2014 not from getAgentConfigForClient",
+        "Agent info section shows displayName, templateDisplayName, status badge, template description; integration slot status is loaded separately from listIntegrationsForTenant (Item 35 query) — not from getAgentConfigForClient",
         "Config section renders only customizableFields; if agent has no customizableFields the section is hidden entirely",
         "Inline field edit calls updateAgentConfig mutation with only the changed field; updateAgentConfig enforces that client cannot write locked fields",
         "Run trigger form is dynamically generated from template.inputSchema with correct field types (text, textarea, select, url, file); required fields marked with asterisk",
@@ -575,7 +575,7 @@
         "If agent is not in 'deployed' status, form shows 'Not yet available' message and submit button is disabled"
       ],
       "passes": true,
-      "notes": "S-3 split: Part B \u2014 agent detail + config self-service + run trigger form. NB-1 follow-on: integration slot status on agent detail page is loaded from listIntegrationsForTenant, not from getAgentConfigForClient. W-3: Integration slot status section depends on listIntegrationsForTenant query from Item 35. If building in parallel, stub the integration status section and wire it after Item 35 merges. CYCLE-5: Full agent detail with info section, config self-service (customizableFields only, hidden when empty), dynamic run trigger form from inputSchema, run history table. Non-deployed agents show 'Not yet available'."
+      "notes": "S-3 split: Part B — agent detail + config self-service + run trigger form. NB-1 follow-on: integration slot status on agent detail page is loaded from listIntegrationsForTenant, not from getAgentConfigForClient. W-3: Integration slot status section depends on listIntegrationsForTenant query from Item 35. If building in parallel, stub the integration status section and wire it after Item 35 merges. CYCLE-5: Full agent detail with info section, config self-service (customizableFields only, hidden when empty), dynamic run trigger form from inputSchema, run history table. Non-deployed agents show 'Not yet available'."
     },
     {
       "id": 34,
@@ -584,14 +584,14 @@
       "spec": "specs/client-portal.md",
       "userStory": "As a client, I submit a run form and watch the run progress in real-time. Each pipeline step shows a spinner while running and a checkmark when complete. When the run finishes I see a link to the Google Doc output.",
       "steps": [
-        "Run detail page loads getAgentRun and listAgentRunSteps via useQuery subscriptions \u2014 no polling required; Convex pushes updates automatically",
+        "Run detail page loads getAgentRun and listAgentRunSteps via useQuery subscriptions — no polling required; Convex pushes updates automatically",
         "Run header shows agent name, run status badge, trigger type, start time, live-updating duration while running, and cost after completion",
         "Step timeline renders each agentRunStep in stepOrder with: pending steps grayed out, running step with animated spinner and elapsed time, completed step with green checkmark and duration, failed step with red X and errorMessage",
         "Output section appears when run status is 'completed'; shows Google Doc URL as a clickable link when present in run.output",
         "If run status is 'failed', error section shows errorMessage with a link to /app/integrations if error indicates a missing integration"
       ],
       "passes": true,
-      "notes": "S-3 split: Part C \u2014 real-time run detail page. CYCLE-5: Real-time run detail with getRunDetail subscription. Run header with agent name, status badge, trigger, start time, live duration, cost. Step timeline via StepTimeline component. Output section with URL extraction and clickable links."
+      "notes": "S-3 split: Part C — real-time run detail page. CYCLE-5: Real-time run detail with getRunDetail subscription. Run header with agent name, status badge, trigger, start time, live duration, cost. Step timeline via StepTimeline component. Output section with URL extraction and clickable links."
     },
     {
       "id": 35,
@@ -656,7 +656,7 @@
         "Zoom credentials UI is accessible from client detail page integrations tab or a dedicated Zoom settings section"
       ],
       "passes": true,
-      "notes": "CYCLE-3: saveZoomCredentials action (not mutation \u2014 needs Node crypto) with AES-256-CBC encryption in zoomCredentials.ts. getZoomConnectionStatus query. Internal helpers: getDecryptedCredByAccountId, getChallengeSecret, getCredentialsForTenant, updateAccessToken. UI step deferred to UI cycle."
+      "notes": "CYCLE-3: saveZoomCredentials action (not mutation — needs Node crypto) with AES-256-CBC encryption in zoomCredentials.ts. getZoomConnectionStatus query. Internal helpers: getDecryptedCredByAccountId, getChallengeSecret, getCredentialsForTenant, updateAccessToken. UI step deferred to UI cycle."
     },
     {
       "id": 39,
@@ -674,7 +674,7 @@
         "Report appears in consultant's /reports page with correct status and score badge"
       ],
       "passes": false,
-      "notes": "W-9: This is a QA verification scenario, NOT a build item. QA uses this checklist to validate the full pipeline end-to-end after all component items are built. Do not assign this to a builder \u2014 it is only used by QA during backpressure verification."
+      "notes": "W-9: This is a QA verification scenario, NOT a build item. QA uses this checklist to validate the full pipeline end-to-end after all component items are built. Do not assign this to a builder — it is only used by QA during backpressure verification."
     },
     {
       "id": 40,
@@ -690,8 +690,8 @@
         "UI: agent config card in /clients/{tenantId} Agents tab shows 'Update Available' badge when agentConfig.version < agentTemplate.version",
         "'Sync to Latest' button on the badge calls syncAgentConfigWithTemplate; on success badge disappears and config reflects new version"
       ],
-      "passes": false,
-      "notes": "O-1 from Round 3 review: specs/agent-config-system.md Must Have requirement \u2014 'Template propagation: when a template is updated (new version), consultants can choose to sync linked instances.' Depends on Items 5 (schema), 6 (config CRUD), and 20 (GitHub sync). Build after Item 20. UI surface lives on the Agents tab built in Item 27."
+      "passes": true,
+      "notes": "Cycle 7: syncAgentConfigWithTemplate mutation + Update Available badge/Sync to Latest button implemented. Backend QA + code inspection confirm all verification steps pass."
     }
   ]
 }

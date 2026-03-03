@@ -416,3 +416,34 @@ Sprint log -- append only, never overwrite.
 - Coach filter uses coachId string input, not name dropdown — matches spec
 - updateConsultant mutation added by lead (not in original scope)
 - Consultant nav bar added to layout by builder-31 (was in scout scope)
+
+---
+
+## Cycle 7 Complete — 2026-03-03
+
+**Items completed:** Item 40 (Template Propagation)
+**Items blocked:** Item 39 (E2E QA Verification — blocked by runtime auth + seed data + external services, not a code defect)
+
+**What was built:**
+- Item 40: `syncAgentConfigWithTemplate` mutation in convex/agentConfigs.ts — accepts agentConfigId, validates consultant ownership, compares versions (throws AlreadyCurrentError if current), merges locked fields from template + preserves customizable fields, writes agentConfigHistory audit trail with changeSummary
+- Item 40 UI: "Update Available" badge + "Sync to Latest" button on agent config cards in AgentsTab.tsx, with loading/error states. templateVersion added to clientDetail.ts enriched response.
+- Clerk auth configured: convex/auth.config.ts created, Clerk keys in .env.local, CLERK_JWT_ISSUER_DOMAIN set on Convex deployment (graceful-otter-634)
+
+**What was learned:**
+- Item 39 (E2E QA) requires runtime infrastructure that doesn't exist yet: Playwright test config, auth bypass for tests, seed data, live external services (Zoom, Anthropic, Google Docs, Resend)
+- Clerk auth setup is straightforward: activate Convex integration in Clerk dashboard, add auth.config.ts, set env vars. No manual JWT template creation needed.
+- New Convex deployment: graceful-otter-634 (replaced hallowed-snail-756)
+
+**Files changed:**
+- builder-40: convex/agentConfigs.ts (syncAgentConfigWithTemplate mutation), convex/clientDetail.ts (templateVersion), src/components/AgentsTab.tsx (badge + button)
+- Lead: convex/auth.config.ts (new — Clerk auth config)
+
+**PRD status:** 39/40 items passing
+**Remaining:** Item 39 (E2E QA verification — blocked by test infrastructure, not code)
+
+**Active Signs:** 1, 7, 11, 13, 14, 15, 16, 17
+
+**Decisions in effect:**
+- Convex deployment changed to graceful-otter-634
+- Clerk auth configured with renewed-escargot-45.clerk.accounts.dev
+- Item 39 deferred — requires Playwright test infra + seed data + runtime auth verification
