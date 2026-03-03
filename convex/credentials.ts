@@ -196,6 +196,91 @@ export const getCredentialBySlot = internalQuery({
 });
 
 /**
+ * Returns all integration slots required by deployed agents for this tenant,
+ * along with credential status for each slot.
+ * Auth: client role (resolves tenantId from JWT).
+ */
+export const listIntegrationsForTenant = query({
+  args: {},
+  handler: async (ctx) => {
+    const auth = await requireAuth(ctx);
+
+    if (auth.role !== "client") {
+      throw new Error("Only client users can use listIntegrationsForTenant");
+    }
+
+    const tenantId = auth.tenantId;
+    if (!tenantId) {
+      throw new Error("No tenant associated with this user");
+    }
+
+    // Get all agent configs for this tenant
+    const agentConfigs = await ctx.db
+      .query("agentConfigs")
+      .withIndex("by_tenantId", (q) => q.eq("tenantId", tenantId))
+      .collect();
+
+    // Aggregate integration slots across all configs
+    // slotName -> { agentNames, provider }
+    const slotMap: Map<string, { agentNames: string[]; provider: string }> =
+      new Map();
+
+    for (const config of agentConfigs) {
+      const template = await ctx.db.get(config.templateId);
+      if (!template) continue;
+
+      for (const slotName of template.integrationSlots) {
+        const existing = slotMap.get(slotName);
+        if (existing) {
+          existing.agentNames.push(config.displayName);
+        } else {
+          // Derive provider from slotName: "google_docs" -> "Google", "slack" -> "Slack"
+          const providerRaw = slotName.split("_")[0] ?? slotName;
+          const provider =
+            providerRaw.charAt(0).toUpperCase() + providerRaw.slice(1);
+          slotMap.set(slotName, {
+            agentNames: [config.displayName],
+            provider,
+          });
+        }
+      }
+    }
+
+    if (slotMap.size === 0) {
+      return [];
+    }
+
+    // For each slot, check credential status
+    const results: Array<{
+      slotName: string;
+      provider: string;
+      connected: boolean;
+      connectedAt?: number;
+      agentNames: string[];
+    }> = [];
+
+    for (const [slotName, info] of slotMap.entries()) {
+      const credential = await ctx.db
+        .query("credentials")
+        .withIndex("by_tenantId_slotName", (q) =>
+          q.eq("tenantId", tenantId).eq("slotName", slotName)
+        )
+        .unique();
+
+      results.push({
+        slotName,
+        provider: info.provider,
+        connected: credential?.status === "active",
+        connectedAt: credential?.connectedAt,
+        agentNames: info.agentNames,
+      });
+    }
+
+    return results;
+  },
+});
+
+/**
  * Creates or updates a credential record for a tenant slot.
  * Used by the OAuth callback after successful Composio connection.
  */

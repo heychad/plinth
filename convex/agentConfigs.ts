@@ -420,6 +420,88 @@ export const getConfigById = internalQuery({
   },
 });
 
+// Query for the client home page — returns agent config summaries + run stats for the caller's tenant
+export const getClientHome = query({
+  args: {},
+  handler: async (ctx) => {
+    const auth = await requireAuth(ctx);
+
+    if (auth.role !== "client") {
+      throw new Error("Only client users can use getClientHome");
+    }
+
+    const tenantId = auth.tenantId!;
+
+    // Load all agent configs for this tenant
+    const configs = await ctx.db
+      .query("agentConfigs")
+      .withIndex("by_tenantId", (q) => q.eq("tenantId", tenantId))
+      .collect();
+
+    // Determine the start of the current calendar month (UTC)
+    const now = Date.now();
+    const nowDate = new Date(now);
+    const monthStart = Date.UTC(nowDate.getUTCFullYear(), nowDate.getUTCMonth(), 1);
+
+    // Build summaries — one query per config for lastRunAt and monthly run count
+    const agentConfigs = await Promise.all(
+      configs.map(async (config) => {
+        // Most recent run for this config
+        const latestRun = await ctx.db
+          .query("agentRuns")
+          .withIndex("by_agentConfigId", (q) => q.eq("agentConfigId", config._id))
+          .order("desc")
+          .first();
+
+        // Count runs created in the current month
+        const allRuns = await ctx.db
+          .query("agentRuns")
+          .withIndex("by_agentConfigId", (q) => q.eq("agentConfigId", config._id))
+          .collect();
+        const monthlyRunCount = allRuns.filter((r) => r.createdAt >= monthStart).length;
+
+        // Join with template for displayName
+        const template = await ctx.db.get(config.templateId);
+
+        return {
+          configId: config._id,
+          displayName: config.displayName,
+          status: config.status,
+          templateDisplayName: template?.displayName ?? "Unknown Template",
+          lastRunAt: latestRun?.createdAt,
+          monthlyRunCount,
+        };
+      })
+    );
+
+    // Compute overall stats: total runs this month and the most recent run across all configs
+    const totalRunCount = agentConfigs.reduce((sum, c) => sum + c.monthlyRunCount, 0);
+
+    // Find the most recent run across all configs
+    const mostRecentRun = await ctx.db
+      .query("agentRuns")
+      .withIndex("by_tenantId_createdAt", (q) => q.eq("tenantId", tenantId))
+      .order("desc")
+      .first();
+
+    // Get the agent config display name for the most recent run
+    let lastRunAgentName: string | undefined;
+    if (mostRecentRun) {
+      const runConfig = configs.find(
+        (c) => c._id === mostRecentRun.agentConfigId
+      );
+      lastRunAgentName = runConfig?.displayName;
+    }
+
+    return {
+      agentConfigs,
+      runCount: totalRunCount,
+      lastRunAt: mostRecentRun?.createdAt,
+      lastRunAgentName,
+    };
+  },
+});
+
 // Internal query used by the execution engine (Items 9/10)
 // Returns merged config for execution: merges template defaultConfig with tenant config
 export const getResolved = internalQuery({
