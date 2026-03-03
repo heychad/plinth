@@ -420,6 +420,123 @@ export const getReportById = internalQuery({
   },
 });
 
+// ─── Cross-tenant consultant query ────────────────────────────────────────────
+
+export const listCoachingReportsForConsultant = query({
+  args: {
+    status: v.optional(v.string()),
+    coachId: v.optional(v.string()),
+    callNumber: v.optional(
+      v.union(v.number(), v.literal("onboarding"), v.literal("bonus"))
+    ),
+    dateFrom: v.optional(v.number()),
+    dateTo: v.optional(v.number()),
+    cursor: v.optional(v.string()),
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const auth = await requireAuth(ctx);
+
+    if (auth.role !== "consultant" && auth.role !== "platform_admin") {
+      throw new Error("Not authorized");
+    }
+
+    const consultantId = auth.consultantId!;
+
+    // Get all tenants owned by this consultant
+    const tenants = await ctx.db
+      .query("tenants")
+      .withIndex("by_consultantId", (q) => q.eq("consultantId", consultantId))
+      .collect();
+
+    // Collect reports from all tenants
+    type ReportDoc = import("./_generated/dataModel").Doc<"coachingCallReports">;
+    let allReports: ReportDoc[] = [];
+
+    for (const tenant of tenants) {
+      let tenantReports: ReportDoc[];
+
+      if (args.coachId) {
+        tenantReports = await ctx.db
+          .query("coachingCallReports")
+          .withIndex("by_tenantId_coachId", (q) =>
+            q.eq("tenantId", tenant._id).eq("coachId", args.coachId!)
+          )
+          .order("desc")
+          .collect();
+      } else if (args.status === "flagged") {
+        tenantReports = await ctx.db
+          .query("coachingCallReports")
+          .withIndex("by_tenantId_flagged", (q) =>
+            q.eq("tenantId", tenant._id).eq("flagged", true)
+          )
+          .order("desc")
+          .collect();
+      } else if (args.status) {
+        tenantReports = await ctx.db
+          .query("coachingCallReports")
+          .withIndex("by_tenantId_status", (q) =>
+            q
+              .eq("tenantId", tenant._id)
+              .eq("status", args.status! as "draft" | "reviewed" | "sent" | "no_action")
+          )
+          .order("desc")
+          .collect();
+      } else {
+        tenantReports = await ctx.db
+          .query("coachingCallReports")
+          .withIndex("by_tenantId_status", (q) =>
+            q.eq("tenantId", tenant._id)
+          )
+          .order("desc")
+          .collect();
+      }
+
+      allReports = allReports.concat(tenantReports);
+    }
+
+    // In-memory filters
+    if (args.callNumber !== undefined) {
+      allReports = allReports.filter((r) => r.callNumber === args.callNumber);
+    }
+    if (args.dateFrom !== undefined) {
+      allReports = allReports.filter((r) => r.createdAt >= args.dateFrom!);
+    }
+    if (args.dateTo !== undefined) {
+      allReports = allReports.filter((r) => r.createdAt <= args.dateTo!);
+    }
+
+    // Default sort: flagged+draft first, then createdAt desc
+    allReports.sort((a, b) => {
+      const aFlaggedDraft = a.flagged && a.status === "draft" ? 1 : 0;
+      const bFlaggedDraft = b.flagged && b.status === "draft" ? 1 : 0;
+      if (bFlaggedDraft !== aFlaggedDraft) {
+        return bFlaggedDraft - aFlaggedDraft;
+      }
+      return b.createdAt - a.createdAt;
+    });
+
+    // Build tenant lookup for enrichment
+    const tenantMap = new Map(tenants.map((t) => [t._id, t]));
+
+    // Manual cursor-based pagination
+    const pageLimit = args.limit ?? 50;
+    const startIndex = args.cursor ? parseInt(args.cursor, 10) : 0;
+    const page = allReports.slice(startIndex, startIndex + pageLimit);
+    const nextIndex = startIndex + pageLimit;
+    const nextCursor =
+      nextIndex < allReports.length ? String(nextIndex) : null;
+
+    // Enrich with tenant businessName
+    const reports = page.map((r) => ({
+      ...r,
+      tenantBusinessName: tenantMap.get(r.tenantId)?.businessName ?? "",
+    }));
+
+    return { reports, nextCursor };
+  },
+});
+
 export const updateReport = internalMutation({
   args: {
     reportId: v.id("coachingCallReports"),
