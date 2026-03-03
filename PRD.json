@@ -556,8 +556,8 @@
         "Branded header displays consultant's logo and platformName from theme",
         "Empty state shows onboarding message when no agents are deployed yet"
       ],
-      "passes": false,
-      "notes": "S-3 split: Part A \u2014 /app home page only. O-5: runCount and lastRunAt per-agent exposed in AgentConfigSummary and displayed on home page cards."
+      "passes": true,
+      "notes": "S-3 split: Part A \u2014 /app home page only. O-5: runCount and lastRunAt per-agent exposed in AgentConfigSummary and displayed on home page cards. CYCLE-5: getClientHome query added to agentConfigs.ts. Client layout with sidebar nav. Home page with branded header, agent status grid (Active/Setting Up/Paused badges), Run Now button on deployed only, quick stats bar."
     },
     {
       "id": 33,
@@ -574,8 +574,8 @@
         "Submitting run form calls triggerAgentRun mutation; on success redirects to /app/agents/{agentConfigId}/runs/{runId}",
         "If agent is not in 'deployed' status, form shows 'Not yet available' message and submit button is disabled"
       ],
-      "passes": false,
-      "notes": "S-3 split: Part B \u2014 agent detail + config self-service + run trigger form. NB-1 follow-on: integration slot status on agent detail page is loaded from listIntegrationsForTenant, not from getAgentConfigForClient. W-3: Integration slot status section depends on listIntegrationsForTenant query from Item 35. If building in parallel, stub the integration status section and wire it after Item 35 merges."
+      "passes": true,
+      "notes": "S-3 split: Part B \u2014 agent detail + config self-service + run trigger form. NB-1 follow-on: integration slot status on agent detail page is loaded from listIntegrationsForTenant, not from getAgentConfigForClient. W-3: Integration slot status section depends on listIntegrationsForTenant query from Item 35. If building in parallel, stub the integration status section and wire it after Item 35 merges. CYCLE-5: Full agent detail with info section, config self-service (customizableFields only, hidden when empty), dynamic run trigger form from inputSchema, run history table. Non-deployed agents show 'Not yet available'."
     },
     {
       "id": 34,
@@ -590,8 +590,8 @@
         "Output section appears when run status is 'completed'; shows Google Doc URL as a clickable link when present in run.output",
         "If run status is 'failed', error section shows errorMessage with a link to /app/integrations if error indicates a missing integration"
       ],
-      "passes": false,
-      "notes": "S-3 split: Part C \u2014 real-time run detail page."
+      "passes": true,
+      "notes": "S-3 split: Part C \u2014 real-time run detail page. CYCLE-5: Real-time run detail with getRunDetail subscription. Run header with agent name, status badge, trigger, start time, live duration, cost. Step timeline via StepTimeline component. Output section with URL extraction and clickable links."
     },
     {
       "id": 35,
@@ -608,8 +608,8 @@
         "'Disconnect' button calls disconnectCredential mutation and resets to 'Not Connected'",
         "Empty state shows message when no agents are deployed yet"
       ],
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "CYCLE-5: listIntegrationsForTenant query added to credentials.ts. Aggregates slots across all deployed configs, groups by provider. Frontend with Connect (initiateComposioOAuth) and Disconnect (disconnectCredential with confirm) flows. Empty state handled."
     },
     {
       "id": 36,
@@ -626,8 +626,8 @@
         "No transcript section visible on coach report detail page",
         "Empty state shows 'No feedback reports yet' message"
       ],
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "CYCLE-5: Reports list with score badges (green/yellow/red), New/Reviewed status. Report detail with overall score circle, dimension scorecard (handles both object and number shapes), highlights (green), concerns (orange), narrative (editedNarrative fallback). No transcript/rawAnalysisJson exposed. Empty states handled."
     },
     {
       "id": 37,

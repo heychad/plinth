@@ -323,3 +323,50 @@ Sprint log -- append only, never overwrite.
 - Items with shared files combined into single builders (25+26, 27+28) to avoid serialization
 - Playwright QA deferred until E2E infrastructure exists (Clerk config, seed data, auth bypass)
 - Clerk-optional fallback allows build without env vars — runtime auth still requires Clerk setup
+
+## Cycle 5 Complete — 2026-03-03
+
+**Items completed:** 32, 33, 34, 35, 36
+
+**What was built:**
+- Item 32: Client home page (`/app`) — getClientHome query, shared client layout with sidebar nav, branded header with platformName/logo, agent status grid with Active/Setting Up/Paused badges, "Run Now" on deployed only, quick stats bar
+- Item 33: Agent detail (`/app/agents/{id}`) — agent info section with integration slot status, config self-service (customizableFields only, hidden when empty), dynamic run trigger form from inputSchema (text/textarea/select/number/boolean), run history table with pagination
+- Item 34: Run detail (`/app/agents/{id}/runs/{runId}`) — real-time via getRunDetail subscription, run header with start time + live duration + cost, step timeline via StepTimeline component, output section with URL extraction
+- Item 35: Integrations (`/app/integrations`) — listIntegrationsForTenant query in credentials.ts, cards grouped by provider, Connect (initiateComposioOAuth) and Disconnect (disconnectCredential + confirm) flows, empty state
+- Item 36: Reports (`/app/reports` + `/app/reports/{id}`) — reports table with score badges (green/yellow/red), New/Reviewed status, report detail with score circle, dimension scorecard, highlights, concerns, narrative, no transcript/rawAnalysisJson exposed
+
+**What was learned:**
+- HTMLTableRowElement and other DOM element types need to be in ESLint browser globals (added to eslint.config.mjs)
+- Spec-required "start time" in run header was missed by builder — Playwright code review caught it
+- All 5 client portal pages followed consistent patterns from consultant-side pages (inline styles, CSS variables, useQuery subscriptions)
+- Zero file overlap between 5 parallel builders confirmed — sprint builder isolation pattern working well
+
+**Files changed:**
+- builder-32: convex/agentConfigs.ts, src/app/(client)/app/page.tsx, src/app/(client)/app/layout.tsx
+- builder-33: src/app/(client)/app/agents/[agentConfigId]/page.tsx
+- builder-34: src/app/(client)/app/agents/[agentConfigId]/runs/[runId]/page.tsx
+- builder-35: convex/credentials.ts, src/app/(client)/app/integrations/page.tsx
+- builder-36: src/app/(client)/app/reports/page.tsx, src/app/(client)/app/reports/[reportId]/page.tsx
+- Lead fix: eslint.config.mjs (DOM type globals), run detail start time
+
+**PRD status:** 34/40 items passing
+
+**Next priority items:**
+- Item 20 (GitHub template sync webhook) — specs/agent-config-system.md
+- Item 23 (Format + Deliver pipeline steps) — specs/coaching-call-analyzer.md
+- Items 30-31 (Consultant reports + settings pages) — specs/consultant-dashboard.md
+- Item 40 (Template propagation) — specs/agent-config-system.md (depends on Item 20)
+- Item 39 (E2E QA scenario) — specs/coaching-call-analyzer.md (QA-only, deferred)
+
+**Active Signs:**
+- SIGN-1: Convex codegen requires live deployment — use `(internal as any).module.fn`
+- SIGN-7: Builders must NEVER run git commands — lead is sole operator (still in effect)
+- SIGN-13: ESLint browser/node globals split — now includes DOM element types
+- SIGN-14: Convex ES target rejects Error cause syntax
+- SIGN-15: ConvexClientProvider Clerk fallback
+
+**Decisions in effect:**
+- 5 parallel builders on shared main with zero file overlap — proven pattern
+- Scout maps file ownership, lead cross-references git status before commit
+- Code review by Playwright QA sufficient when no Playwright config exists
+- DOM type globals added proactively (HTMLElement, HTMLTableRowElement, HTMLInputElement, etc.)
