@@ -275,3 +275,51 @@ Sprint log -- append only, never overwrite.
 - coachTalkPercent always returns null until zoomUserId→coach mapping table is built
 - Challenge-response uses first available credential record from DB (not env var)
 - Convex typecheck failures (SIGN-1) are accepted until deployment — not blocking cycles
+
+## Cycle 4 Complete — 2026-03-02
+
+**Items completed:** 19, 21, 22, 24, 25, 26, 27, 28, 29, 37 (10 items)
+
+**What was built:**
+- **Item 24:** Next.js app setup — Clerk+Convex providers, ThemeProvider with CSS variable injection, middleware with role-based routing, (consultant) and (client) route groups
+- **Item 19:** Coaching call analyzer seed template — full Growth Factor Implementation config with 4 rubric dimensions (100pts), 16 curriculum entries, 4 pipeline steps
+- **Item 21:** Coaching pipeline Intake step — webhook path (reads pre-stored transcript) + manual path (VTT parsing, speaker label extraction, coachTalkPercent computation), <500 word short-circuit
+- **Item 22:** Coaching pipeline Analyze step — Claude structured output via tool_use + Zod validation, score capping, overallScore computation, flagged threshold check
+- **Item 25:** Consultant dashboard home — 4 stat cards + searchable/filterable client roster with pagination
+- **Item 26:** Full-page /clients — reuses roster with server-side sort (businessName, lastRun, monthlyCost)
+- **Items 27+28:** Client detail page — header + 4 tabs (Agents with deploy modal, Integrations, Recent Runs, Reports with inline Send to Coach)
+- **Item 29:** Run detail page — real-time step timeline with expandable output, error display
+- **Item 37:** Secondary pages — /agents template library, /app/runs client history, /app/agents client list with Run Now
+
+**What was learned:**
+- ESLint config needed browser globals for src/ files (document, setTimeout, URL, process) — only had Node globals for convex/
+- ConvexClientProvider needs Clerk-optional fallback for builds without NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
+- Convex ES target doesn't support Error cause option — use eslint-disable instead
+- Anthropic SDK tool input_schema type needs `as any` cast (ToolUnion[] possibly undefined)
+- `convex typecheck` runs separately from `tsc --noEmit` (different tsconfig)
+
+**Files changed:**
+- Builder A (Item 24): 8 files — layout.tsx, middleware.ts, ConvexClientProvider, ThemeProvider, route group layouts
+- Builder B (Items 19,21,22): 3 files — coachingCallAnalyzerTemplate.ts, coachingPipeline.ts, coachingCallReports.ts
+- Builder C (Items 25,26): 6 files — dashboard.ts, dashboard/page, clients/page, StatCard, ClientRosterTable, StatusBadge
+- Builder E (Items 27,28): 8 files — clientDetail.ts, clients/[tenantId]/page, 5 tab components + DeployAgentModal
+- Builder F (Item 29): 4 files — runDetail.ts, runs/[runId]/page, RunHeader, StepTimeline
+- Builder H (Item 37): 5 files — agents/page, app/runs/page, app/agents/page, TemplateCard, ClientPickerModal
+- QA fixes: 3 files — eslint.config.mjs, coachingPipeline.ts, ConvexClientProvider.tsx
+
+**PRD status:** 29/40 items passing (was 19/40)
+
+**Next priority items:** 20 (GitHub template sync), 23 (Format+Deliver pipeline steps), 30-31 (reports+settings), 32-36 (client portal), 39 (E2E integration), 40 (template propagation)
+
+**Active Signs:**
+- SIGN-1: Convex codegen — use (internal as any) pattern (still relevant)
+- SIGN-7: Builders must not run git (still relevant)
+- SIGN-13 (NEW): ESLint config — src/ files need browser globals, convex/ files need node globals
+- SIGN-14 (NEW): Convex ES target doesn't support Error cause — eslint-disable preserve-caught-error
+- SIGN-15 (NEW): ConvexClientProvider must handle missing Clerk publishable key for build to pass
+
+**Decisions in effect:**
+- 2-wave build structure for frontend: foundation first, then pages (dependency chain)
+- Items with shared files combined into single builders (25+26, 27+28) to avoid serialization
+- Playwright QA deferred until E2E infrastructure exists (Clerk config, seed data, auth bypass)
+- Clerk-optional fallback allows build without env vars — runtime auth still requires Clerk setup
