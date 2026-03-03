@@ -86,6 +86,10 @@ export default [
         HTMLDivElement: "readonly",
         HTMLFormElement: "readonly",
         HTMLAnchorElement: "readonly",
+        // File API
+        File: "readonly",
+        FileReader: "readonly",
+        FileList: "readonly",
         // React JSX
         React: "readonly",
         JSX: "readonly",

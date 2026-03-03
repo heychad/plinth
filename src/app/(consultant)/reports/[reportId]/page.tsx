@@ -138,7 +138,7 @@ export default function ReportDetailPage() {
     if (report) {
       setNarrative(report.editedNarrative ?? report.narrative ?? "");
     }
-  }, [report?._id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [report?._id]);
 
   // Fetch transcript from URL
   useEffect(() => {

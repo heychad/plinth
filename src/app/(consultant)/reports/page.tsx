@@ -339,7 +339,8 @@ export default function ReportsPage() {
               </tr>
             </thead>
             <tbody>
-              {reports.map((report, idx) => {
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              {reports.map((report: any, idx: number) => {
                 const date = report.recordedAt
                   ? new Date(report.recordedAt).toLocaleDateString()
                   : new Date(report.createdAt).toLocaleDateString();

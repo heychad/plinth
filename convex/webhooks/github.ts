@@ -183,7 +183,7 @@ export const syncTemplateFromGit = internalAction({
       }
 
       // Decode base64 content (GitHub includes newlines in encoding)
-      const contentStr = atob(contentBase64.replace(/\n/g, ""));
+      const contentStr = Buffer.from(contentBase64.replace(/\n/g, ""), "base64").toString();
 
       try {
         return JSON.parse(contentStr);

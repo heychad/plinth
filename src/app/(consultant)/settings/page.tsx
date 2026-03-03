@@ -35,8 +35,6 @@ function ProfileTab() {
     if (currentUser && displayName === "") {
       setDisplayName(currentUser.displayName ?? "");
     }
-  // Only run once when user loads
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentUser]);
 
   async function handleSave() {
@@ -205,7 +203,6 @@ function ThemeTab() {
       const file = e.dataTransfer.files[0];
       if (file) handleLogoFile(file);
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [generateUploadUrl, updateThemeLogo]
   );
 
@@ -324,8 +321,7 @@ function ThemeTab() {
               <p style={{ color: "#6b7280", fontSize: "0.875rem" }}>Uploading...</p>
             ) : (savedTheme?.logoUrl || theme.logoUrl) ? (
               <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                                <img
                   src={savedTheme?.logoUrl ?? theme.logoUrl ?? ""}
                   alt="Current logo"
                   style={{ maxHeight: "48px", maxWidth: "120px", objectFit: "contain" }}
@@ -440,7 +436,6 @@ function ThemeTab() {
           {/* Header */}
           <div style={previewHeaderStyle}>
             {(savedTheme?.logoUrl || theme.logoUrl) && (
-              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={savedTheme?.logoUrl ?? theme.logoUrl ?? ""}
                 alt="Logo preview"
