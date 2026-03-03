@@ -500,3 +500,14 @@ Sprint log -- append only, never overwrite.
 - TEST_MODE env var on Convex deployment (graceful-otter-634) — must be unset before production
 - Playwright tests run with `NEXT_PUBLIC_TEST_MODE=true` via webServer env in playwright.config.ts
 - test_consultant_001 is the well-known test user ID shared between seed.ts and auth.ts
+
+---
+
+## UI Sprint -- Planned
+
+- Date: 2026-03-03
+- Items: 65 (foundation: 9, functional: 12, ui: 27, integration: 2, test-backend: 5, test-e2e: 10)
+- Specs: 8 files in specs/ (ui-design-system-foundation, ui-auth-and-routing, ui-client-chat-interface, ui-client-onboarding, ui-document-store, ui-consultant-redesign, ui-consultant-user-management, ui-shared-polish)
+- Status: Ready for building
+- Replaces previous backend sprint PRD.json entirely (IDs restart at 1)
+- Reviewer fixes applied: 2 blockers fixed, 3 omissions added, 3 items split, 1 warning addressed (65 items, was 61)

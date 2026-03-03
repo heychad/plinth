@@ -171,3 +171,53 @@ NEXT_PUBLIC_CONVEX_URL           # Convex deployment URL
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY
 CLERK_SECRET_KEY
 ```
+
+## UI Sprint
+
+### New Packages
+- **UI framework:** shadcn/ui (Tailwind v4 CSS-first config, no tailwind.config.js)
+- **Table:** @tanstack/react-table (client-side sorting, filtering, pagination)
+- **Rich text editor:** @blocknote/core, @blocknote/mantine (document editor with markdown)
+- **Document conversion:** mammoth (docx to HTML), turndown (HTML to markdown)
+- **Chat streaming:** @convex-dev/persistent-text-streaming (SSE streaming to Convex)
+- **Markdown rendering:** react-markdown, remark-gfm (agent message rendering)
+- **Forms:** react-hook-form, zod (form validation)
+- **Toasts:** sonner (via shadcn add sonner)
+- **Icons:** lucide-react (sole icon library — no emojis as UI icons)
+- **Webhooks:** svix (Clerk webhook signature verification)
+
+### New Convex Tables
+- `conversations` — chat conversations per tenant/user (indexes: by_userId_lastMessageAt, by_tenantId_userId)
+- `messages` — chat messages with streaming support (indexes: by_conversationId, by_conversationId_createdAt)
+- `documents` — user and agent-generated documents (indexes: by_tenantId_createdAt, by_tenantId_userId, by_agentRunId)
+- `invitations` — Clerk org invitations tracked in Convex (indexes: by_tenantId_status, by_clerkInvitationId)
+
+### Design System
+- **Primary:** Indigo #6366F1 (as OKLCH for Tailwind v4)
+- **Accent:** Emerald #10B981
+- **Background:** Warm lavender #F5F3FF
+- **Font:** Plus Jakarta Sans (via next/font/google, variable --font-plus-jakarta-sans)
+- **18 shadcn CSS variables** defined in globals.css :root block
+- **Dark theme stub** via [data-theme="dark"] block
+
+### Key Patterns
+- **Chat-first client experience:** /app is a full-screen chat interface with sidebar
+- **Orchestrator agent:** Routes user messages to deployed sub-agents dynamically
+- **Sidebar navigation:** shadcn SidebarProvider + collapsible sidebar on desktop, Sheet drawer on mobile
+- **Onboarding wizard:** 3-step card flow for new clients, provisions starter agent
+- **Document store:** BlockNote editor with auto-save, .docx import, Google Docs export
+- **White-label theming:** CSS variables injected from Convex themes table via ThemeProvider
+
+### UI Sprint Constraints
+- **Specs override design system page overrides** — when `specs/*.md` conflicts with `design-system/plinth/pages/*.md`, the spec is authoritative
+- **Existing files from prior sprint may need replacing, not appending** — always read existing files before modifying (e.g., consultant layout already has an inline nav bar)
+- `CLERK_SECRET_KEY` must be set in Convex environment variables for the Clerk webhook handler (Item 50) to call Clerk Admin API
+- `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL` must be set for invitation redirect URLs
+- All shadcn components installed via `npx shadcn@latest add` — do not manually create component files
+- Tailwind v4 uses CSS-first config — @import "tailwindcss" in globals.css, NO tailwind.config.js
+- shadcn variables use OKLCH color space internally — convert hex to OKLCH when defining
+- Every interactive element must have minimum 44x44px touch target
+- prefers-reduced-motion: reduce must disable all animations
+- All tables must have <caption>, <th scope="col">, and aria-sort on sortable columns
+- Skip-to-content link must be first focusable element in all layouts
+- <Toaster /> mounted exactly once in root layout — never duplicate in route-group layouts

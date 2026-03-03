@@ -1,697 +1,1056 @@
 {
-  "project": "Plinth",
-  "description": "White-label AI agent platform where consultants license, brand, and resell AI agents to their clients.",
+  "project": "Plinth UI Sprint",
+  "description": "UI redesign sprint for the Plinth white-label AI agent platform: chat-first client experience, consultant dashboard overhaul, document store, onboarding wizard, and shared polish.",
   "items": [
     {
       "id": 1,
       "category": "foundation",
-      "description": "Convex schema definition for all core documents: consultants, tenants, users, usageLogs. Includes all field types, required flags, indexes on foreign keys, validator definitions, and the by_tenantId_loggedDate index on usageLogs for monthly cost aggregation.",
-      "spec": "specs/platform-foundation.md",
+      "description": "Initialize shadcn/ui, configure Tailwind v4 CSS-first in globals.css, and set up path aliases in tsconfig.json",
+      "specRef": "specs/ui-design-system-foundation.md",
       "steps": [
-        "Convex schema file defines tables: consultants, tenants, users, usageLogs with all fields from spec",
-        "All foreign key fields have Convex indexes defined (e.g., tenants.by_consultantId, users.by_clerkUserId)",
-        "Field validators enforce types: plan is union of 'starter'|'growth'|'scale', status is union of 'active'|'paused'|'churned', role is union of 'client'|'consultant'|'platform_admin'",
-        "usageLogs table has index by_tenantId_loggedDate on (tenantId, loggedDate) for monthly cost aggregation queries",
-        "npx convex dev --typecheck succeeds with no schema errors"
+        "Run `npx shadcn@latest init` — components.json exists at project root with style=default, rsc=true, tsx=true, tailwind.css=src/app/globals.css, cssVariables=true, iconLibrary=lucide",
+        "src/lib/utils.ts exists and exports cn() utility function",
+        "tsconfig.json has path aliases: @/components, @/lib/utils, @/components/ui, @/lib, @/hooks",
+        "src/app/globals.css starts with `@import \"tailwindcss\";` — no tailwind.config.js or tailwind.config.ts exists at project root",
+        "npm run build completes with no Tailwind v4 configuration errors",
+        "npx tsc --noEmit passes with no path alias errors"
       ],
-      "passes": true,
-      "notes": "W-6: by_tenantId_loggedDate index added for the monthly cost aggregation query used in the consultant dashboard (Item 25). The credentials table schema is fully defined in Item 14 (output-integrations.md) which owns the credentials document definition. Builders of Item 1 should leave room for it. CYCLE-1: All 10 tables defined in convex/schema.ts with all fields and indexes. Convex typecheck deferred until deployment connected."
+      "passes": false,
+      "notes": "First item — all other foundation items depend on this. Use --legacy-peer-deps if npm install fails."
     },
     {
       "id": 2,
       "category": "foundation",
-      "description": "Clerk auth integration: requireAuth and requireRole helper functions that extract JWT claims (clerkUserId, role, tenantId, consultantId) from ctx.auth.getUserIdentity(). getCurrentUser query resolves authenticated user.",
-      "spec": "specs/platform-foundation.md",
+      "description": "Define the full Plinth CSS variable palette (18 shadcn variables + Plinth-specific tokens + spacing + shadows) and dark theme stub in globals.css",
+      "specRef": "specs/ui-design-system-foundation.md",
       "steps": [
-        "requireAuth helper reads ctx.auth.getUserIdentity() and returns { clerkUserId, role, tenantId?, consultantId? }",
-        "requireAuth throws AuthenticationError if not authenticated",
-        "requireRole helper throws AuthorizationError with message 'Requires role: {requiredRole}' if role mismatch",
-        "getCurrentUser query returns full user document for authenticated caller or null if no user record",
-        "All helpers are exported from a shared convex/auth.ts module"
+        ":root block defines all 18 shadcn variables: --primary (indigo #6366F1 as OKLCH), --primary-foreground (#FFFFFF), --secondary (#818CF8), --secondary-foreground (#1E1B4B), --accent (#10B981), --accent-foreground (#FFFFFF), --background (#F5F3FF), --foreground (#1E1B4B), --muted (#EDE9FE), --muted-foreground (#6B7280), --card (#FFFFFF), --card-foreground (#1E1B4B), --border (#E2E8F0), --input (#E2E8F0), --ring (#6366F1), --radius (0.5rem), --destructive (#EF4444), --destructive-foreground (#FFFFFF)",
+        ":root defines Plinth-specific tokens: --color-primary, --color-secondary, --color-cta, --color-background, --color-text",
+        ":root defines 7 spacing tokens (--space-xs through --space-3xl) and 4 shadow tokens (--shadow-sm through --shadow-xl)",
+        "[data-theme=\"dark\"] block exists in globals.css (stubbed)",
+        "In browser devtools, --primary CSS variable resolves to an indigo color"
       ],
-      "passes": true,
-      "notes": "CYCLE-1: requireAuth, requireRole, getCurrentUser implemented in convex/auth.ts. AuthResult type exported."
+      "passes": false,
+      "notes": "shadcn with Tailwind v4 uses OKLCH color space. Convert hex to OKLCH equivalents."
     },
     {
       "id": 3,
       "category": "foundation",
-      "description": "Core CRUD mutations and queries for consultants, tenants, and users with multi-tenancy enforcement. Every query/mutation calls requireAuth before data access and scopes results by caller's role.",
-      "spec": "specs/platform-foundation.md",
+      "description": "Load Plus Jakarta Sans via next/font/google, apply as default font in root layout, and install all 20 initial shadcn/ui components plus lucide-react",
+      "specRef": "specs/ui-design-system-foundation.md",
       "steps": [
-        "getConsultant query returns consultant only if caller is that consultant or platform_admin; throws AuthorizationError otherwise",
-        "listTenants query returns paginated tenants scoped to caller's consultantId; platform_admin sees all",
-        "createTenant mutation creates tenant with consultantId from caller's JWT; rejects if caller is not consultant role",
-        "createTenant mutation rejects duplicate ownerEmail for the same consultant",
-        "createUser mutation enforces role/owner constraint: client must have tenantId set and consultantId null; consultant must have consultantId set and tenantId null",
-        "createUser mutation rejects if clerkUserId already exists",
-        "A client-role user calling listTenants gets an AuthorizationError (not their role)"
+        "src/app/layout.tsx imports Plus_Jakarta_Sans from next/font/google with subsets=[\"latin\"], weight=[\"300\",\"400\",\"500\",\"600\",\"700\"], variable=\"--font-plus-jakarta-sans\", display=\"swap\"",
+        "<html> has className={plusJakartaSans.variable}; <body> has className=\"font-sans antialiased bg-background text-foreground\"",
+        "globals.css sets font-family: var(--font-plus-jakarta-sans), sans-serif on :root or body",
+        "src/components/ui/ contains all 20 component files: button, card, input, select, badge, dialog, sheet, tabs, avatar, dropdown-menu, skeleton, sidebar, breadcrumb, form, table, textarea, checkbox, separator, tooltip, sonner",
+        "lucide-react is in package.json dependencies; no emoji characters used as UI icons in src/ files",
+        "import './globals.css' is present in layout.tsx; layout exports RootLayout wrapping ConvexClientProvider and ThemeProvider",
+        "npm run build passes; browser shows Plus Jakarta Sans font and warm lavender (#F5F3FF) background"
       ],
-      "passes": true,
-      "notes": "CYCLE-1: getConsultant in consultants.ts, listTenants/createTenant in tenants.ts, createUser in users.ts. All call requireAuth, all enforce multi-tenancy."
+      "passes": false,
+      "notes": "The --font-plus-jakarta-sans CSS variable must be referenced via className on <html>, not imported in CSS."
     },
     {
       "id": 4,
       "category": "foundation",
-      "description": "Convex schema for themes document and white-label theming queries/mutations. One theme per consultant with CSS variable mapping.",
-      "spec": "specs/white-label-theming.md",
+      "description": "Add conversations and messages tables to convex/schema.ts with all required fields and indexes",
+      "specRef": "specs/ui-client-chat-interface.md",
       "steps": [
-        "Schema defines themes table with all fields: platformName, logoUrl, faviconUrl, primaryColor through fontFamily, customDomain, supportEmail",
-        "Index by_consultantId exists on themes table",
-        "getThemeByConsultantId query returns theme for any authenticated user in that consultant's scope",
-        "getThemeForCurrentUser resolves theme by looking up caller's consultantId chain",
-        "upsertTheme mutation creates or updates theme; validates all color fields match ^#[0-9A-Fa-f]{6}$; throws ValidationError on invalid hex",
-        "upsertTheme rejects fontFamily values not in [Inter, Poppins, Lato, Montserrat, Open Sans]",
-        "uploadThemeLogo action stores file in Convex storage; rejects files > 2MB; rejects non-image types"
+        "conversations table has fields: tenantId, userId, agentConfigId (nullable), title, lastMessageAt, messageCount, platform, status, createdAt",
+        "conversations table has indexes: by_userId_lastMessageAt on [userId, lastMessageAt] and by_tenantId_userId on [tenantId, userId]",
+        "messages table has fields: conversationId, tenantId, role (union of user/assistant/system), content, streamingToken (nullable), isStreaming, agentConfigId (nullable), agentRunId (nullable), metadata (optional object), createdAt",
+        "messages table has indexes: by_conversationId on [conversationId] and by_conversationId_createdAt on [conversationId, createdAt]",
+        "npx tsc --noEmit passes with no type errors"
       ],
-      "passes": true,
-      "notes": "CYCLE-1: themes.ts implements getThemeByConsultantId, getThemeForCurrentUser, upsertTheme (hex+font validation), generateThemeUploadUrl, updateThemeLogo. File size/type validation deferred to client-side or middleware (Convex storage.generateUploadUrl doesn't enforce server-side)."
+      "passes": false,
+      "notes": "Foundation for all chat features. Must be completed before any conversations/messages API items."
     },
     {
       "id": 5,
       "category": "foundation",
-      "description": "Agent config system schema: agentTemplates, agentConfigs, and agentConfigHistory documents with all fields, indexes, validator definitions, and toolDefinitions array on agentTemplates.",
-      "spec": "specs/agent-config-system.md",
+      "description": "Add documents table to convex/schema.ts with all required fields, types, and indexes",
+      "specRef": "specs/ui-document-store.md",
       "steps": [
-        "Schema defines agentTemplates with slug, displayName, description, category union, version, isActive, isPipeline, executionMode ('autonomous'|'simple'), estimatedDurationSeconds, systemPrompt, integrationSlots, inputSchema, defaultLockedFields, defaultCustomizableFields, defaultConfig, pipelineSteps, toolDefinitions (array of custom tool definitions: name, description, inputSchema, handlerRef), createdBy (Id<'users'>)",
-        "Schema defines agentConfigs with tenantId, templateId, displayName, status union (building|testing|deployed|paused|archived), config, lockedFields, customizableFields, modelOverride, scheduleCron, scheduleTimezone, deployedAt, deployedBy (Id<'users'>), version, updatedByType ('admin'|'client'|'template_sync')",
-        "Schema defines agentConfigHistory with agentConfigId, tenantId, changedByUserId (Id<'users'>), previousConfig, newConfig, changedByType, changeSummary, createdAt (number, Unix timestamp — required)",
-        "Indexes exist: agentTemplates.by_slug, agentTemplates.by_category_isActive, agentConfigs.by_tenantId, agentConfigs.by_templateId, agentConfigs.by_tenantId_templateId (composite unique), agentConfigHistory.by_agentConfigId",
-        "npx convex dev --typecheck succeeds with all config tables"
+        "documents table defined with fields: tenantId (Id<'tenants'>), userId (Id<'users'>), title (string), content (string | null), storageId (string | null), mimeType (string), source ('user' | 'agent'), agentRunId (Id<'agentRuns'> | null), agentConfigId (Id<'agentConfigs'> | null), googleDocUrl (string | null), wordCount (number | null), createdAt (number), updatedAt (number)",
+        "Three indexes: by_tenantId_createdAt on ['tenantId', 'createdAt'], by_tenantId_userId on ['tenantId', 'userId'], by_agentRunId on ['agentRunId']",
+        "npx tsc --noEmit passes with no schema errors"
       ],
-      "passes": true,
-      "notes": "O-2: toolDefinitions field added to agentTemplates schema per specs/agent-execution-engine.md which references custom tools defined in the template's toolDefinitions array. NW-3: createdAt explicitly listed as a required field on agentConfigHistory. CYCLE-1: All 3 tables (agentTemplates, agentConfigs, agentConfigHistory) with all fields, validators, indexes in schema.ts."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": 6,
       "category": "foundation",
-      "description": "Agent config CRUD: listAgentTemplates, listAgentConfigsForTenant, deployAgentConfig, updateAgentConfig, getAgentConfig, getAgentConfigHistory mutations and queries with locked field enforcement.",
-      "spec": "specs/agent-config-system.md",
+      "description": "Add invitations table to convex/schema.ts and clerkOrgId field to consultants table",
+      "specRef": "specs/ui-consultant-user-management.md",
       "steps": [
-        "listAgentTemplates returns only isActive=true templates with optional category filter and pagination",
-        "listAgentConfigsForTenant returns paginated configs for a tenant with optional status filter; tenant users see their own tenantId only; consultants see any of their tenants' configs",
-        "deployAgentConfig creates agentConfig with status 'building'; merges template defaultConfig with initialConfig; enforces one-per-template-per-tenant constraint; defaults scheduleTimezone to 'UTC' if not provided",
-        "deployAgentConfig throws if config already exists for tenantId + templateId combination",
-        "updateAgentConfig allows consultant to update any field; allows client to update only customizableFields",
-        "updateAgentConfig throws LockedFieldError with field names if client attempts to write a locked field",
-        "updateAgentConfig writes agentConfigHistory record before updating with previousConfig and newConfig",
-        "getAgentConfigHistory returns history records newest-first with pagination"
+        "consultants table now has clerkOrgId: v.optional(v.string()) field",
+        "invitations table exists with fields: tenantId, consultantId, email, displayName (v.union(v.string(), v.null())), clerkInvitationId, status (v.union of 'pending'|'accepted'|'revoked'|'expired'), sentAt, acceptedAt (v.union(v.number(), v.null())), createdAt",
+        "invitations has indexes: by_tenantId_status on ['tenantId', 'status'] and by_clerkInvitationId on ['clerkInvitationId']",
+        "npx tsc --noEmit passes with no type errors"
       ],
-      "passes": true,
-      "notes": "W-7: deployAgentConfig defaults scheduleTimezone to 'UTC' when not provided by caller. CYCLE-2: Full CRUD in agentTemplates.ts, agentConfigs.ts, agentConfigHistory.ts. Locked field enforcement with { code: LOCKED_FIELD } error. Config merge at deploy. One-per-template-per-tenant constraint."
+      "passes": false,
+      "notes": "Depends on existing consultants schema from prior sprint"
     },
     {
       "id": 7,
       "category": "foundation",
-      "description": "getAgentConfigForClient query: returns AgentConfigClientView for the calling client user, stripping locked field values and exposing only customizableFields. Critical multi-tenancy guard — locked field values must not be sent to client browsers.",
-      "spec": "specs/client-portal.md",
+      "description": "Install @convex-dev/persistent-text-streaming, @blocknote/core, @blocknote/mantine, mammoth, turndown, svix, @tanstack/react-table, react-hook-form, zod, react-markdown, remark-gfm packages and wire streaming component into convex.config.ts",
+      "specRef": "specs/ui-client-chat-interface.md",
       "steps": [
-        "getAgentConfigForClient query accepts { agentConfigId } and validates caller is a client user in the tenant that owns the agentConfigId; throws AuthorizationError if tenantId mismatch",
-        "Query returns AgentConfigClientView: { displayName, status, template.displayName, template.description, template.inputSchema, config (only customizableFields values — no locked field values), customizableFields } — does NOT include integrationSlots or credential status (credential status is provided separately by listIntegrationsForTenant in Item 35)",
-        "Locked field values are excluded from the returned config object — the lockedFields array itself is also excluded from the response",
-        "A client user attempting to fetch an agentConfigId from a different tenant gets an AuthorizationError, not a 404",
-        "A consultant calling this query gets the full config (not the client-restricted view) — consult role bypasses the field strip"
+        "npm install @convex-dev/persistent-text-streaming @blocknote/core @blocknote/mantine @mantine/core @mantine/hooks mammoth turndown svix @tanstack/react-table react-hook-form @hookform/resolvers react-markdown remark-gfm --legacy-peer-deps exits 0",
+        "npm install --save-dev @types/mammoth @types/turndown vitest convex-test --legacy-peer-deps exits 0; package.json 'test' script updated to 'vitest run' (replaces 'echo No tests configured')",
+        "convex/convex.config.ts imports and registers the persistent-text-streaming component",
+        "npx convex dev --once (or equivalent type generation) shows no component errors",
+        "npx tsc --noEmit reports no missing module errors for any of these packages"
       ],
-      "passes": true,
-      "notes": "O-4: This query is required to prevent locked field values from being sent to client browsers. NB-1: integrationSlots removed from return shape — enriched in Item 35. CYCLE-2: getAgentConfigForClient in agentConfigs.ts strips locked fields, returns client-safe view. getResolved internalQuery returns merged config for execution engine."
+      "passes": false,
+      "notes": "Consolidates package installs from chat-interface, document-store, and user-management specs. zod is already installed (v4) — no-op for that package. @mantine/core and @mantine/hooks are peer deps of @blocknote/mantine. @hookform/resolvers@^4 supports Zod v4."
     },
     {
       "id": 8,
       "category": "foundation",
-      "description": "Agent execution engine schema: agentRuns and agentRunSteps documents with all fields, status enums, and indexes. Includes triggerAgentRun mutation and run status queries.",
-      "spec": "specs/agent-execution-engine.md",
+      "description": "Create Clerk middleware at src/middleware.ts with route protection, TEST_MODE bypass, and onboarding redirect logic for client users",
+      "specRef": "specs/ui-auth-and-routing.md",
       "steps": [
-        "Schema defines agentRuns with status union (queued|running|completed|failed|cancelled), triggerType union, input, output, workflowId, token tracking fields, error fields",
-        "Schema defines agentRunSteps with tenantId (Id<'tenants'>, denormalized for access control), runId, stepSlug, stepDisplayName, stepOrder, status union (pending|running|completed|failed|skipped), modelUsed, token tracking (promptTokens, completionTokens, costUsd), output, rawResponse, startedAt, completedAt, durationMs, errorMessage",
-        "Indexes exist: agentRuns.by_agentConfigId, agentRuns.by_tenantId_status, agentRuns.by_tenantId_createdAt, agentRunSteps.by_runId",
-        "triggerAgentRun mutation creates run with status 'queued'; validates agentConfig status is 'deployed'; validates input against template inputSchema",
-        "triggerAgentRun reads agentTemplate.executionMode and schedules the selected workflow (agentWorkflow for 'autonomous', simpleWorkflow for 'simple') via ctx.scheduler.runAfter(0, ...) and stores the returned workflowId on the agentRun document",
-        "getAgentRun query returns run scoped to caller's tenant or consultant access",
-        "listAgentRunSteps returns steps ordered by stepOrder ascending",
-        "listAgentRunsForTenant returns paginated runs ordered by queuedAt descending",
-        "cancelAgentRun sets status to 'cancelled'; throws if run is already in terminal state"
+        "src/middleware.ts exports default clerkMiddleware; config.matcher excludes _next/static, _next/image, favicon.ico",
+        "Public routes: /, /sign-in(.*), /sign-up(.*), /api/webhooks/(.*), /oauth/(.*)",
+        "Non-public routes call auth.protect() — visiting /dashboard while unauthenticated redirects to /sign-in",
+        "When process.env.NEXT_PUBLIC_TEST_MODE === 'true', auth checks are skipped entirely (use NEXT_PUBLIC_TEST_MODE, not TEST_MODE — must be accessible in Edge Runtime)",
+        "Client user hitting /app route (excluding /app/onboarding) with onboardingComplete absent/false: redirects 302 to /app/onboarding",
+        "Client user on /app/onboarding with onboardingComplete: true: redirects 302 to /app",
+        "Consultant users are not affected by onboarding redirect logic",
+        "npx tsc --noEmit passes"
       ],
-      "passes": true,
-      "notes": "NW-2: triggerAgentRun workflow dispatch step added — triggerAgentRun schedules the selected workflow via ctx.scheduler.runAfter and stores workflowId on the agentRun document. This is the authoritative location for workflow dispatch; Item 9 (Workflows setup) defines the workflow shells and Item 10 (executeAgent) is the action called by those workflows. CYCLE-1: Schema + all CRUD in agentRuns.ts and agentRunSteps.ts. Workflow scheduling is TODO (depends on Item 9)."
+      "passes": false,
+      "notes": "Consolidates middleware from auth-and-routing and client-onboarding specs."
     },
     {
       "id": 9,
-      "category": "core-system",
-      "description": "Convex Workflows setup and workflow definitions. Install Workflows Component, define agentWorkflow (Agent SDK mode) and simpleWorkflow (Client SDK fallback) shells with status transitions. Reads executionMode from agentTemplate to dispatch correct workflow. Includes updateStepStatus internal mutation for real-time step progress logging.",
-      "spec": "specs/agent-execution-engine.md",
+      "category": "foundation",
+      "description": "Create auth layout at src/app/(auth)/layout.tsx — centered full-screen container for sign-in/sign-up pages",
+      "specRef": "specs/ui-auth-and-routing.md",
       "steps": [
-        "Convex Workflows Component is installed and configured in convex.config.ts",
-        "agentWorkflow is defined using workflow.define with args { runId }; reads resolved config; dispatches to executeAgent action; updates run status to completed or failed",
-        "simpleWorkflow is defined for executionMode='simple'; dispatches to executeSimpleCall action; updates run status",
-        "updateRunStatus internal mutation computes totalTokensIn/Out/CostUsd from child steps when transitioning to terminal state",
-        "updateStepStatus internal mutation accepts { runId, stepSlug, status, output?, rawResponse?, promptTokens?, completionTokens?, costUsd?, errorMessage? }; used by executeAgent to log tool calls and step transitions to agentRunSteps in real time",
-        "Usage log entry is written to usageLogs at run completion"
+        "File src/app/(auth)/layout.tsx exists and exports a default React component",
+        "Layout renders a full-screen centered container with classes including min-h-screen, items-center, justify-center",
+        "bg-background Tailwind class is applied to the outer wrapper",
+        "Layout accepts and renders {children}",
+        "npx tsc --noEmit passes"
       ],
-      "passes": true,
-      "notes": "W-3: updateStepStatus internal mutation added. NW-2: Workflow shells here; dispatch in Item 8. CYCLE-2: agentWorkflow + simpleWorkflow in execution/. WorkflowManager from @convex-dev/workflow. triggerAgentRun wired to schedule workflows. cancelAgentRun wired. createStep + updateStepStatus in agentRunSteps.ts."
+      "passes": false,
+      "notes": "Depends on design-system-foundation for CSS variables."
     },
     {
       "id": 10,
-      "category": "core-system",
-      "description": "executeAgent internal action: Agent SDK agentic loop with tool call logging, maxTurns enforcement, extended thinking, and 10-minute timeout checkpoint-and-continue pattern. Also executeSimpleCall for Client SDK fallback.",
-      "spec": "specs/agent-execution-engine.md",
+      "category": "functional",
+      "description": "Create root page (src/app/page.tsx) with role-based redirect: unauthenticated to /sign-in, consultants/admins to /dashboard, others to /app",
+      "specRef": "specs/ui-auth-and-routing.md",
       "steps": [
-        "executeAgent internal action instantiates Agent SDK agent with system prompt, model, tools, and thinking config",
-        "executeAgent injects run input as initial user message and starts agentic loop",
-        "executeAgent calls updateStepStatus internal mutation on each tool call to log tool name, input args, output, tokens, and cost to agentRunSteps",
-        "executeAgent respects maxTurns limit (default 25) to prevent runaway agents",
-        "executeAgent uses extended thinking when enableThinking is true for complex reasoning",
-        "executeAgent checkpoints state to DB after each turn; if approaching 10-minute Convex action limit, saves progress and schedules continuation action",
-        "executeSimpleCall makes a single messages.create call with Zod structured output; no tool use, no looping",
-        "Both actions return structured output and accumulated token usage"
+        "src/app/page.tsx is a server component using async/await",
+        "Calls await auth() from @clerk/nextjs/server to get userId",
+        "Unauthenticated users (userId null) redirected to /sign-in",
+        "Authenticated users with role 'consultant' or 'platform_admin' redirected to /dashboard",
+        "Authenticated users with any other role redirected to /app",
+        "npx tsc --noEmit passes"
       ],
-      "passes": true,
-      "notes": "CYCLE-2: Full agentic loop in executeAgent.ts — Anthropic client, tool dispatch via executePlatformTool, step logging, maxTurns, extended thinking (budget_tokens 10000), 9-min checkpoint pattern. executeSimple.ts for single-call fallback."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": 11,
-      "category": "core-system",
-      "description": "Agent memory system: RAG and Agent component setup for per-tenant memory. Configures @convex-dev/rag and @convex-dev/agent with OpenAI embeddings, namespace isolation, and memory tools.",
-      "spec": "specs/agent-memory-system.md",
+      "category": "functional",
+      "description": "Implement conversations CRUD in convex/conversations.ts: listConversations, getConversation, createConversation — all with multi-tenancy enforcement",
+      "specRef": "specs/ui-client-chat-interface.md",
       "steps": [
-        "convex.config.ts imports and uses both @convex-dev/rag and @convex-dev/agent components",
-        "RAG component configured with text-embedding-3-small (1536 dims) and filterNames for type, agentTemplateSlug, agentRunId",
-        "Agent component configured with text+vector search and message range settings",
-        "capture_memory tool wraps memory.add() with deduplication check (vectorScoreThreshold > 0.97)",
-        "capture_memory stores to namespace tenant_{tenantId} with filter values for type and agentTemplateSlug",
-        "retrieve_memory tool wraps memory.search() with namespace scoping; returns formatted results with content, type, importance, similarity score",
-        "Memory operations are non-fatal: embedding service failure logs error but does not block agent run",
-        "listMemoriesForTenant query accessible by consultant only; client users cannot list raw memories",
-        "deleteMemory mutation callable by consultant or platform_admin; calls memory.delete() on RAG component",
-        "compactMemories action synthesizes old observations into summaries via Claude; stores summary with importance 0.9; deletes source observations. Note: schedule as weekly cron per tenant per agent template, or defer to Phase 2"
+        "listConversations calls requireAuth(), resolves userId from JWT, returns conversations ordered by lastMessageAt DESC with limit 20, scoped by caller's tenantId",
+        "A query with tenant A's JWT cannot return tenant B's conversations",
+        "getConversation accepts { conversationId }, calls requireAuth(), validates conversation.userId matches caller's userId",
+        "createConversation accepts optional { agentConfigId }, inserts conversation with tenantId/userId from JWT, returns Id<'conversations'>",
+        "npx tsc --noEmit passes"
       ],
-      "passes": true,
-      "notes": "CYCLE-2: RAG component in memory.ts with text-embedding-3-small, tenant namespaces, deduplication (>0.97 threshold). Agent component in agentSetup.ts. captureMemory/retrieveMemory as internalActions. deleteMemory/listMemoriesForTenant with auth. compactMemories for observation synthesis."
+      "passes": false,
+      "notes": "Depends on conversations table in schema (Item 4)."
     },
     {
       "id": 12,
-      "category": "core-system",
-      "description": "Coaching call reports schema and CRUD: coachingCallReports document with all fields (including docUrl), indexes, and queries/mutations for report review workflow (get, list, updateNarrative, sendToCoach, markNoAction, getScoreTrend, getTranscriptUrl). sendReportToCoach triggers report_sent_to_coach email notification.",
-      "spec": "specs/coaching-call-analyzer.md",
+      "category": "functional",
+      "description": "Implement messages CRUD in convex/messages.ts: listMessages and createUserMessage with conversation ownership validation",
+      "specRef": "specs/ui-client-chat-interface.md",
       "steps": [
-        "Schema defines coachingCallReports with overallScore, dimensionScores, highlights, concerns, narrative, editedNarrative, flagged, status union (draft|reviewed|sent|no_action), releasedToCoach, docUrl (string — Google Doc URL written by the Format step and read by the UI), all other fields from spec (coachId, coachName, studentId, studentName, callNumber, zoomMeetingId, recordedAt, durationMinutes, transcriptStorageId, parsedTranscript, coachTalkPercent, rawAnalysisJson, sentAt, createdAt, updatedAt)",
-        "Indexes exist: by_tenantId_status, by_tenantId_coachId, by_tenantId_flagged, by_agentRunId",
-        "getCoachingReport returns full report for admin; omits rawAnalysisJson and transcriptStorageId for coach callers",
-        "listCoachingReports supports filters by status, coachId, flagged, callNumber with default sort flagged+draft first",
-        "updateReportNarrative sets editedNarrative and status to 'reviewed'; admin only",
-        "sendReportToCoach validates status is draft or reviewed (not already sent); sets releasedToCoach=true, status=sent, sentAt=now(); triggers sendNotificationEmail action using the report_sent_to_coach template to send email notification to the coach",
-        "markNoAction sets status to 'no_action'",
-        "getCoachScoreTrend returns score history per coach ordered by createdAt ascending",
-        "getTranscriptUrl query accepts { reportId } and calls ctx.storage.getUrl(report.transcriptStorageId) to generate a short-lived Convex storage URL for the VTT transcript file; accessible by admin callers only; throws AuthorizationError for coach callers; returns null if transcriptStorageId is not set on the report"
+        "listMessages accepts { conversationId }, calls requireAuth(), validates caller owns the conversation, returns messages ordered by createdAt ASC",
+        "listMessages with a conversationId owned by a different user returns null or throws auth error",
+        "createUserMessage accepts { conversationId, content }, validates ownership, inserts message with role 'user', isStreaming false, tenantId from JWT",
+        "createUserMessage returns Id<'messages'>",
+        "npx tsc --noEmit passes"
       ],
-      "passes": true,
-      "notes": "B-2: docUrl field added. B-1 reorder: before Item 13. O-3: sendReportToCoach triggers email. CYCLE-2: Full CRUD in coachingCallReports.ts (408 lines). All 9 functions: get, list (flagged-first sort), updateNarrative, sendToCoach, markNoAction, scoreTrend, transcriptUrl, createReport/updateReport internal mutations."
+      "passes": false,
+      "notes": "Depends on messages table (Item 4) and conversations.ts for ownership check."
     },
     {
       "id": 13,
-      "category": "core-system",
-      "description": "Platform tools registration: define the tool set available to all agents (retrieve_memory, capture_memory, read_file, store_file, query_reports, get_config). Each tool has a JSON schema definition and handler that delegates to internal Convex functions.",
-      "spec": "specs/agent-execution-engine.md",
+      "category": "functional",
+      "description": "Implement POST /api/chat/stream HTTP action with SSE streaming via persistent-text-streaming and orchestrator routing",
+      "specRef": "specs/ui-client-chat-interface.md",
       "steps": [
-        "Platform tools module exports an array of tool definitions with name, description, and JSON schema for input parameters",
-        "retrieve_memory tool calls RAG search scoped to tenant namespace and returns formatted results",
-        "capture_memory tool calls RAG add with deduplication and returns success/skipped status",
-        "read_file tool reads from Convex file storage by storageId and returns content",
-        "store_file tool writes to Convex file storage and returns storageId",
-        "query_reports tool queries coachingCallReports by tenantId with optional filters (depends on coachingCallReports table defined in Item 12)",
-        "get_config tool reads merged agent config values (template defaults + tenant overrides)",
-        "All tools enforce tenantId scoping — no cross-tenant data access"
+        "convex/execution/chatStream.ts exports an HTTP action handler; route POST /api/chat/stream registered in convex/http.ts",
+        "Handler validates Clerk JWT from Authorization header — returns 401 for invalid token",
+        "Handler creates assistant message with isStreaming: true and streamingToken before streaming",
+        "Handler uses createTextStreamer from @convex-dev/persistent-text-streaming to write chunks",
+        "Response is text/event-stream content type with SSE chunks",
+        "On failure, assistant message content set to error message and isStreaming set to false",
+        "npx tsc --noEmit passes"
       ],
-      "passes": true,
-      "notes": "Depends on Item 12. CYCLE-2: platformToolDefinitions array with 6 tools in Anthropic schema format + executePlatformTool handler. All tenant-scoped. Memory tools non-fatal. query_reports delegates to internal coachingCallReports."
+      "passes": false,
+      "notes": "Depends on persistent-text-streaming package (Item 7), messages schema (Item 4)."
     },
     {
       "id": 14,
-      "category": "core-system",
-      "description": "Credentials schema and Composio integration management: credentials document, initiateComposioOAuth action, OAuth callback HTTP endpoint, resolveCredentials internal action for batch credential resolution at pipeline start.",
-      "spec": "specs/output-integrations.md",
+      "category": "functional",
+      "description": "Implement orchestratorRoute internal action that dynamically routes to sub-agents based on tenant's deployed agentConfigs",
+      "specRef": "specs/ui-client-chat-interface.md",
       "steps": [
-        "Schema defines credentials table with tenantId, slotName, provider, composioEntityId, status union (pending|active|expired|revoked|error), connectedAt, lastUsedAt, errorMessage",
-        "Index by_tenantId_slotName (composite unique) exists on credentials table",
-        "initiateComposioOAuth action creates Composio entity plinth_tenant_{tenantId} and returns authUrl for OAuth flow",
-        "HTTP endpoint GET /oauth/composio/callback receives Composio callback; updates credential to active; redirects to integrations page",
-        "Route registered in convex/http.ts via http.route({ path: '/oauth/composio/callback', method: 'GET' })",
-        "resolveCredentials internal action batch-resolves all required slots; throws IntegrationNotConnectedError for any slot not in 'active' status",
-        "getCredentialStatus query returns connection status without exposing raw credentials",
-        "disconnectCredential mutation takes { slotName }, resolves tenantId from caller's JWT, sets status to 'revoked', and calls Composio API to revoke"
+        "convex/execution/orchestrator.ts exports internalAction named orchestratorRoute accepting { conversationId, userMessage, tenantId, userId }",
+        "Action queries tenant's deployed agentConfigs to build orchestrator system prompt dynamically — no hardcoded agent capabilities",
+        "If no agentConfigs deployed, returns 'Your consultant hasn't set up any agents yet.' without empty tool list",
+        "Uses claude-sonnet-4-6 via Agent SDK as primary execution mode",
+        "When user message names an agent, routes via tool call; when ambiguous, asks clarifying question; when no match, responds directly",
+        "npx tsc --noEmit passes"
       ],
-      "passes": true,
-      "notes": "This item owns credentials table. NW-4: Route in http.ts. CYCLE-2: credentials.ts with CRUD + resolveCredentials batch resolver. composio.ts with initiateComposioOAuth action. composioCallback.ts httpAction. http.ts with /oauth/composio/callback route. Entity ID format: plinth_tenant_{tenantId}."
+      "passes": false,
+      "notes": "Depends on agentConfigs table from prior sprint. Requires Agent SDK."
     },
     {
       "id": 15,
-      "category": "core-system",
-      "description": "Google Docs integration via Composio: createGoogleDoc internal action that resolves tenant credentials, calls Composio GOOGLEDOCS_CREATE_DOCUMENT tool, and returns docId + docUrl. Supports optional folderId for Drive folder organization.",
-      "spec": "specs/output-integrations.md",
+      "category": "functional",
+      "description": "Implement document CRUD in convex/documents.ts: listDocuments, getDocument, createDocument, updateDocument, saveAgentDocument (internal)",
+      "specRef": "specs/ui-document-store.md",
       "steps": [
-        "createGoogleDoc action accepts { tenantId, title, content, folderId? } parameters",
-        "createGoogleDoc resolves credentials for slotName 'google_docs' for the given tenantId",
-        "createGoogleDoc validates credential status is 'active'; throws IntegrationNotConnectedError if not",
-        "createGoogleDoc calls Composio tool GOOGLEDOCS_CREATE_DOCUMENT with title and content",
-        "If folderId provided, calls Composio tool GOOGLEDRIVE_MOVE_FILE to place doc in folder",
-        "createGoogleDoc updates credential.lastUsedAt on success",
-        "createGoogleDoc returns { docId, docUrl } object",
-        "createGoogleDoc throws ComposioToolError on Composio API failure with detail from response"
+        "listDocuments query accepts optional sortBy ('createdAt'|'updatedAt'|'title'), calls requireAuth, scopes by tenantId, returns limit 50",
+        "getDocument query validates document.tenantId matches caller's tenantId; returns null on mismatch; includes signed URL if storageId is set",
+        "createDocument mutation sets tenantId/userId from JWT, mimeType 'text/markdown', createdAt/updatedAt to Date.now(), returns Id<'documents'>",
+        "updateDocument mutation validates tenant ownership, throws ConvexError on mismatch, always updates updatedAt",
+        "saveAgentDocument is internalMutation — idempotent per agentRunId (upserts via by_agentRunId index), sets source: 'agent'",
+        "npx tsc --noEmit passes"
       ],
-      "passes": true,
-      "notes": "CYCLE-2: createGoogleDoc internalAction in integrations/googleDocs.ts. Resolves credentials, calls Composio GOOGLEDOCS_CREATE_DOCUMENT, optional folder move (best-effort). formatCoachingReport helper for report document structure."
+      "passes": false,
+      "notes": "Depends on documents table (Item 5)."
     },
     {
       "id": 16,
-      "category": "core-system",
-      "description": "Resend email integration: sendNotificationEmail internal action with template substitution. Includes flagged_call_admin and report_sent_to_coach email templates.",
-      "spec": "specs/output-integrations.md",
+      "category": "functional",
+      "description": "Implement exportToGoogleDocs action and importFromDocx action in convex/documents.ts",
+      "specRef": "specs/ui-document-store.md",
       "steps": [
-        "sendNotificationEmail action looks up template by templateName from NOTIFICATION_TEMPLATES constant",
-        "sendNotificationEmail substitutes {{variable_name}} placeholders in subject and body",
-        "sendNotificationEmail calls Resend API POST /emails with platform API key from RESEND_API_KEY env var",
-        "sendNotificationEmail uses per-tenant from-email from agentConfig.config.resendFromEmail",
-        "flagged_call_admin template produces subject 'Growth Factor Implementation -- Flagged Call -- CoachName -- Call #X -- Score/100'",
-        "report_sent_to_coach template produces subject with coach name, admin name, and call date",
-        "sendNotificationEmail returns { messageId } on success; throws ResendError on API failure"
+        "exportToGoogleDocs action accepts { documentId }, validates tenant ownership, calls createGoogleDoc from googleDocs.ts, updates googleDocUrl on document",
+        "exportToGoogleDocs throws recognizable error code (CREDENTIAL_EXPIRED or CREDENTIAL_MISSING) when Google credential is missing",
+        "importFromDocx action accepts { storageId, fileName }, downloads from Convex storage, converts via mammoth then turndown, creates document with source 'user'",
+        "importFromDocx returns the new Id<'documents'>",
+        "npx tsc --noEmit passes"
       ],
-      "passes": true,
-      "notes": "CYCLE-2: sendNotificationEmail internalAction in integrations/resend.ts. fetch-based Resend API call. NOTIFICATION_TEMPLATES with flagged_call_admin and report_sent_to_coach. substituteVariables with {{key}} and {{#key}}conditional{{/key}} support."
+      "passes": false,
+      "notes": "Depends on existing createGoogleDoc action in convex/integrations/googleDocs.ts."
     },
     {
       "id": 17,
-      "category": "first-agent",
-      "description": "Zoom webhook HTTP endpoint and VTT processing: POST /webhooks/zoom with signature validation, challenge-response handler, and deferred processZoomTranscript action. Includes zoomCredentials and zoomWebhookEvents schema.",
-      "spec": "specs/zoom-integration.md",
+      "category": "functional",
+      "description": "Add provisionStarterAgent mutation to convex/agentConfigs.ts — idempotent per tenant, client-role only",
+      "specRef": "specs/ui-client-onboarding.md",
       "steps": [
-        "Schema defines zoomCredentials with tenantId, accountId, clientId, clientSecret, webhookSecretToken, accessToken, accessTokenExpiresAt, createdAt, updatedAt",
-        "Schema defines zoomWebhookEvents with tenantId, zoomMeetingId, eventType, zoomUserId, rawPayload (object), processed (boolean), processedAt, agentRunId, error (string), createdAt",
-        "Indexes exist on zoomWebhookEvents: by_zoomMeetingId for deduplication, by_tenantId_processed for retry queue",
-        "Index exists on zoomCredentials: by_tenantId for fast lookup",
-        "HTTP endpoint POST /webhooks/zoom validates x-zm-signature using HMAC-SHA256 of v0:{timestamp}:{body}",
-        "Route registered in convex/http.ts via http.route({ path: '/webhooks/zoom', method: 'POST' })",
-        "Endpoint returns 400 on signature mismatch",
-        "Endpoint handles endpoint.url_validation challenge by returning { plainToken, encryptedToken }",
-        "Endpoint responds 200 OK within 3 seconds for recording.transcript_completed events and defers processing to scheduled action",
-        "Endpoint silently responds 200 for unrecognized event types"
+        "provisionStarterAgent checks for existing agentConfig with templateId matching 'general-assistant' for caller's tenant; creates one if absent",
+        "Second call returns same agentConfigId (idempotency)",
+        "Returns null when 'general-assistant' template does not exist",
+        "Throws authorization error when called by non-client role",
+        "Created agentConfig tenantId matches caller's tenantId from JWT",
+        "npx tsc --noEmit passes"
       ],
-      "passes": true,
-      "notes": "NW-4: Route registered in convex/http.ts added as an explicit step. CYCLE-3: zoomWebhook httpAction in webhooks/zoom.ts with Web Crypto HMAC-SHA256. Challenge-response via getChallengeSecret. Defers to processZoomTranscript via scheduler."
+      "passes": false,
+      "notes": "Depends on general-assistant seed data (Item 20)."
     },
     {
       "id": 18,
-      "category": "first-agent",
-      "description": "Zoom transcript download and VTT parsing: processZoomTranscript action downloads VTT using downloadToken, parses to plain text with speaker labels, computes coachTalkPercent, stores in Convex file storage, and triggers coaching call analyzer run.",
-      "spec": "specs/zoom-integration.md",
+      "category": "functional",
+      "description": "Create completeOnboarding server action and onboarding redirect middleware logic",
+      "specRef": "specs/ui-client-onboarding.md",
       "steps": [
-        "processZoomTranscript checks for duplicate by zoomMeetingId + tenantId before processing",
-        "getOrRefreshZoomToken returns cached token if valid; refreshes via Zoom OAuth endpoint if expired; encrypts new accessToken using platform-level secret before writing back to zoomCredentials",
-        "VTT parser strips WEBVTT header, timestamp lines, and cue index numbers; preserves speaker labels in format 'Speaker: text'",
-        "coachTalkPercent is computed from cumulative speaking time per speaker; set to null if coach speaker cannot be identified",
-        "Raw VTT is stored in Convex file storage; storageId is returned",
-        "Action queries agentConfigs for tenantId where template slug = 'coaching-call-analyzer' and status = 'deployed'",
-        "Action triggers agentRun with input { zoomMeetingId, transcriptStorageId, parsedTranscript, coachTalkPercent, zoomUserId }",
-        "Action retries VTT download up to 3 times with 5s backoff on failure"
+        "src/app/(client)/app/onboarding/_actions.ts exists with 'use server' directive",
+        "completeOnboarding() calls clerkClient().users.updateUser with publicMetadata.onboardingComplete = true",
+        "Calling without authenticated session throws 'Unauthenticated' error",
+        "No publicMetadata updates exist in client-side code (grep for updateUser in .tsx outside _actions.ts returns no results)"
       ],
-      "passes": true,
-      "notes": "CYCLE-3: processZoomTranscript and getOrRefreshZoomToken internalActions in integrations/zoom.ts. VTT parser with parseTimestamp, parseVTT, computeCoachTalkPercent. createWebhookAgentRun for auth-free webhook triggers. 3x retry with 5s backoff."
+      "passes": false,
+      "notes": "Middleware onboarding redirect logic is in Item 8."
     },
     {
       "id": 19,
-      "category": "first-agent",
-      "description": "Coaching call analyzer template and config: seed the coaching-call-analyzer agent template with system prompt, 4-step pipeline definition, rubric dimensions, curriculum, and Growth Factor Implementation default config via a seed script.",
-      "spec": "specs/coaching-call-analyzer.md",
+      "category": "functional",
+      "description": "Create convex/invitations.ts with createInvitation/updateInvitationStatus internal mutations and listInvitations query",
+      "specRef": "specs/ui-consultant-user-management.md",
       "steps": [
-        "agentTemplate with slug 'coaching-call-analyzer' exists with isPipeline=true, category='coaching'",
-        "pipelineSteps array has 4 entries: intake (order 0), analyze (order 1), format (order 2), deliver (order 3)",
-        "defaultConfig includes programName, adminName, notificationThreshold (70), rubricDimensions (4 dimensions totaling 100 points), curriculum (16 entries: onboarding + calls 1-14 + bonus)",
-        "integrationSlots includes 'google_docs' for report output",
-        "inputSchema defines fields for transcript input (text/file) and optional callNumber",
-        "defaultLockedFields includes rubricDimensions and curriculum",
-        "defaultCustomizableFields includes notificationThreshold, adminEmail, adminName",
-        "Template is created via a seed script (e.g., convex/seeds/coachingCallAnalyzerTemplate.ts); GitHub sync (Item 20) can update it later but does NOT create it"
+        "createInvitation is internalMutation accepting { tenantId, consultantId, email, displayName?, clerkInvitationId }, returns Id<'invitations'>",
+        "updateInvitationStatus is internalMutation accepting { clerkInvitationId, status, acceptedAt? }",
+        "listInvitations query calls requireAuth, verifies consultant ownership of tenantId, returns invitations ordered by sentAt DESC",
+        "Calling listInvitations with a tenantId belonging to a different consultant returns empty or throws authorization error",
+        "npx tsc --noEmit passes"
       ],
-      "passes": true,
-      "notes": "W-4: Template creation is seeded via a migration/seed script, not dependent on GitHub sync. This ensures the template exists before any runs are triggered regardless of GitHub sync status. Cycle 4 green."
+      "passes": false,
+      "notes": "Depends on invitations table in schema (Item 6)."
     },
     {
       "id": 20,
-      "category": "first-agent",
-      "description": "GitHub template sync: HTTP endpoint for GitHub webhooks that triggers syncTemplateFromGit action. Validates GitHub signature, parses changed template files, upserts agentTemplate documents.",
-      "spec": "specs/agent-config-system.md",
+      "category": "functional",
+      "description": "Add missing backend mutations, expand existing mutations, update validators, and seed data for UI sprint prerequisites",
+      "specRef": "specs/ui-consultant-redesign.md",
       "steps": [
-        "HTTP endpoint POST /webhooks/github-template-sync validates x-hub-signature-256 using HMAC-SHA256 with GITHUB_WEBHOOK_SECRET",
-        "Route registered in convex/http.ts via http.route({ path: '/webhooks/github-template-sync', method: 'POST' })",
-        "Endpoint parses push payload; filters changed files to templates/**/*.json paths",
-        "Endpoint schedules syncTemplateFromGit action for each changed template directory",
-        "syncTemplateFromGit fetches template.json, pipeline-steps.json, default-config.json from GitHub API for the given slug and commitSha",
-        "syncTemplateFromGit upserts agentTemplate matched by slug; increments version number",
-        "syncTemplateFromGit returns status: created | updated | unchanged",
-        "Malformed JSON in git causes sync to skip and log error without corrupting existing template"
+        "convex/coachingCallReports.ts exports a markReviewed mutation that accepts { reportId }, calls requireAuth, validates consultant ownership, sets status to 'reviewed' and updatedAt to Date.now()",
+        "convex/tenants.ts exports an updateTenant mutation that accepts { tenantId, businessName?, ownerName?, ownerEmail?, website?, vertical?, notes? }, calls requireAuth, validates consultant ownership of tenant, patches fields and sets updatedAt",
+        "convex/consultants.ts updateConsultant mutation expanded to accept { displayName?, businessName?, supportEmail? } — currently only accepts displayName. Add businessName and supportEmail as v.optional(v.string()) args",
+        "convex/themes.ts VALID_FONT_FAMILIES updated to include 'Plus Jakarta Sans': [\"Inter\", \"Poppins\", \"Lato\", \"Montserrat\", \"Open Sans\", \"Plus Jakarta Sans\"]",
+        "Add v.literal('general') to the agentTemplates category union in convex/schema.ts. convex/seed.ts includes a 'general-assistant' agentTemplate entry with slug 'general-assistant', category 'general', executionMode 'autonomous', isActive true — seed is idempotent (checks for existing slug before insert)",
+        "Existing mutations are NOT modified: sendReportToCoach (line ~277) and markNoAction (line ~308) remain as-is",
+        "npx tsc --noEmit passes"
       ],
-      "passes": true,
-      "notes": "NW-4: Route registered in convex/http.ts added as an explicit step. CYCLE-6: GitHub webhook validates HMAC-SHA256 via Web Crypto API. Parses push events for templates/**/*.json. syncTemplateFromGit fetches from GitHub Contents API, upserts by slug, increments version. Uses Buffer.from for base64 decode."
+      "passes": false,
+      "notes": "BLOCKER-1 fix: markReviewed was missing. updateTenant was missing. updateConsultant needs businessName/supportEmail fields for Settings Profile tab. VALID_FONT_FAMILIES needs Plus Jakarta Sans. general-assistant seed needed for provisionStarterAgent (Item 17)."
     },
     {
       "id": 21,
-      "category": "first-agent",
-      "description": "Coaching call analyzer pipeline: Intake step only. Reads transcript from run input (webhook path uses transcriptStorageId already stored by Item 18; manual path downloads/parses). Determines callNumber and creates initial coachingCallReport document.",
-      "spec": "specs/coaching-call-analyzer.md",
+      "category": "functional",
+      "description": "Create server actions for inviteUser, resendInvitation, and revokeInvitation at src/app/(consultant)/clients/[tenantId]/_actions.ts",
+      "specRef": "specs/ui-consultant-user-management.md",
       "steps": [
-        "On the webhook-triggered path, Intake reads transcriptStorageId from agentRun.input.transcriptStorageId — it does NOT re-download the VTT because Item 18 (processZoomTranscript) already downloaded and stored it",
-        "On the manual path, Intake accepts transcript text directly from agentRun.input.transcriptText; stores raw text to Convex file storage and records storageId",
-        "VTT parsing (strip timestamps, preserve speaker labels) runs on the manual path only; webhook path receives pre-parsed parsedTranscript from agentRun.input",
-        "coachTalkPercent is read from agentRun.input.coachTalkPercent (webhook path) or computed from VTT timestamps (manual path); set to null if coach speaker cannot be identified",
-        "callNumber is determined from agentRun.input.callNumber; null if not provided (does not perform GHL lookup — call number must come from run input or be set manually by admin)",
-        "Intake writes initial coachingCallReport document with transcriptStorageId, coachTalkPercent, callNumber, coachId, coachName, studentName from run input",
-        "Transcripts < 500 words skip the pipeline: create report with status 'no_action' and note 'Transcript too short for coaching analysis'; pipeline exits here"
+        "File src/app/(consultant)/clients/[tenantId]/_actions.ts exists with 'use server' directive",
+        "inviteUser server action validates email with Zod z.string().email(), checks for existing user, retrieves clerkOrgId — returns { success: false, error } for invalid email, missing clerkOrgId, or existing user",
+        "inviteUser calls clerkClient().organizations.createOrganizationInvitation with role 'org:client' and saves record via createInvitation internal mutation",
+        "revokeInvitation calls Clerk revoke API then updateInvitationStatus with 'revoked'",
+        "resendInvitation revokes old, creates new, updates clerkInvitationId and sentAt",
+        "npx tsc --noEmit passes"
       ],
-      "passes": true,
-      "notes": "S-2 split: this is the Intake step only (was originally combined with Analyze in a single item). W-1: On webhook path, Intake reads transcriptStorageId from agentRun.input, NOT from a fresh Zoom download. B-4: GHL contact lookup removed — callNumber comes from run input or is null. Cycle 4 green."
+      "passes": false,
+      "notes": "Depends on convex/invitations.ts (Item 19). Clerk SDK must be installed."
     },
     {
       "id": 22,
-      "category": "first-agent",
-      "description": "Coaching call analyzer pipeline: Analyze step only. Calls Claude with Zod structured output for scoring against configurable rubric and curriculum. coachTalkPercent is nullable in the Zod schema.",
-      "spec": "specs/coaching-call-analyzer.md",
+      "category": "ui",
+      "description": "Create design system visual reference page at /design-system (dev-only) displaying all installed shadcn components with Plinth tokens",
+      "specRef": "specs/ui-design-system-foundation.md",
+      "userStory": "As a developer, when I navigate to /design-system in development mode, I see all shadcn components rendered with Plinth's color palette, typography, and spacing tokens.",
       "steps": [
-        "Analyze step looks up curriculum entry for callNumber from agentConfig.config.curriculum; if callNumber is null or not found, uses a generic rubric anchor for the call type",
-        "Analyze step builds prompt with transcript + call-specific curriculum entry + rubric dimension anchors",
-        "Analyze step calls Claude (claude-sonnet-4-6) with messages.parse() using AnalysisResultSchema Zod structured output",
-        "AnalysisResultSchema defines coachTalkPercent as z.number().min(0).max(100).nullable() — it can be null when the coach speaker cannot be identified from the VTT",
-        "Analyze step validates all dimension scores present and sum <= total maxScore; caps any dimension score exceeding maxScore at that dimension's maxScore",
-        "Analyze step computes overallScore = sum of dimension scores; sets flagged = overallScore < agentConfig.config.notificationThreshold"
+        "http://localhost:3000/design-system renders without 404 or errors",
+        "Page displays Button components in all variants (default, secondary, destructive, outline, ghost)",
+        "Card component has correct --card background (#FFFFFF) and --border color (#E2E8F0)",
+        "Badge, Input, Select, Checkbox, and Textarea components are visible and styled with Plinth tokens",
+        "All text renders in Plus Jakarta Sans",
+        "Page returns 404 or redirects in production build (NODE_ENV=production)"
       ],
-      "passes": true,
-      "notes": "S-2 split: this is the Analyze step only (split from original combined Intake+Analyze item). B-3: coachTalkPercent uses .nullable() in AnalysisResultSchema per spec — null when coach speaker cannot be identified. Cycle 4 green."
+      "passes": false,
+      "notes": "Developer reference page only, not user-facing."
     },
     {
       "id": 23,
-      "category": "first-agent",
-      "description": "Coaching call analyzer pipeline: Format and Deliver steps. Format creates Google Doc with structured report. Deliver saves results to coachingCallReport and sends email notification if flagged.",
-      "spec": "specs/coaching-call-analyzer.md",
+      "category": "ui",
+      "description": "Create sign-in and sign-up pages with Clerk components styled with Plinth brand",
+      "specRef": "specs/ui-auth-and-routing.md",
+      "userStory": "As an unauthenticated visitor, when I navigate to /sign-in or /sign-up, I see centered Clerk forms styled with Plinth brand colors and Plus Jakarta Sans font.",
       "steps": [
-        "Format step creates Google Doc via createGoogleDoc with structured report content (scorecard table, highlights, concerns, narrative) using agentConfig.config.programName in header",
-        "Format step returns { docUrl, reportFormatted }",
-        "Deliver step updates coachingCallReport with overallScore, dimensionScores, highlights, concerns, narrative, docUrl, flagged",
-        "Deliver step sends email via sendNotificationEmail using flagged_call_admin template to adminEmail if flagged=true",
-        "Deliver step does not send notification if not flagged; report saved to DB for admin to view at convenience",
-        "Deliver step returns { notificationSent: boolean, notificationChannel: 'email' | null }"
+        "src/app/(auth)/sign-in/[[...sign-in]]/page.tsx renders <SignIn /> with appearance.variables.colorPrimary='#6366F1' and fontFamily='var(--font-plus-jakarta-sans)'; afterSignInUrl='/'",
+        "src/app/(auth)/sign-up/[[...sign-up]]/page.tsx renders <SignUp /> with matching brand appearance; afterSignUpUrl='/'",
+        "Both use catch-all route segments so Clerk sub-routes resolve correctly",
+        "Navigating to /sign-in and /sign-up while unauthenticated renders the Clerk widgets",
+        "npx tsc --noEmit passes"
       ],
-      "passes": true,
-      "notes": "CYCLE-6: formatStep.ts creates Google Doc via existing createGoogleDoc + formatCoachingReport helpers. deliverStep.ts updates report, sends flagged-call email via Resend (non-fatal on failure). docUrl stored in rawAnalysisJson (no dedicated schema field). Steps are standalone internalActions."
+      "passes": false,
+      "notes": "Consolidated sign-in and sign-up into one item."
     },
     {
       "id": 24,
       "category": "ui",
-      "description": "Next.js app setup with Clerk auth, Convex provider, ThemeProvider, and route group middleware. Two route groups: /(consultant) for dashboard, /(client)/app for client portal. Middleware enforces role-based routing.",
-      "spec": "specs/consultant-dashboard.md",
-      "userStory": "When a consultant logs in, they are routed to /dashboard. When a client logs in, they are routed to /app. If a consultant tries to access /app routes, they are redirected to /dashboard. If a client tries to access /dashboard routes, they are redirected to /app.",
+      "description": "Add role guard to consultant layout and wire UserButton in both consultant and client layouts",
+      "specRef": "specs/ui-auth-and-routing.md",
+      "userStory": "As a consultant, I see a UserButton for profile/sign-out; as a client trying to access /dashboard, I am redirected to /app.",
       "steps": [
-        "Next.js 15 App Router project initializes with Clerk and Convex providers in root layout",
-        "ThemeProvider component reads theme from getThemeForCurrentUser and injects CSS variables (--color-primary, --color-secondary, --color-accent, --color-background, --color-foreground, --font-family)",
-        "Route group /(consultant) exists with layout requiring consultant role",
-        "Route group /(client)/app exists with layout requiring client role",
-        "Middleware redirects consultant-role users from /app/* to /dashboard",
-        "Middleware redirects client-role users from /dashboard/* to /app",
-        "Default Plinth theme renders when no consultant theme is configured"
+        "Consultant layout calls await auth() — if role is 'client' or absent, redirects to /app",
+        "/dashboard as consultant/admin renders without redirect",
+        "Consultant layout renders <UserButton afterSignOutUrl='/sign-in' /> in sidebar footer or header",
+        "Client layout renders <UserButton afterSignOutUrl='/sign-in' /> in sidebar footer",
+        "Clicking Sign out from either layout redirects to /sign-in",
+        "npx tsc --noEmit passes"
       ],
-      "passes": true,
-      "notes": "Cycle 4 green."
+      "passes": false,
+      "notes": "Depends on consultant and client layouts existing."
     },
     {
       "id": 25,
       "category": "ui",
-      "description": "Consultant dashboard home page (/dashboard): stats bar with 4 cards (active clients, deployed agents, flagged reports, monthly cost) and client roster table with search/filter/status management.",
-      "spec": "specs/consultant-dashboard.md",
-      "userStory": "As a consultant, I log into my dashboard and see four stat cards showing my active client count, total deployed agents, flagged reports needing review, and monthly API cost. Below, I see a table of all my clients with their business name, status, agent count, and cost. I can search by name, filter by status, and click 'View' to see a client's detail page.",
+      "description": "Build custom 404 page, root error boundary, and route-group error boundaries",
+      "specRef": "specs/ui-shared-polish.md",
+      "userStory": "As a user who navigates to a non-existent URL or encounters a runtime error, I see a friendly page with recovery options.",
       "steps": [
-        "getConsultantDashboard query returns { activeClientCount, totalAgentsDeployed, flaggedReportCount, monthlyCostUsd }; monthlyCostUsd is computed from usageLogs using the by_tenantId_loggedDate index (Item 1)",
-        "listClientsForConsultant query returns paginated TenantSummary with search by businessName/ownerName and status filter",
-        "/dashboard page renders 4 stat cards with correct data from getConsultantDashboard",
-        "Client roster table shows columns: Business Name, Owner, Status badge, Agents count, Last Run, Monthly Cost, Actions",
-        "Search input filters roster by business name or owner name",
-        "Status filter shows Active/Paused/Churned options",
-        "'View' button navigates to /clients/{tenantId}",
-        "Empty state shows 'Add your first client' CTA when no tenants exist"
+        "src/app/not-found.tsx renders '404', h1 'Page not found', and 'Go home' button linking to /",
+        "src/app/error.tsx has 'use client' directive, accepts error and reset props, renders Try again (calls reset) and Go home buttons",
+        "src/app/(consultant)/error.tsx and src/app/(client)/app/error.tsx both exist with matching error boundary contract",
+        "Navigating to /nonexistent-page renders the 404 component",
+        "npx tsc --noEmit passes"
       ],
-      "passes": true,
-      "notes": "Cycle 4 green."
+      "passes": false,
+      "notes": "Consolidated root + route-group error boundaries into one item."
     },
     {
       "id": 26,
       "category": "ui",
-      "description": "Full-page /clients route: the same client roster data as the /dashboard table but as a standalone full-page view with additional filter and sort options.",
-      "spec": "specs/consultant-dashboard.md",
-      "userStory": "As a consultant, I navigate to /clients and see a full-page list of all my clients with additional sort and filter controls. I can sort by business name, last run date, or monthly cost. I can filter by status. I click a client row to navigate to their detail page.",
+      "description": "Install and configure Sonner toast, mount <Toaster /> once in root layout, and create SkipToContent accessibility component",
+      "specRef": "specs/ui-shared-polish.md",
+      "userStory": "As a user performing actions, I see toast notifications; as a keyboard user, I can skip to main content with Tab+Enter.",
       "steps": [
-        "/clients page renders a full-page table of all tenants for the calling consultant using listClientsForConsultant query",
-        "listClientsForConsultant accepts an optional sortBy parameter with values 'businessName' | 'lastRun' | 'monthlyCost' and an optional sortDir parameter 'asc' | 'desc'; default sort is businessName ascending; sort is applied server-side in the query",
-        "Table supports the same columns as the /dashboard roster: Business Name, Owner, Status badge, Agents count, Last Run, Monthly Cost, Actions",
-        "/clients page exposes sort controls for Last Run and Monthly Cost (ascending/descending) not present on the /dashboard roster",
-        "/clients page retains the search and status filter controls from the dashboard roster",
-        "'View' button per row navigates to /clients/{tenantId}",
-        "Empty state shows 'No clients yet' when no tenants exist"
+        "<Toaster position='bottom-right' richColors /> rendered once in src/app/layout.tsx body — grep '<Toaster' returns exactly one result",
+        "toast.success('Test') shows green toast in bottom-right; toast.error('Test') shows red toast",
+        "src/components/SkipToContent.tsx renders anchor with href='#main-content', sr-only classes that become visible on focus",
+        "<SkipToContent /> is first child inside <body> in layout.tsx",
+        "All <main> elements have id='main-content' and tabIndex={-1}",
+        "npx tsc --noEmit passes"
       ],
-      "passes": true,
-      "notes": "O-1: Added per specs/consultant-dashboard.md which defines /clients as a distinct full-page route: 'Same as the roster table in /dashboard, but full-page with additional filter and sort options.' NW-6: listClientsForConsultant accepts sortBy and sortDir parameters; sort is applied server-side. W-4: This item modifies the listClientsForConsultant query originally built in Item 25 to add sortBy/sortDir parameters. Requires Item 25 complete first to avoid merge conflicts. Cycle 4 green."
+      "passes": false,
+      "notes": "Toaster must NOT be duplicated in route-group layouts."
     },
     {
       "id": 27,
       "category": "ui",
-      "description": "Client detail page (/clients/{tenantId}) — Part A: page header with business info, Agents tab with deployed agent list and Deploy New Agent modal.",
-      "spec": "specs/consultant-dashboard.md",
-      "userStory": "As a consultant, I click on a client in my roster and see their detail page. In the Agents tab I see all their deployed agents with status badges and run counts. I click 'Deploy New Agent' and select from the template library. The new agent appears with status 'building'.",
+      "description": "Add prefers-reduced-motion CSS, touch target minimums, and create reusable PageBreadcrumb component",
+      "specRef": "specs/ui-shared-polish.md",
+      "userStory": "As a user who prefers reduced motion, all animations are instant; as a mobile user, all touch targets are at least 44x44px.",
       "steps": [
-        "getClientDetail query returns tenant info, agentConfigs, credential statuses, and recent runs for the given tenantId; consultant must own the tenantId or get AuthorizationError",
-        "/clients/{tenantId} page renders header with businessName, ownerName, vertical badge, status badge",
-        "Agents tab lists agentConfigs with displayName, status badge, template name, last run, run count",
-        "'Deploy New Agent' button opens template picker modal showing all isActive agentTemplates",
-        "Selecting a template from the picker calls deployAgentConfig mutation; new agentConfig appears with status 'building'",
-        "Template picker modal shows integration slots required for each template so consultant knows what OAuth connections the client will need"
+        "globals.css contains @media (prefers-reduced-motion: reduce) block setting animation-duration/transition-duration to 0.01ms on *, *::before, *::after",
+        "Interactive elements (Button, Link) achieve 44x44px minimum via min-h-11 min-w-11 or padding",
+        "src/components/PageBreadcrumb.tsx accepts items: Array<{ label: string; href?: string }>, renders shadcn Breadcrumb components",
+        "Labels > 40 chars truncated with '...' and full label in title attribute",
+        "Verify WCAG AA contrast ratios: foreground #1E1B4B on background #F5F3FF >= 7:1 (actual ~8.5:1); primary-foreground #FFFFFF on primary #6366F1 >= 4.5:1",
+        "npm run build passes"
       ],
-      "passes": true,
-      "notes": "S-1 split: Part A covers header + Agents tab. Part B (Item 28) covers Integrations, Recent Runs, and Reports tabs. Cycle 4 green."
+      "passes": false,
+      "notes": "OMISSION fix: added WCAG AA contrast ratio verification step."
     },
     {
       "id": 28,
       "category": "ui",
-      "description": "Client detail page (/clients/{tenantId}) — Part B: Integrations tab, Recent Runs tab, and Reports tab (coaching clients only).",
-      "spec": "specs/consultant-dashboard.md",
-      "userStory": "As a consultant, on a client's detail page I switch to the Integrations tab and see which OAuth connections are active. I see the Recent Runs tab with the last 20 agent runs. For coaching clients I see the Reports tab with inline Review and Send to Coach actions.",
+      "description": "Create route-group loading fallbacks and LoadingPage shared component with skeleton layouts",
+      "specRef": "specs/ui-shared-polish.md",
+      "userStory": "As a user navigating pages, I see skeleton placeholders during data fetch instead of blank screens.",
       "steps": [
-        "Integrations tab shows required integration slots across all deployed agent templates for this tenant; each slot shows slot name, provider, connection status, connected-at date, and a Connect button for disconnected slots",
-        "'Connect' button in Integrations tab calls initiateComposioOAuth and opens auth URL in new tab; page reflects updated status after OAuth callback",
-        "Recent Runs tab shows last 20 agentRuns for this tenant with columns: Agent, Status, Trigger, Duration, Cost, Started At; clicking a run navigates to /clients/{tenantId}/runs/{runId}",
-        "Reports tab appears only if the tenant has any coachingCallReports; shows same columns as /reports with inline 'Review' link and 'Send to Coach' button",
-        "'Send to Coach' inline action in Reports tab calls sendReportToCoach mutation; report status updates to 'sent' in real time"
+        "src/app/(consultant)/loading.tsx renders Skeleton for page title, 4 stat cards grid, and table area",
+        "src/app/(client)/app/loading.tsx renders 3 message bubble skeletons and input area skeleton",
+        "src/components/LoadingPage.tsx accepts optional variant prop ('dashboard'|'list'|'detail') with generic default",
+        "Both loading files use Skeleton from @/components/ui/skeleton",
+        "npx tsc --noEmit passes"
       ],
-      "passes": true,
-      "notes": "S-1 split: Part B covers Integrations, Recent Runs, and Reports tabs. Part A (Item 27) covers header + Agents tab. Cycle 4 green."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": 29,
       "category": "ui",
-      "description": "Consultant run detail page (/clients/{tenantId}/runs/{runId}): full run detail view for debugging with step timeline, expanding steps to show output and raw model response, and error detail display.",
-      "spec": "specs/consultant-dashboard.md",
-      "userStory": "As a consultant, I click on a run from a client's Recent Runs tab and see the full run detail. I see the agent name, status, trigger type, duration, and cost in the header. Below is a step timeline showing each agentRunStep with status, duration, and token count. I expand a step to see its output and raw model response. If the run failed, I see the errorMessage and errorDetail.",
+      "description": "Build ChatInterface root layout with sidebar + main area, ConversationSidebar with New Chat, agent list, and recent conversations",
+      "specRef": "specs/ui-client-chat-interface.md",
+      "userStory": "As a client, when I navigate to /app, I see a chat layout with a 260px sidebar showing agents and recent conversations, and a main chat area.",
       "steps": [
-        "/clients/{tenantId}/runs/{runId} page renders run header with agent name, status badge, trigger type, duration, cost",
-        "Step timeline lists agentRunSteps with status badge, duration, and token count per step",
-        "Expanding a step shows step output object and raw model response",
-        "Error detail section appears when run status is 'failed'; displays errorMessage and errorDetail",
-        "Page uses useQuery for real-time updates when run is still in progress"
+        "src/components/chat/ChatInterface.tsx renders full-screen flex layout; sidebar is 260px on desktop (>= 768px), hidden on mobile with Sheet hamburger toggle",
+        "Main chat area fills remaining space (flex-1); <main> element has id='main-content' and tabIndex={-1}",
+        "src/components/chat/ConversationSidebar.tsx has '+ New Chat' button calling createConversation and navigating to /app/{conversationId}",
+        "AGENTS section renders each deployed agentConfig as clickable item creating a conversation",
+        "RECENT section renders up to 20 conversations ordered by lastMessageAt DESC via listConversations query",
+        "Active conversation highlighted with bg-muted; sidebar can collapse to icon-only on desktop",
+        "npm run build passes"
       ],
-      "passes": true,
-      "notes": "Cycle 4 green."
+      "passes": false,
+      "notes": "Depends on conversations functional items (Items 11-12). OMISSION fix: id='main-content' and tabIndex={-1} on main element. WARNING: src/app/(client)/app/layout.tsx already exists as a 'use client' component with old nav items (Integrations, not Connections; no Documents). This layout must be fully replaced with the new client sidebar. Coordinate with Items 33 (Connections rename) and 45 (Documents nav)."
     },
     {
       "id": 30,
       "category": "ui",
-      "description": "Reports overview and detail pages for consultant (/reports and /reports/{reportId}): cross-client report list with filters, and report detail with scorecard, narrative editor, transcript viewer, and Send to Coach flow.",
-      "spec": "specs/consultant-dashboard.md",
-      "userStory": "As a consultant, I go to /reports and see all coaching reports across all my clients. I filter by 'Flagged' to see calls needing attention. I click a report and see the scorecard, highlights, concerns, and AI-generated narrative. I edit the narrative, then click 'Send to Coach' which shows a confirmation modal. After confirming, the coach receives an email notification.",
+      "description": "Build MessageList, MessageBubble, AgentAvatar, TypingIndicator, EmptyState, and MessageInput chat components",
+      "specRef": "specs/ui-client-chat-interface.md",
+      "userStory": "As a client, I see my messages right-aligned in indigo bubbles, agent messages left-aligned with avatars and markdown rendering, and I can type/send messages with Enter.",
       "steps": [
-        "listCoachingReportsForConsultant query returns paginated reports with filters: status, coachId, callNumber, date range",
-        "/reports page renders table with Date, Client, Coach, Student, Call #, Score badge, Status badge, Actions columns",
-        "Default sort shows flagged+draft first, then by createdAt descending",
-        "Score badges color-coded: green >= 80, yellow 70-79, red < 70",
-        "/reports/{reportId} page has left panel (60%) with scorecard, highlights, concerns, editable narrative textarea",
-        "/reports/{reportId} page has right panel (40%) with scrollable transcript viewer loaded via getTranscriptUrl query (defined in Item 12; generates short-lived Convex storage URL for the VTT file)",
-        "'Send to Coach' button triggers confirmation modal; on confirm calls sendReportToCoach mutation; report transitions to 'sent' status",
-        "Narrative textarea saves on blur via updateReportNarrative mutation; sets status to 'reviewed'"
+        "MessageList.tsx renders scrollable list of MessageBubble components, auto-scrolls on new messages",
+        "User messages: right-aligned, bg-primary text-primary-foreground, rounded-2xl rounded-br-sm, max-width 75%",
+        "Agent messages: left-aligned, bg-card border, AgentAvatar 16x16px, max-width 85%, markdown via react-markdown with remark-gfm (bold, italic, lists, code blocks render correctly)",
+        "TypingIndicator.tsx renders animated three-dot indicator while isStreaming: true on latest assistant message",
+        "EmptyState.tsx renders welcome message and 3-4 suggested prompts when no conversation is active",
+        "MessageInput.tsx: textarea auto-grows to 120px then scrolls; Enter sends, Shift+Enter newlines; send button disabled when empty or streaming",
+        "Sending calls createUserMessage then triggers POST /api/chat/stream",
+        "npm run build passes"
       ],
-      "passes": true,
-      "notes": "CYCLE-6: listCoachingReportsForConsultant query added to coachingCallReports.ts with cross-tenant aggregation, all filters, flagged+draft-first sort. Reports list page with 4 filters and 8-column table. Detail page with 60/40 two-panel layout, dimension progress bars, editable narrative (blur-save), Send to Coach modal (50-char min), transcript viewer. View-only mode for sent reports."
+      "passes": false,
+      "notes": "Depends on design-system-foundation for react-markdown."
     },
     {
       "id": 31,
       "category": "ui",
-      "description": "Consultant settings pages (/settings): profile tab, theme tab with live preview, and notifications tab. Theme editor includes color pickers, font dropdown, logo upload, and platformName input. Notifications tab configures per-tenant score thresholds.",
-      "spec": "specs/consultant-dashboard.md",
-      "userStory": "As a consultant, I go to Settings > Theme and see my current branding. I change my primary color, upload a new logo, and pick a font. The live preview panel updates in real-time as I adjust. I click Save Theme and my client portal immediately reflects the new branding on next page load. In the Notifications tab I can set the score threshold for flagged call alerts per coaching program.",
+      "description": "Wire up /app and /app/[conversationId] pages to ChatInterface, handle routing edge cases",
+      "specRef": "specs/ui-client-chat-interface.md",
+      "userStory": "As a client, when I navigate to /app I see the empty state, and when I navigate to a conversation URL I see that conversation's messages.",
       "steps": [
-        "/settings page has Profile, Theme, and Notifications tabs; all tabs are rendered within the single /settings route — Notifications is NOT a separate /settings/notifications route",
-        "Theme tab shows inputs for platformName, logo upload (drag-and-drop, max 2MB), color pickers for 5 colors, font dropdown with 5 options",
-        "Live preview panel shows mock client portal header with current CSS variable settings, updating in real-time as user edits",
-        "'Save Theme' calls upsertTheme mutation; success shows confirmation",
-        "Logo upload calls uploadThemeLogo action; shows upload progress; updates preview on success",
-        "Invalid hex color input shows inline validation error before save attempt",
-        "Notifications tab shows score threshold slider/input per coaching program deployment; save updates agentConfig.config.notificationThreshold"
+        "src/app/(client)/app/page.tsx renders ChatInterface with EmptyState",
+        "src/app/(client)/app/[conversationId]/page.tsx renders ChatInterface with specified conversation loaded",
+        "Navigating to /app/{invalidId} redirects to /app with toast 'Conversation not found'",
+        "Navigating to /app/{conversationId} owned by different user redirects to /app",
+        "ArtifactPanel at src/components/chat/ArtifactPanel.tsx renders as right-side panel for agent output documents",
+        "npm run build passes"
       ],
-      "passes": true,
-      "notes": "NW-1: /settings/notifications is NOT a separate route — it is a tab within the /settings page. CYCLE-6: 3-tab settings page. Profile tab with displayName edit (added updateConsultant mutation). Theme tab: 5 color pickers with hex validation, font dropdown, logo drag-drop upload (2MB max), live preview panel. Notifications tab: per-program threshold input. Consultant nav bar added to layout."
+      "passes": false,
+      "notes": "Depends on auth-and-routing for client route protection."
     },
     {
       "id": 32,
       "category": "ui",
-      "description": "Client portal home page (/app): agent status grid, quick stats bar (runCount and lastRunAt), and branded header with consultant theme.",
-      "spec": "specs/client-portal.md",
-      "userStory": "As a client, I log in and see my deployed agents as cards with status badges. I see a quick stats bar showing my total runs this month and when my last run was. I click Run Now on a deployed agent to go to its detail page.",
+      "description": "Build OnboardingWizard with 3 steps (Welcome, WhatYouCanDo, Ready) and wire to /app/onboarding page",
+      "specRef": "specs/ui-client-onboarding.md",
+      "userStory": "As a new client, when I arrive at /app/onboarding, I step through a 3-step wizard in a centered card, and clicking 'Start chatting' provisions my starter agent and takes me to the chat interface.",
       "steps": [
-        "getClientHome query returns { agentConfigs: AgentConfigSummary[], runCount: number, lastRunAt?: number } for caller's tenant",
-        "AgentConfigSummary includes: configId, displayName, status, templateDisplayName, lastRunAt, monthlyRunCount",
-        "/app page renders agent status cards with displayName, status badge, last run date, and 'Run Now' button",
-        "'Run Now' button only appears for agents with status 'deployed'; agents with other statuses show the status badge only",
-        "Quick stats bar shows runCount (total runs this month across all agents) and lastRunAt displayed as time-ago with the agent name",
-        "Branded header displays consultant's logo and platformName from theme",
-        "Empty state shows onboarding message when no agents are deployed yet"
+        "OnboardingWizard.tsx is 'use client' component managing step state (1-3); card is bg-card rounded-2xl shadow-lg p-8 max-w-[480px] centered; progress indicator shows 3 dots filled by --color-primary",
+        "Step 1: heading 'Welcome to {platformName}' (fallback 'Plinth'), 'Let's go' CTA (bg-accent), 'Skip setup' link — skip calls completeOnboarding() and redirects to /app",
+        "Step 2: heading 'Here's what your AI assistant can do', 3 bullet points, 'Next' CTA, 'Back' link, 'Skip setup' link",
+        "Step 3: heading 'You're all set!', 'Start chatting' CTA triggers provisionStarterAgent then completeOnboarding() then redirects to /app; no skip link; toast error on failure",
+        "src/app/(client)/app/onboarding/page.tsx renders OnboardingWizard, does NOT render standard app sidebar",
+        "npx tsc --noEmit passes"
       ],
-      "passes": true,
-      "notes": "S-3 split: Part A — /app home page only. O-5: runCount and lastRunAt per-agent exposed in AgentConfigSummary and displayed on home page cards. CYCLE-5: getClientHome query added to agentConfigs.ts. Client layout with sidebar nav. Home page with branded header, agent status grid (Active/Setting Up/Paused badges), Run Now button on deployed only, quick stats bar."
+      "passes": false,
+      "notes": "Depends on provisionStarterAgent (Item 17) and completeOnboarding (Item 18). IMPORTANT: The onboarding page at src/app/(client)/app/onboarding/page.tsx inherits the client app layout sidebar. To suppress the sidebar, create a sub-layout at src/app/(client)/app/onboarding/layout.tsx that renders only {children} without the sidebar wrapper, OR use a route group like (client)/app/(no-sidebar)/onboarding/."
     },
     {
       "id": 33,
       "category": "ui",
-      "description": "Client portal agent detail page (/app/agents/{agentConfigId}): agent info, customizable config self-service (no locked fields), run trigger form generated from inputSchema.",
-      "spec": "specs/client-portal.md",
-      "userStory": "As a client, I click an agent card and see its description, my customizable settings, and a form to trigger a run. I edit a customizable setting inline and save it. I fill in the run form and click Run Agent to start a run.",
+      "description": "Rename Integrations page to Connections with 301 redirect, update sidebar nav and all copy",
+      "specRef": "specs/ui-client-onboarding.md",
+      "userStory": "As a client, 'Connections' replaces 'Integrations' in the sidebar; the old URL redirects; page copy uses friendly language.",
       "steps": [
-        "/app/agents/{agentConfigId} page loads config using getAgentConfigForClient query (Item 7); does not show locked field values",
-        "Agent info section shows displayName, templateDisplayName, status badge, template description; integration slot status is loaded separately from listIntegrationsForTenant (Item 35 query) — not from getAgentConfigForClient",
-        "Config section renders only customizableFields; if agent has no customizableFields the section is hidden entirely",
-        "Inline field edit calls updateAgentConfig mutation with only the changed field; updateAgentConfig enforces that client cannot write locked fields",
-        "Run trigger form is dynamically generated from template.inputSchema with correct field types (text, textarea, select, url, file); required fields marked with asterisk",
-        "Submitting run form calls triggerAgentRun mutation; on success redirects to /app/agents/{agentConfigId}/runs/{runId}",
-        "If agent is not in 'deployed' status, form shows 'Not yet available' message and submit button is disabled"
+        "Sidebar nav reads 'Connections' not 'Integrations'",
+        "GET /app/connections returns 200; GET /app/integrations returns 301 redirect to /app/connections",
+        "Page heading: 'Link your apps'; subtitle: 'Connect the tools your agents need to work their magic.'",
+        "Section heading: 'Connected apps'; Connect button: 'Link account'; Disconnect button: 'Unlink'",
+        "Empty state: 'No apps needed yet. Your consultant will let you know when you need to link something.'",
+        "Status badges use Badge variant='default' (emerald) for connected, variant='secondary' for unconnected"
       ],
-      "passes": true,
-      "notes": "S-3 split: Part B — agent detail + config self-service + run trigger form. NB-1 follow-on: integration slot status on agent detail page is loaded from listIntegrationsForTenant, not from getAgentConfigForClient. W-3: Integration slot status section depends on listIntegrationsForTenant query from Item 35. If building in parallel, stub the integration status section and wire it after Item 35 merges. CYCLE-5: Full agent detail with info section, config self-service (customizableFields only, hidden when empty), dynamic run trigger form from inputSchema, run history table. Non-deployed agents show 'Not yet available'."
+      "passes": false,
+      "notes": ""
     },
     {
       "id": 34,
       "category": "ui",
-      "description": "Client portal real-time run detail page (/app/agents/{agentConfigId}/runs/{runId}): step timeline with real-time updates, output section with Google Doc URL on completion.",
-      "spec": "specs/client-portal.md",
-      "userStory": "As a client, I submit a run form and watch the run progress in real-time. Each pipeline step shows a spinner while running and a checkmark when complete. When the run finishes I see a link to the Google Doc output.",
+      "description": "Build consultant sidebar layout with SidebarProvider, collapsible nav, Sheet drawer on mobile, and Clerk UserButton",
+      "specRef": "specs/ui-consultant-redesign.md",
+      "userStory": "As a consultant, when I open any consultant page on mobile, I see a hamburger button; clicking it opens the navigation drawer with all nav items.",
       "steps": [
-        "Run detail page loads getAgentRun and listAgentRunSteps via useQuery subscriptions — no polling required; Convex pushes updates automatically",
-        "Run header shows agent name, run status badge, trigger type, start time, live-updating duration while running, and cost after completion",
-        "Step timeline renders each agentRunStep in stepOrder with: pending steps grayed out, running step with animated spinner and elapsed time, completed step with green checkmark and duration, failed step with red X and errorMessage",
-        "Output section appears when run status is 'completed'; shows Google Doc URL as a clickable link when present in run.output",
-        "If run status is 'failed', error section shows errorMessage with a link to /app/integrations if error indicates a missing integration"
+        "Consultant layout at src/app/(consultant)/layout.tsx wraps in <SidebarProvider>; <main> element has id='main-content' and tabIndex={-1}",
+        "ConsultantSidebar has nav items: Dashboard, Clients, Agents, Reports, Settings with Lucide icons",
+        "Sidebar header shows Plinth wordmark/logo; footer shows <UserButton afterSignOutUrl='/sign-in' /> and consultant name",
+        "Click SidebarTrigger on desktop — collapses to icon-only; click again — expands",
+        "At < 768px, sidebar hidden; hamburger trigger (min 44x44px) opens Sheet drawer",
+        "Active nav item has bg-sidebar-accent and aria-current='page'",
+        "<nav> has role='navigation' and aria-label='Consultant navigation'"
       ],
-      "passes": true,
-      "notes": "S-3 split: Part C — real-time run detail page. CYCLE-5: Real-time run detail with getRunDetail subscription. Run header with agent name, status badge, trigger, start time, live duration, cost. Step timeline via StepTimeline component. Output section with URL extraction and clickable links."
+      "passes": false,
+      "notes": "WARNING: src/app/(consultant)/layout.tsx already exists with an inline nav bar from Cycle 6. Read the existing file first, then replace entirely with SidebarProvider pattern. Do not append to the existing layout. Files: src/app/(consultant)/layout.tsx, src/components/consultant/ConsultantSidebar.tsx. OMISSION fix: id='main-content' and tabIndex={-1} on main element."
     },
     {
       "id": 35,
       "category": "ui",
-      "description": "Client portal integrations page (/app/integrations): list required integration slots across all deployed agents, connect/disconnect OAuth via Composio, and show connection status.",
-      "spec": "specs/client-portal.md",
-      "userStory": "As a client, I go to Integrations and see which connections my agents need. Google Docs shows 'Not Connected'. I click Connect, complete the Google OAuth flow in a new tab, and return to see it now shows 'Connected'. I can also disconnect an integration if needed.",
+      "description": "Build consultant dashboard page with time-aware greeting, 4 stat cards, recent clients table, and recent draft reports",
+      "specRef": "specs/ui-consultant-redesign.md",
+      "userStory": "As a consultant, when I navigate to the dashboard, I see my 4 key stats and recent clients without horizontal scrolling.",
       "steps": [
-        "listIntegrationsForTenant query returns aggregated integration slots with connection status and which agents use them",
-        "/app/integrations page renders integration cards grouped by provider",
-        "Each card shows slot name, provider badge, connection status, connected date, and list of agents using this slot",
-        "'Connect' button calls initiateComposioOAuth and opens auth URL in new tab",
-        "After OAuth callback, page shows updated 'Connected' status with green checkmark and date",
-        "'Disconnect' button calls disconnectCredential mutation and resets to 'Not Connected'",
-        "Empty state shows message when no agents are deployed yet"
+        "Greeting reads 'Good morning/afternoon/evening, {firstName}' based on time of day",
+        "4 stat cards (Total clients, Active agents, Runs this month, Cost this month) in responsive grid: 4-col desktop, 2-col tablet, stacked mobile",
+        "Recent clients table: max 5 rows with Client name, Status badge, Agents count, Last run date; 'View all clients' link to /clients",
+        "Draft reports section: max 3 reports with client name, score, and 'Review' button",
+        "Skeleton loading states for stat cards and clients table; empty state card with 'Add your first client' CTA when no clients exist",
+        "No horizontal scroll at 375px viewport"
       ],
-      "passes": true,
-      "notes": "CYCLE-5: listIntegrationsForTenant query added to credentials.ts. Aggregates slots across all deployed configs, groups by provider. Frontend with Connect (initiateComposioOAuth) and Disconnect (disconnectCredential with confirm) flows. Empty state handled."
+      "passes": false,
+      "notes": "Depends on ConsultantSidebar (Item 34). Use existing queries: api.dashboard.getConsultantDashboard (stat data) and api.dashboard.listClientsForConsultant (recent clients table). Do NOT create new queries."
     },
     {
       "id": 36,
       "category": "ui",
-      "description": "Client portal coaching reports pages (/app/reports): coach-only view showing released reports with score, status. Report detail shows scorecard, highlights, concerns, narrative (read-only, no transcript access).",
-      "spec": "specs/client-portal.md",
-      "userStory": "As a coach, I log into the client portal and see a Reports link in the nav. I click it and see a list of reports my admin has shared with me. I click a report and see my overall score, dimension scores, highlights, concerns, and the feedback narrative. I cannot see the raw transcript or other coaches' reports.",
+      "description": "Build clients list page with TanStack Table (6 columns, search, status filter, pagination, kebab menu) and empty state with Add Client dialog",
+      "specRef": "specs/ui-consultant-redesign.md",
+      "userStory": "As a consultant, when I click a column header the table sorts, and when I type in the search field the table filters in real-time.",
       "steps": [
-        "getCoachReports query returns only reports where releasedToCoach=true and coachId matches caller",
-        "getCoachReport returns filtered view: no rawAnalysisJson, no transcriptStorageId, shows editedNarrative if set else narrative",
-        "/app/reports page shows reports table with Date, Student, Call #, Score badge, Status columns",
-        "Reports nav link is hidden for users with no coachId association",
-        "/app/reports/{reportId} shows read-only report: overall score, dimension scorecard, highlights, concerns, narrative",
-        "No transcript section visible on coach report detail page",
-        "Empty state shows 'No feedback reports yet' message"
+        "TanStack Table with columns: Business name (link), Owner, Status (badge), Agents (count), Last run (relative date), Actions",
+        "Click column header — sorts ascending then descending; aria-sort attribute updates",
+        "Search input filters client-side without page reload; status Select filters by paused/active/all",
+        "25 rows per page with pagination controls; 'View' navigates to /clients/{tenantId}",
+        "Kebab menu shows Pause, Edit, Archive; table has <caption> and <th scope='col'>",
+        "Empty state: 'No clients yet' with 'Add client' button opening Dialog form",
+        "At 375px, table renders as stacked cards or is horizontally scrollable"
       ],
-      "passes": true,
-      "notes": "CYCLE-5: Reports list with score badges (green/yellow/red), New/Reviewed status. Report detail with overall score circle, dimension scorecard (handles both object and number shapes), highlights (green), concerns (orange), narrative (editedNarrative fallback). No transcript/rawAnalysisJson exposed. Empty states handled."
+      "passes": false,
+      "notes": "Requires @tanstack/react-table."
     },
     {
       "id": 37,
       "category": "ui",
-      "description": "Secondary navigation pages: consultant agent template library (/agents), client run history (/app/runs), and client agents list (/app/agents). These are full-page list views complementing the summary views on home pages.",
-      "spec": "specs/consultant-dashboard.md",
-      "userStory": "As a consultant, I go to /agents to browse the full agent template library with category filtering and deploy-to-client actions. As a client, I go to /app/runs to see my full run history across all agents with filters by agent, status, and date range. I go to /app/agents to see all my agents in table format with more detail than the home page cards.",
+      "description": "Build client detail page shell: breadcrumb, heading with status badge, 4-tab container (Agent Configs, Run History, Reports, Client Settings)",
+      "specRef": "specs/ui-consultant-redesign.md",
+      "userStory": "As a consultant, when I open a client detail page, I see tabbed content and can switch between tabs.",
       "steps": [
-        "/agents page shows grid of active agentTemplates with displayName, category badge, description, integration slots needed, and 'Deploy to Client' button opening a client picker modal (spec: specs/consultant-dashboard.md)",
-        "/app/runs page shows full run history with filters: Agent (dropdown), Status (All/Completed/Failed/Running), Date range; table columns: Agent, Status, Trigger, Started, Duration, Cost, Actions; pagination with load-more (50 per page) (spec: specs/client-portal.md)",
-        "/app/agents page shows agents in table format: Name, Status, Template, Last Run, Runs This Month, Actions with inline 'Run Now' button (spec: specs/client-portal.md)"
+        "Breadcrumb reads 'Clients / {businessName}'; heading shows businessName with status badge",
+        "4 tabs render: Agent Configs, Run History, Reports, Client Settings — Users tab added separately in Item 48",
+        "Clicking each tab switches content without page reload; skeleton loading per tab",
+        "ConsultantSidebar is present with 'Clients' highlighted as active",
+        "Convex query scopes by consultantId — consultant cannot access another consultant's client",
+        "npx tsc --noEmit passes"
       ],
-      "passes": true,
-      "notes": "NW-5: /agents (consultant template library) is defined in specs/consultant-dashboard.md; /app/runs and /app/agents (client-side pages) are defined in specs/client-portal.md. Each step now cites its source spec inline. Cycle 4 green."
+      "passes": false,
+      "notes": "BLOCKER-2 fix: 4 tabs initially; Users tab wired as 5th tab by Item 48. Tab content in Items 38, 39."
     },
     {
       "id": 38,
-      "category": "integration",
-      "description": "Zoom credentials management: saveZoomCredentials mutation for consultant to configure Zoom connection per tenant, getZoomConnectionStatus query, and encrypted storage of secrets.",
-      "spec": "specs/zoom-integration.md",
+      "category": "ui",
+      "description": "Build client detail tab content: Agent Configs tab (table + deploy dialog) and Run History tab (table + agent filter)",
+      "specRef": "specs/ui-consultant-redesign.md",
+      "userStory": "As a consultant on the Agent Configs tab, I can see deployed agents and deploy new ones from the template library.",
       "steps": [
-        "saveZoomCredentials mutation upserts zoomCredentials for a tenant; only callable by consultant who owns the tenant",
-        "clientSecret and webhookSecretToken are encrypted using platform-level secret from Convex environment variable before storage",
-        "getZoomConnectionStatus returns { connected, accountId, lastUsedAt } without exposing credentials",
-        "saveZoomCredentials rejects if caller is not consultant role",
-        "Zoom credentials UI is accessible from client detail page integrations tab or a dedicated Zoom settings section"
+        "Agent Configs tab: table with Name, Status, Template, Deployed, Version, Actions (Configure/Pause/Deploy); 'Add agent config' opens Dialog with template select; empty state 'Deploy your first agent'",
+        "Run History tab: table with Agent, Status, Triggered, Duration, Cost, Actions; 'View' navigates to run detail; agent dropdown filter",
+        "When no agent configs exist, tab shows empty state: 'Deploy your first agent' button",
+        "When no runs exist, tab shows empty state message"
       ],
-      "passes": true,
-      "notes": "CYCLE-3: saveZoomCredentials action (not mutation — needs Node crypto) with AES-256-CBC encryption in zoomCredentials.ts. getZoomConnectionStatus query. Internal helpers: getDecryptedCredByAccountId, getChallengeSecret, getCredentialsForTenant, updateAccessToken. UI step deferred to UI cycle."
+      "passes": false,
+      "notes": "Depends on client detail page shell (Item 37). Split from original combined tab content item."
     },
     {
       "id": 39,
-      "category": "integration",
-      "description": "End-to-end integration verification scenario: Zoom webhook fires, transcript is downloaded and parsed, coaching call analyzer runs all 4 steps, Google Doc is created, flagged call sends email notification, report appears in consultant dashboard.",
-      "spec": "specs/coaching-call-analyzer.md",
+      "category": "ui",
+      "description": "Build client detail tab content: Reports tab (table) and Client Settings tab (Zod-validated form calling updateTenant)",
+      "specRef": "specs/ui-consultant-redesign.md",
+      "userStory": "As a consultant on the Reports tab, I can see reports; on Settings tab, I can edit client details with validation.",
       "steps": [
-        "A simulated Zoom webhook with valid signature for recording.transcript_completed triggers processZoomTranscript",
-        "VTT transcript is downloaded, parsed to plain text with speaker labels, and stored in Convex file storage",
-        "coachTalkPercent is computed from speaker timestamps",
-        "Coaching call analyzer agentRun is created with status 'queued' then transitions to 'running'",
-        "All 4 pipeline steps (intake, analyze, format, deliver) complete and agentRunSteps show 'completed' status",
-        "coachingCallReport document is created with overallScore, dimensionScores, highlights, concerns, narrative, docUrl",
-        "If overallScore < 70 (notificationThreshold), report.flagged=true and email notification is sent to adminEmail",
-        "Report appears in consultant's /reports page with correct status and score badge"
+        "Reports tab: table with Date, Coach, Score, Status, Actions; 'Review' navigates to report detail; scoped to tenantId",
+        "Client Settings tab: editable fields (Business name, Owner name, Owner email, Website, Vertical select, Notes) + read-only (Consultant ID, Tenant ID, Created date)",
+        "Submit with empty Business name shows Zod error 'Business name is required' inline",
+        "Submit with valid data calls updateTenant mutation (Item 20); success toast confirms save"
       ],
-      "passes": true,
-      "notes": "W-9: This is a QA verification scenario, NOT a build item. Verified via Playwright E2E tests (15/15 passing) using seed-first strategy — seeded completed coaching reports, validated UI rendering of scores, badges, flagged rows, dimensions, highlights, concerns, narrative editing, and action buttons."
+      "passes": false,
+      "notes": "Depends on client detail page shell (Item 37) and updateTenant mutation (Item 20). Split from original combined tab content item."
     },
     {
       "id": 40,
-      "category": "first-agent",
-      "description": "Template propagation: syncAgentConfigWithTemplate mutation that lets consultants pull a new template version into an existing agentConfig. Merges updated defaultConfig, increments version, writes audit trail. Includes minimal UI trigger on agent config card.",
-      "spec": "specs/agent-config-system.md",
+      "category": "ui",
+      "description": "Build agent templates library page with category filter tabs and responsive card grid with 'Deploy to client' dialog",
+      "specRef": "specs/ui-consultant-redesign.md",
+      "userStory": "As a consultant, when I click 'Deploy to client' on a template card, a dialog opens to select a client and confirm deployment.",
       "steps": [
-        "syncAgentConfigWithTemplate mutation accepts { agentConfigId }; resolves caller as consultant who owns the tenant",
-        "Mutation reads current agentTemplate version and compares to agentConfig.version; throws AlreadyCurrentError if versions match",
-        "Mutation merges template defaultConfig changes into agentConfig.config: locked fields are overwritten from template, customizable fields are preserved from current config",
-        "Mutation increments agentConfig.version to match template version; sets updatedByType to 'template_sync'",
-        "Mutation writes agentConfigHistory record with changedByType='template_sync', previousConfig, newConfig, and changeSummary describing what changed",
-        "UI: agent config card in /clients/{tenantId} Agents tab shows 'Update Available' badge when agentConfig.version < agentTemplate.version",
-        "'Sync to Latest' button on the badge calls syncAgentConfigWithTemplate; on success badge disappears and config reflects new version"
+        "Heading 'Agent Library' with category tabs: All, Marketing, Sales, Operations, Coaching",
+        "Card grid: 3 columns desktop, 2 tablet, 1 mobile; TemplateCard shows name, description (2 lines truncated), category badge, Active/Pipeline badges",
+        "'Deploy to client' button opens Dialog with client Select and display name input; confirm calls deployAgentConfig (NOT createAgentConfig — use the existing mutation name); toast 'Agent deployed to {clientName}'",
+        "Templates fetched via Convex agentTemplates query; skeleton cards during loading"
       ],
-      "passes": true,
-      "notes": "Cycle 7: syncAgentConfigWithTemplate mutation + Update Available badge/Sync to Latest button implemented. Backend QA + code inspection confirm all verification steps pass."
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": 41,
+      "category": "ui",
+      "description": "Build reports list page with TanStack Table (8 columns, status/score/flagged filters, color-coded score badges)",
+      "specRef": "specs/ui-consultant-redesign.md",
+      "userStory": "As a consultant, when I filter by 'Low' score range, only reports with scores below 70 remain.",
+      "steps": [
+        "Heading 'Reports' with count badge; TanStack Table columns: Date, Client, Coach, Student, Call #, Score (badge), Status (badge), Actions",
+        "Score badges: >= 80 emerald, 70-79 amber, < 70 red; Status badges: draft muted, reviewed blue, sent green, no_action gray",
+        "Status Select, Score range Select ('Low < 70'), 'Show flagged only' checkbox filters",
+        "Column headers sortable with aria-sort; table has <caption> and <th scope='col'>; badges have role='status'",
+        "Skeleton rows during loading"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": 42,
+      "category": "ui",
+      "description": "Build report detail page with two-panel layout: scores/metadata on left, editable narrative + action buttons on right",
+      "specRef": "specs/ui-consultant-redesign.md",
+      "userStory": "As a consultant, I can read the narrative, edit it, release it to the coach, and mark it as reviewed.",
+      "steps": [
+        "Breadcrumb 'Reports / {coachName} - Call {callNumber}'; left panel (1/3): overall score (colored by tier), dimension scorecards, call metadata, flagged badge",
+        "Right panel (2/3): narrative in Textarea (pre-filled editedNarrative or narrative); '(edited)' badge when editedNarrative set",
+        "'Save edits' calls updateReportNarrative (original not overwritten); 'Mark Reviewed' calls markReviewed mutation (Item 20)",
+        "'Release to Coach' calls sendReportToCoach mutation; 'Mark No Action' calls markNoAction mutation",
+        "At 375px, panels stack vertically; 'No dimension scores available' when no scores exist; skeleton during loading"
+      ],
+      "passes": false,
+      "notes": "BLOCKER-1 fix: uses actual mutation names — markReviewed (Item 20), sendReportToCoach, markNoAction."
+    },
+    {
+      "id": 43,
+      "category": "ui",
+      "description": "Build settings page with Profile, Theme, and Billing tabs — including hex color validation, live preview, and logo upload",
+      "specRef": "specs/ui-consultant-redesign.md",
+      "userStory": "As a consultant, when I update my primary color in Theme settings, I see a live preview before saving.",
+      "steps": [
+        "3 tabs: Profile, Theme, Billing",
+        "Profile: Display name (required), Business name (required), Email (read-only), Support email; Zod validation; save calls updateConsultant; success toast",
+        "Theme: Platform name, 5 hex color inputs with swatch preview; '#xyz' shows 'Invalid hex color format' inline; save disabled while invalid",
+        "Theme live preview panel updates when valid colors entered; logo upload via Convex generateUploadUrl; 'Save theme' calls upsertTheme (NOT updateTheme — use the existing mutation name); font family field is a Select with valid values from VALID_FONT_FAMILIES: Inter, Poppins, Lato, Montserrat, Open Sans, Plus Jakarta Sans",
+        "Billing: read-only plan info + 'Upgrade plan' external link",
+        "Tab switching does not reset unsaved form state"
+      ],
+      "passes": false,
+      "notes": "All color inputs must validate #XXXXXX per CLAUDE.md constraint."
+    },
+    {
+      "id": 44,
+      "category": "ui",
+      "description": "Build run detail page for consultant: run header, step timeline with status icons, and output section with Google Doc links",
+      "specRef": "specs/ui-consultant-redesign.md",
+      "userStory": "As a consultant, when I view a run detail page, I see the step-by-step timeline with status icons and final output.",
+      "steps": [
+        "Breadcrumb 'Clients / {clientName} / Runs / {runId short}'; header card: agent name, status badge, trigger type, start time, duration, cost",
+        "Step timeline renders vertically with one Card per step: pending (muted), running (Loader2 spinner), completed (green CheckCircle2), failed (red XCircle + error message)",
+        "Output section renders key-value display; Google Doc URLs as clickable links with ExternalLink icon",
+        "Skeleton cards during loading"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": 45,
+      "category": "ui",
+      "description": "Add 'Documents' nav item to client sidebar, build document list page with sort controls, DocumentList table, and EmptyDocuments state",
+      "specRef": "specs/ui-document-store.md",
+      "userStory": "As a client, when I navigate to /app/documents, I see my documents in a table with sort options, or an empty state with a 'Create document' button.",
+      "steps": [
+        "Client sidebar includes { href: '/app/documents', label: 'Documents', icon: 'FileText' } between Agents and Connections; active state highlights on /app/documents and /app/documents/[id]",
+        "Page heading 'Documents', 'New document' button (bg-accent), Sort By Select (Date created / Date modified / Name)",
+        "useQuery(api.documents.listDocuments, { sortBy }) updates list on sort change",
+        "'New document' calls createDocument({title: 'Untitled document'}) then navigates to /app/documents/[newId]",
+        "DocumentList.tsx: shadcn Table with Title (link), Source badge ('You' or agent name), Date (relative), Actions (Open + kebab: Rename/Export/Delete)",
+        "EmptyDocuments renders 'No documents yet' message with 'Create document' button when list is empty"
+      ],
+      "passes": false,
+      "notes": "Split from original combined document UI item. Covers list page and table only."
+    },
+    {
+      "id": 46,
+      "category": "ui",
+      "description": "Build DocumentEditor (BlockNote with auto-save), DocumentToolbar (editable title, export, import), and document editor page",
+      "specRef": "specs/ui-document-store.md",
+      "userStory": "As a client, when I open a document, I see a breadcrumb, toolbar with title/export/import, and a full-height BlockNote editor that auto-saves.",
+      "steps": [
+        "DocumentEditor.tsx: 'use client', BlockNote initialized with markdownToBlocks; changes debounce 1000ms then call updateDocument; shows 'Saving...' then 'Saved'",
+        "Navigation guard: shadcn Dialog 'You have unsaved changes. Leave anyway?' with Confirm/Cancel",
+        "DocumentToolbar.tsx: editable title (blur saves), Export to Google Docs (loading state, toast on success, credential error handling), Import .docx (file picker, accept='.docx' only)",
+        "Import flow: file upload to Convex storage, importFromDocx call, redirect to new document; non-.docx file shows error toast",
+        "Editor page at src/app/(client)/app/documents/[documentId]/page.tsx: breadcrumb 'Documents / {title}', full-height editor; 'Document not found' for invalid IDs; fallback raw markdown in <pre> if BlockNote parse fails"
+      ],
+      "passes": false,
+      "notes": "Split from original combined document UI item. Covers editor, toolbar, and editor page."
+    },
+    {
+      "id": 47,
+      "category": "ui",
+      "description": "Build UsersTab for client detail page: InviteUserForm dialog, InvitationsTable with resend/revoke, ActiveUsersTable",
+      "specRef": "specs/ui-consultant-user-management.md",
+      "userStory": "As a consultant on the Users tab, I see active users and pending invitations, and can invite new users via a dialog form.",
+      "steps": [
+        "InviteUserForm: email (required, Zod validated), display name (optional), disabled role select showing 'Client'; Loader2 spinner on submit; toast 'Invitation sent to {email}'; inline error on failure",
+        "InvitationsTable: columns Email, Sent (relative date), Status (Badge: Pending yellow, Expired gray, Revoked red), Actions; 'Resend' calls resendInvitation; 'Revoke' opens AlertDialog confirmation",
+        "ActiveUsersTable: columns Name, Email, Role, Joined, Actions; 'Remove user' disabled (v1)",
+        "When clerkOrgId not set on consultant, tab shows 'Organization not configured. Contact support.'"
+      ],
+      "passes": false,
+      "notes": "Depends on invitation server actions (Item 21) and client detail page shell (Item 37). Components only — wiring as tab in Item 48."
+    },
+    {
+      "id": 48,
+      "category": "ui",
+      "description": "Wire UsersTab as 5th tab on client detail page with count badge and Invite user button",
+      "specRef": "specs/ui-consultant-user-management.md",
+      "userStory": "As a consultant, when I click the 'Users' tab on a client detail page, I see active users and pending invitations.",
+      "steps": [
+        "UsersTab composes ActiveUsersTable, InvitationsTable, and InviteUserForm components from Item 47",
+        "'Invite user' Button positioned at top-right of the tab; clicking opens Dialog containing InviteUserForm",
+        "Tab label shows count of active users + pending invitations: e.g. 'Users (3)'",
+        "Users tab appears as 5th tab after Agent Configs, Run History, Reports, Settings on client detail page (Item 37)",
+        "npx tsc --noEmit passes"
+      ],
+      "passes": false,
+      "notes": "Depends on UsersTab components (Item 47) and client detail page shell (Item 37). Adds the 5th tab."
+    },
+    {
+      "id": 49,
+      "category": "integration",
+      "description": "Wire agentWorkflow.ts to call saveAgentDocument when agent output contains document-type content",
+      "specRef": "specs/ui-document-store.md",
+      "steps": [
+        "Read the existing convex/execution/agentWorkflow.ts file to understand current structure before making changes",
+        "agentWorkflow.ts checks agent output for type: 'document' or outputType: 'document'",
+        "When detected, calls internal('documents:saveAgentDocument') with tenantId, agentRunId, agentConfigId, title, content",
+        "A document with source: 'agent' appears in documents table linked to agentRunId",
+        "npx tsc --noEmit passes"
+      ],
+      "passes": false,
+      "notes": "Depends on saveAgentDocument (Item 15). OMISSION fix: added step to read existing file before modifying."
+    },
+    {
+      "id": 50,
+      "category": "integration",
+      "description": "Create Clerk webhook handler for organizationMembership.created and organizationInvitation.expired events, register in http.ts",
+      "specRef": "specs/ui-consultant-user-management.md",
+      "steps": [
+        "convex/webhooks/clerk.ts verifies svix-id, svix-timestamp, svix-signature headers — returns 400 for invalid",
+        "organizationMembership.created: resolves consultantId from clerkOrgId, resolves tenantId from invitation by email, creates users record (idempotent by clerkUserId), sets Clerk publicMetadata { role: 'client', tenantId: string }",
+        "Updates invitation status to 'accepted'; if no invitation found, creates user with tenantId: null",
+        "organizationInvitation.expired: updates invitation status to 'expired' via by_clerkInvitationId index",
+        "POST /webhooks/clerk route registered in convex/http.ts",
+        "npx tsc --noEmit passes"
+      ],
+      "passes": false,
+      "notes": "Depends on invitations.ts (Item 19); svix package (Item 7). IMPORTANT: The existing createUser mutation in users.ts requires platform_admin role — the webhook handler MUST use an internalMutation for user creation (create a new createUserInternal in users.ts), NOT the existing createUser. CLERK_WEBHOOK_SECRET and CLERK_SECRET_KEY must both be set in Convex env vars."
+    },
+    {
+      "id": 51,
+      "category": "test-backend",
+      "description": "Unit/integration tests for conversations.ts and messages.ts: CRUD operations and multi-tenancy enforcement",
+      "specRef": "specs/ui-client-chat-interface.md",
+      "steps": [
+        "createConversation with valid client JWT inserts conversation with correct tenantId/userId from JWT",
+        "listConversations with client A's JWT does not return client B's conversations",
+        "getConversation with conversationId owned by different user returns null or throws",
+        "createUserMessage with conversationId owned by different user throws authorization error",
+        "listMessages with conversationId owned by different user throws authorization error",
+        "createUserMessage sets role 'user', isStreaming false, tenantId from JWT",
+        "npm test passes"
+      ],
+      "passes": false,
+      "notes": "Multi-tenancy enforcement is non-negotiable."
+    },
+    {
+      "id": 52,
+      "category": "test-backend",
+      "description": "Unit/integration tests for documents.ts: listDocuments, getDocument, createDocument, updateDocument, saveAgentDocument — tenant isolation and idempotency",
+      "specRef": "specs/ui-document-store.md",
+      "steps": [
+        "listDocuments: tenant A cannot see tenant B's documents; sortBy 'createdAt' returns newest first; sortBy 'title' returns alphabetical; max 50 returned",
+        "getDocument: valid doc returns document; wrong tenant returns null; doc with storageId includes signedUrl; non-existent returns null",
+        "createDocument: sets tenantId/userId from JWT, mimeType 'text/markdown', sets createdAt/updatedAt",
+        "updateDocument: updates fields + updatedAt; throws for wrong tenant",
+        "saveAgentDocument: first call inserts with source 'agent'; second call with same agentRunId updates (no duplicate)",
+        "npm test passes"
+      ],
+      "passes": false,
+      "notes": "Consolidates 4 test-backend items from document-store spec."
+    },
+    {
+      "id": 53,
+      "category": "test-backend",
+      "description": "Unit/integration tests for exportToGoogleDocs, importFromDocx, provisionStarterAgent, and completeOnboarding",
+      "specRef": "specs/ui-document-store.md",
+      "steps": [
+        "exportToGoogleDocs: valid doc + credential calls createGoogleDoc and updates googleDocUrl; missing credential throws CREDENTIAL_MISSING",
+        "importFromDocx: valid .docx storageId creates document with source 'user' and markdown content; returns new documentId",
+        "provisionStarterAgent: creates agentConfig for client; second call returns same ID; missing template returns null; non-client throws",
+        "completeOnboarding: no session throws; valid session calls clerkClient updateUser with onboardingComplete: true",
+        "npm test passes"
+      ],
+      "passes": false,
+      "notes": "Consolidates document action tests with onboarding backend tests."
+    },
+    {
+      "id": 54,
+      "category": "test-backend",
+      "description": "Unit/integration tests for invitations.ts and invitation server actions: CRUD, validation, multi-tenancy, and Clerk API integration",
+      "specRef": "specs/ui-consultant-user-management.md",
+      "steps": [
+        "createInvitation inserts and returns Id; updateInvitationStatus updates matching record; non-existent clerkInvitationId does not throw",
+        "listInvitations returns only invitations for specified tenantId ordered by sentAt DESC; different consultant gets auth error",
+        "inviteUser: invalid email returns error; no clerkOrgId returns 'Organization not configured'; existing user returns 'already has account'",
+        "revokeInvitation calls Clerk revoke + updates status to 'revoked'",
+        "resendInvitation revokes old, creates new, updates clerkInvitationId and sentAt",
+        "npm test passes"
+      ],
+      "passes": false,
+      "notes": "Mock Clerk client for testing."
+    },
+    {
+      "id": 55,
+      "category": "test-backend",
+      "description": "Backend tests for Clerk webhook handler: signature verification, event handling, idempotency",
+      "specRef": "specs/ui-consultant-user-management.md",
+      "steps": [
+        "Request without valid svix headers returns HTTP 400",
+        "organizationMembership.created creates user with correct tenantId, consultantId, role; duplicate clerkUserId does not create second record",
+        "organizationMembership.created with no matching invitation creates user with tenantId: null",
+        "organizationInvitation.expired updates invitation status to 'expired'",
+        "npm test passes"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": 56,
+      "category": "test-e2e",
+      "description": "E2E tests for design system foundation: font loading, CSS variables, and component rendering on /design-system page",
+      "specRef": "specs/ui-design-system-foundation.md",
+      "userStory": "As a developer, when I run E2E tests, design system foundation tests confirm fonts load, CSS variables resolve, and shadcn components render with Plinth styles.",
+      "steps": [
+        "Test file at tests/e2e/design-system.spec.ts",
+        "Test: navigate to /, verify --font-plus-jakarta-sans CSS variable is non-empty",
+        "Test: verify --primary and --background CSS variables are defined",
+        "Test: navigate to /design-system, heading is visible with no console errors",
+        "Test: Button on /design-system has cursor-pointer computed style",
+        "npx playwright test passes"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": 57,
+      "category": "test-e2e",
+      "description": "E2E tests for auth flows: unauthenticated redirects, role-based redirects after sign-in, cross-role guard, and sign-out",
+      "specRef": "specs/ui-auth-and-routing.md",
+      "userStory": "As any user, auth redirects work correctly: unauthenticated to /sign-in, consultants to /dashboard, clients to /app, cross-role blocked.",
+      "steps": [
+        "Test: navigate to / without session — URL contains /sign-in; /dashboard without session — /sign-in; /app without session — /sign-in",
+        "Test: /sign-in renders Clerk sign-in form",
+        "Test: sign in as consultant — URL is /dashboard; as client — URL is /app; as platform_admin — /dashboard; as no-role — /app",
+        "Test: authenticated client navigates to /dashboard — redirected to /app; page does NOT show consultant UI",
+        "Test: consultant clicks UserButton Sign out — URL is /sign-in; client clicks Sign out — URL is /sign-in; session cleared",
+        "npx playwright test passes"
+      ],
+      "passes": false,
+      "notes": "Consolidated 4 auth E2E items into one."
+    },
+    {
+      "id": 58,
+      "category": "test-e2e",
+      "description": "E2E tests for chat interface: send message, streaming response, conversation history, sidebar navigation, error cases",
+      "specRef": "specs/ui-client-chat-interface.md",
+      "userStory": "As a client, when I type a message and press Enter, it sends and the agent streams a response; I can resume past conversations from the sidebar.",
+      "steps": [
+        "Test: /app as client shows EmptyState with suggested prompts",
+        "Test: type message, press Enter — user bubble appears right-aligned; TypingIndicator shows during streaming; agent response renders with markdown",
+        "Test: textarea and send button disabled while streaming; send button disabled when empty",
+        "Test: conversation appears in sidebar; clicking it navigates to /app/{conversationId} with messages loaded",
+        "Test: '+ New Chat' creates conversation and navigates to new URL",
+        "Test: /app/invalid-id redirects to /app with 'Conversation not found' toast",
+        "npx playwright test passes"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": 59,
+      "category": "test-e2e",
+      "description": "E2E tests for onboarding wizard: happy path (3 steps + redirect), skip flow, back navigation",
+      "specRef": "specs/ui-client-onboarding.md",
+      "userStory": "As a new client, I complete onboarding or skip it, and I'm taken to the chat interface.",
+      "steps": [
+        "Test: new client navigating to /app redirected to /app/onboarding; step counter shows 'Step 1 of 3'",
+        "Test: 'Let's go' advances to step 2; 'Next' to step 3; 'Start chatting' provisions agent and redirects to /app",
+        "Test: after redirect, /app/onboarding redirects back to /app",
+        "Test: 'Skip setup' on step 1 or 2 completes onboarding and redirects to /app; step 3 has no skip link",
+        "Test: 'Back' on step 2 returns to step 1; 'Back' on step 3 returns to step 2; step 1 has no 'Back'",
+        "npx playwright test passes"
+      ],
+      "passes": false,
+      "notes": "Consolidated 3 onboarding E2E items."
+    },
+    {
+      "id": 60,
+      "category": "test-e2e",
+      "description": "E2E test for Connections page rename: redirect from old URL, updated copy",
+      "specRef": "specs/ui-client-onboarding.md",
+      "userStory": "As a client, the old /app/integrations URL redirects to /app/connections with updated copy.",
+      "steps": [
+        "Test: /app/integrations as authenticated client results in final URL /app/connections",
+        "Test: page heading 'Link your apps'; sidebar item 'Connections' not 'Integrations'",
+        "Test: empty state contains 'No apps needed yet'; connect button 'Link account'; disconnect button 'Unlink'",
+        "npx playwright test passes"
+      ],
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": 61,
+      "category": "test-e2e",
+      "description": "E2E tests for document store: create, edit, auto-save, sort, empty state, unsaved changes guard",
+      "specRef": "specs/ui-document-store.md",
+      "userStory": "As a client, I can create, edit, and sort documents, with auto-save and unsaved changes protection.",
+      "steps": [
+        "Test: /app/documents shows heading, 'New document' button; click creates doc and navigates to editor with breadcrumb 'Documents / Untitled document'",
+        "Test: click title, change to 'My Test Document', blur — breadcrumb updates; type in editor — 'Saving...' appears then 'Saved'",
+        "Test: with no documents, empty state shows 'No documents yet' with 'Create document' button",
+        "Test: sort controls change list order (Name alphabetical, Date created newest first, Date modified newest first)",
+        "Test: type in editor, click sidebar nav — unsaved changes dialog appears; Cancel stays, Leave navigates away",
+        "npx playwright test passes"
+      ],
+      "passes": false,
+      "notes": "Consolidated 5 document E2E items."
+    },
+    {
+      "id": 62,
+      "category": "test-e2e",
+      "description": "E2E tests for consultant sidebar navigation and clients table interactions",
+      "specRef": "specs/ui-consultant-redesign.md",
+      "userStory": "As a consultant, sidebar navigation and clients table sorting/filtering/pagination all work correctly.",
+      "steps": [
+        "Test: /dashboard renders sidebar with 5 nav items; clicking 'Clients' navigates to /clients with aria-current='page'",
+        "Test: SidebarTrigger collapses/expands on desktop; at 375px hamburger opens Sheet drawer",
+        "Test: /clients table has sortable columns with aria-sort; search filters in real-time; status filter works",
+        "Test: pagination with 25+ clients shows page 2; 'View' navigates to /clients/{tenantId}; kebab shows Pause/Edit/Archive",
+        "Test: unauthenticated /dashboard redirects to /sign-in",
+        "npx playwright test passes"
+      ],
+      "passes": false,
+      "notes": "Consolidated sidebar + clients table E2E."
+    },
+    {
+      "id": 63,
+      "category": "test-e2e",
+      "description": "E2E tests for consultant settings and report detail page",
+      "specRef": "specs/ui-consultant-redesign.md",
+      "userStory": "As a consultant, settings form validation works and report detail editing/actions are reflected in the UI.",
+      "steps": [
+        "Test: /settings Profile tab — empty Display name shows Zod error; valid data + Save shows success toast",
+        "Test: Theme tab — '#xyz' shows error, save disabled; '#FF5733' clears error, preview updates; Save theme shows toast",
+        "Test: Billing tab — read-only plan info; Upgrade link is anchor not button",
+        "Test: /reports/{reportId} — two-panel layout; edit narrative + Save shows '(edited)' badge; 'Mark Reviewed' updates badge",
+        "Test: at 375px panels stack vertically; report with no dimension scores shows placeholder text",
+        "npx playwright test passes"
+      ],
+      "passes": false,
+      "notes": "Consolidated settings + report detail E2E."
+    },
+    {
+      "id": 64,
+      "category": "test-e2e",
+      "description": "E2E tests for user management: invite user, revoke invitation, and no-org error state",
+      "specRef": "specs/ui-consultant-user-management.md",
+      "userStory": "As a consultant, I can invite users, revoke invitations, and see an error when my org is not configured.",
+      "steps": [
+        "Test: on Users tab, click 'Invite user' — Dialog opens; fill valid email, submit — toast 'Invitation sent to {email}'; email appears in Pending table",
+        "Test: invalid email shows inline error; no toast",
+        "Test: click 'Revoke' on pending invitation — AlertDialog appears; Cancel closes; Revoke removes/updates row",
+        "Test: consultant with no clerkOrgId sees 'Organization not configured. Contact support.' on Users tab; Invite button absent/disabled",
+        "npx playwright test passes"
+      ],
+      "passes": false,
+      "notes": "Consolidated 3 user management E2E items."
+    },
+    {
+      "id": 65,
+      "category": "test-e2e",
+      "description": "E2E tests for shared polish: 404 page, skip-to-content accessibility, toast notifications, and responsive no-scroll check",
+      "specRef": "specs/ui-shared-polish.md",
+      "userStory": "As a user, the 404 page works, skip-to-content is keyboard accessible, toasts appear, and no page has horizontal scroll on mobile.",
+      "steps": [
+        "Test: /this-page-does-not-exist renders '404' and 'Page not found'; 'Go home' navigates to /",
+        "Test: Tab from address bar lands on 'Skip to content'; Enter moves focus to #main-content",
+        "Test: toast.success shows visible toast; toast.error shows visible toast; auto-dismisses within 10s",
+        "Test: at 375x812 viewport, / and at least 2 other pages have document.body.scrollWidth <= clientWidth",
+        "npx playwright test passes"
+      ],
+      "passes": false,
+      "notes": "Consolidated 4 shared polish E2E items."
     }
   ]
 }
