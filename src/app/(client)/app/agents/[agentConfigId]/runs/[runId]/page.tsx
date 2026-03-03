@@ -248,6 +248,20 @@ export default function ClientRunDetailPage() {
             {statusStyle.label}
           </span>
 
+          {/* Start time */}
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <span style={{ fontSize: "0.8125rem", color: "#6b7280" }}>Started:</span>
+            <span
+              style={{
+                fontSize: "0.8125rem",
+                fontWeight: 500,
+                color: "var(--color-foreground, #111827)",
+              }}
+            >
+              {new Date(run.startedAt ?? run.createdAt).toLocaleString()}
+            </span>
+          </div>
+
           {/* Trigger type */}
           <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
             <span style={{ fontSize: "0.8125rem", color: "#6b7280" }}>Trigger:</span>
