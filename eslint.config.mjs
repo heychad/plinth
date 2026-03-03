@@ -48,6 +48,41 @@ export default [
     },
   },
   {
+    // Next.js src/ files run in browser and Node.js (middleware) environments
+    files: ["src/**/*.ts", "src/**/*.tsx"],
+    languageOptions: {
+      globals: {
+        // Browser globals
+        document: "readonly",
+        window: "readonly",
+        navigator: "readonly",
+        localStorage: "readonly",
+        sessionStorage: "readonly",
+        // Web API globals
+        setTimeout: "readonly",
+        setInterval: "readonly",
+        clearTimeout: "readonly",
+        clearInterval: "readonly",
+        fetch: "readonly",
+        URL: "readonly",
+        URLSearchParams: "readonly",
+        Request: "readonly",
+        Response: "readonly",
+        Headers: "readonly",
+        AbortController: "readonly",
+        AbortSignal: "readonly",
+        FormData: "readonly",
+        Blob: "readonly",
+        // Node.js globals (for middleware and env vars)
+        process: "readonly",
+        console: "readonly",
+        // React JSX
+        React: "readonly",
+        JSX: "readonly",
+      },
+    },
+  },
+  {
     ignores: ["node_modules/", ".next/", "convex/_generated/"],
   },
 ];

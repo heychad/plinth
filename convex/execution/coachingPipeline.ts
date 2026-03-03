@@ -536,7 +536,8 @@ Return your analysis using the submit_analysis tool.`;
         {
           name: "submit_analysis",
           description: "Submit the coaching call analysis results",
-          input_schema: analysisJsonSchema as Parameters<typeof anthropic.messages.create>[0]["tools"][0]["input_schema"],
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          input_schema: analysisJsonSchema as any,
         },
       ],
       tool_choice: { type: "tool", name: "submit_analysis" },
@@ -553,6 +554,7 @@ Return your analysis using the submit_analysis tool.`;
     try {
       analysisResult = AnalysisResultSchema.parse(toolUseBlock.input);
     } catch (err) {
+      // eslint-disable-next-line preserve-caught-error -- Convex ES target does not support Error cause
       throw new Error(
         `Claude returned invalid analysis: ${err instanceof Error ? err.message : String(err)}`
       );
