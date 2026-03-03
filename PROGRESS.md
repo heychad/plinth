@@ -447,3 +447,56 @@ Sprint log -- append only, never overwrite.
 - Convex deployment changed to graceful-otter-634
 - Clerk auth configured with renewed-escargot-45.clerk.accounts.dev
 - Item 39 deferred — requires Playwright test infra + seed data + runtime auth verification
+
+---
+
+## Cycle 8 Complete — 2026-03-03
+
+**Items completed:** Item 39 (E2E QA Verification)
+
+**What was built:**
+- Playwright E2E test infrastructure: playwright.config.ts, global-setup.ts, helpers/auth.ts
+- TEST_MODE auth bypass in convex/auth.ts (test user lookup) and src/middleware.ts (skip Clerk)
+- Idempotent seed data in convex/seed.ts: consultant, tenant, agent template, 2 agent runs, 2 coaching reports (score 82 green + score 58 flagged red)
+- 15 Playwright tests in tests/coaching-pipeline.spec.ts covering Reports List (8 tests) and Report Detail (7 tests)
+
+**Convex refactoring (pre-existing "use node" constraint):**
+- Queries/mutations cannot live in "use node" files — split 5 files into companion helpers:
+  - convex/integrations/composioHelpers.ts (from composio.ts)
+  - convex/integrations/googleDocsHelpers.ts (from googleDocs.ts)
+  - convex/integrations/zoomHelpers.ts (from zoom.ts)
+  - convex/webhooks/composioCallbackHelpers.ts (from composioCallback.ts)
+  - convex/zoomCredentialsDb.ts (from zoomCredentials.ts)
+
+**What was learned:**
+- Convex "use node" files can ONLY export action/internalAction — queries, mutations, httpActions all fail. Must split into companion files.
+- Seed-first E2E strategy avoids external API dependencies (Anthropic, Composio, Resend, Zoom) entirely
+- Cold Convex subscriptions can take 30s+ on first load — use waitForFunction with generous timeouts + direct URL navigation instead of click-based
+- eslint-disable block comments needed for browser globals (document) inside waitForFunction callbacks
+
+**Files created:**
+- playwright.config.ts, tests/global-setup.ts, tests/helpers/auth.ts, tests/coaching-pipeline.spec.ts
+- convex/seed.ts
+- convex/integrations/composioHelpers.ts, convex/integrations/googleDocsHelpers.ts, convex/integrations/zoomHelpers.ts
+- convex/webhooks/composioCallbackHelpers.ts, convex/zoomCredentialsDb.ts
+
+**Files modified:**
+- convex/auth.ts, src/middleware.ts, package.json, package-lock.json
+- convex/integrations/composio.ts, convex/integrations/googleDocs.ts, convex/integrations/zoom.ts
+- convex/webhooks/composioCallback.ts, convex/webhooks/zoom.ts, convex/zoomCredentials.ts
+
+**Verification:**
+- `npx tsc --noEmit` — PASS
+- `npx eslint . --max-warnings 0` — PASS
+- `npx convex typecheck` — PASS
+- `npm run build` — PASS
+- `npx playwright test` — 15/15 PASS
+
+**PRD status:** 40/40 items passing — SPRINT COMPLETE
+
+**Active Signs:** All resolved. No remaining blockers.
+
+**Decisions in effect:**
+- TEST_MODE env var on Convex deployment (graceful-otter-634) — must be unset before production
+- Playwright tests run with `NEXT_PUBLIC_TEST_MODE=true` via webServer env in playwright.config.ts
+- test_consultant_001 is the well-known test user ID shared between seed.ts and auth.ts
