@@ -2,6 +2,7 @@ import {
   query,
   mutation,
   internalMutation,
+  internalQuery,
 } from "./_generated/server";
 import { paginationOptsValidator } from "convex/server";
 import { v } from "convex/values";
@@ -330,6 +331,47 @@ export const markNoAction = mutation({
 
 // ─── Internal Mutations (pipeline use) ───────────────────────────────────────
 
+/**
+ * Creates an initial coaching call report at the start of the Intake step.
+ * Fields that require AI analysis (scores, highlights, concerns, narrative)
+ * are initialized to safe placeholder values. The Analyze step updates them.
+ */
+export const createInitialReport = internalMutation({
+  args: {
+    tenantId: v.id("tenants"),
+    agentRunId: v.id("agentRuns"),
+    coachId: v.string(),
+    coachName: v.optional(v.string()),
+    studentId: v.optional(v.string()),
+    studentName: v.optional(v.string()),
+    callNumber: v.union(v.number(), v.literal("onboarding"), v.literal("bonus")),
+    zoomMeetingId: v.optional(v.string()),
+    recordedAt: v.optional(v.number()),
+    durationMinutes: v.optional(v.number()),
+    transcriptStorageId: v.string(),
+    parsedTranscript: v.optional(v.string()),
+    coachTalkPercent: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const now = Date.now();
+    return await ctx.db.insert("coachingCallReports", {
+      ...args,
+      // Placeholder values filled in by the Analyze step
+      overallScore: 0,
+      dimensionScores: {},
+      highlights: [],
+      concerns: [],
+      narrative: "",
+      flagged: false,
+      rawAnalysisJson: null,
+      status: "draft",
+      releasedToCoach: false,
+      createdAt: now,
+      updatedAt: now,
+    });
+  },
+});
+
 export const createReport = internalMutation({
   args: {
     tenantId: v.id("tenants"),
@@ -362,6 +404,19 @@ export const createReport = internalMutation({
       createdAt: now,
       updatedAt: now,
     });
+  },
+});
+
+/**
+ * Internal query: fetch a single coaching call report by ID.
+ * Used by pipeline steps (analyzeStep) to read report state without auth.
+ */
+export const getReportById = internalQuery({
+  args: {
+    reportId: v.id("coachingCallReports"),
+  },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.reportId);
   },
 });
 
