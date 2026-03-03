@@ -72,9 +72,10 @@ plinth/
     components/
       ThemeProvider.tsx     # CSS variable injection from Convex theme
       ...
-  specs/                   # Feature specifications (read-only)
-  scripts/ralph/
-    backpressure.sh        # Verification gate script
+  docs/
+    specs/                 # Feature specifications (read-only)
+    design-system/         # Design system docs + page overrides
+    research/              # Platform research notes
 ```
 
 ## Key Commands
@@ -140,7 +141,7 @@ Every Convex query and mutation that touches tenant-scoped data MUST:
 ## Sprint Constraints
 
 - No code exists yet -- this is a greenfield build
-- Specs in `specs/` are read-only -- do not modify them
+- Specs in `docs/specs/` are read-only -- do not modify them
 - Every PRD item must reference its source spec file
 - PRD.json is the source of truth for what to build
 - Multi-tenancy enforcement in every query/mutation is non-negotiable
@@ -209,7 +210,7 @@ CLERK_SECRET_KEY
 - **White-label theming:** CSS variables injected from Convex themes table via ThemeProvider
 
 ### UI Sprint Constraints
-- **Specs override design system page overrides** — when `specs/*.md` conflicts with `design-system/plinth/pages/*.md`, the spec is authoritative
+- **Specs override design system page overrides** — when `docs/specs/*.md` conflicts with `docs/design-system/plinth/pages/*.md`, the spec is authoritative
 - **Existing files from prior sprint may need replacing, not appending** — always read existing files before modifying (e.g., consultant layout already has an inline nav bar)
 - `CLERK_SECRET_KEY` must be set in Convex environment variables for the Clerk webhook handler (Item 50) to call Clerk Admin API
 - `NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL` must be set for invitation redirect URLs

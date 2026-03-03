@@ -6,7 +6,7 @@
       "id": 1,
       "category": "foundation",
       "description": "Initialize shadcn/ui, configure Tailwind v4 CSS-first in globals.css, and set up path aliases in tsconfig.json",
-      "specRef": "specs/ui-design-system-foundation.md",
+      "specRef": "docs/specs/ui-design-system-foundation.md",
       "steps": [
         "Run `npx shadcn@latest init` — components.json exists at project root with style=default, rsc=true, tsx=true, tailwind.css=src/app/globals.css, cssVariables=true, iconLibrary=lucide",
         "src/lib/utils.ts exists and exports cn() utility function",
@@ -22,7 +22,7 @@
       "id": 2,
       "category": "foundation",
       "description": "Define the full Plinth CSS variable palette (18 shadcn variables + Plinth-specific tokens + spacing + shadows) and dark theme stub in globals.css",
-      "specRef": "specs/ui-design-system-foundation.md",
+      "specRef": "docs/specs/ui-design-system-foundation.md",
       "steps": [
         ":root block defines all 18 shadcn variables: --primary (indigo #6366F1 as OKLCH), --primary-foreground (#FFFFFF), --secondary (#818CF8), --secondary-foreground (#1E1B4B), --accent (#10B981), --accent-foreground (#FFFFFF), --background (#F5F3FF), --foreground (#1E1B4B), --muted (#EDE9FE), --muted-foreground (#6B7280), --card (#FFFFFF), --card-foreground (#1E1B4B), --border (#E2E8F0), --input (#E2E8F0), --ring (#6366F1), --radius (0.5rem), --destructive (#EF4444), --destructive-foreground (#FFFFFF)",
         ":root defines Plinth-specific tokens: --color-primary, --color-secondary, --color-cta, --color-background, --color-text",
@@ -37,7 +37,7 @@
       "id": 3,
       "category": "foundation",
       "description": "Load Plus Jakarta Sans via next/font/google, apply as default font in root layout, and install all 20 initial shadcn/ui components plus lucide-react",
-      "specRef": "specs/ui-design-system-foundation.md",
+      "specRef": "docs/specs/ui-design-system-foundation.md",
       "steps": [
         "src/app/layout.tsx imports Plus_Jakarta_Sans from next/font/google with subsets=[\"latin\"], weight=[\"300\",\"400\",\"500\",\"600\",\"700\"], variable=\"--font-plus-jakarta-sans\", display=\"swap\"",
         "<html> has className={plusJakartaSans.variable}; <body> has className=\"font-sans antialiased bg-background text-foreground\"",
@@ -54,7 +54,7 @@
       "id": 4,
       "category": "foundation",
       "description": "Add conversations and messages tables to convex/schema.ts with all required fields and indexes",
-      "specRef": "specs/ui-client-chat-interface.md",
+      "specRef": "docs/specs/ui-client-chat-interface.md",
       "steps": [
         "conversations table has fields: tenantId, userId, agentConfigId (nullable), title, lastMessageAt, messageCount, platform, status, createdAt",
         "conversations table has indexes: by_userId_lastMessageAt on [userId, lastMessageAt] and by_tenantId_userId on [tenantId, userId]",
@@ -69,7 +69,7 @@
       "id": 5,
       "category": "foundation",
       "description": "Add documents table to convex/schema.ts with all required fields, types, and indexes",
-      "specRef": "specs/ui-document-store.md",
+      "specRef": "docs/specs/ui-document-store.md",
       "steps": [
         "documents table defined with fields: tenantId (Id<'tenants'>), userId (Id<'users'>), title (string), content (string | null), storageId (string | null), mimeType (string), source ('user' | 'agent'), agentRunId (Id<'agentRuns'> | null), agentConfigId (Id<'agentConfigs'> | null), googleDocUrl (string | null), wordCount (number | null), createdAt (number), updatedAt (number)",
         "Three indexes: by_tenantId_createdAt on ['tenantId', 'createdAt'], by_tenantId_userId on ['tenantId', 'userId'], by_agentRunId on ['agentRunId']",
@@ -82,7 +82,7 @@
       "id": 6,
       "category": "foundation",
       "description": "Add invitations table to convex/schema.ts and clerkOrgId field to consultants table",
-      "specRef": "specs/ui-consultant-user-management.md",
+      "specRef": "docs/specs/ui-consultant-user-management.md",
       "steps": [
         "consultants table now has clerkOrgId: v.optional(v.string()) field",
         "invitations table exists with fields: tenantId, consultantId, email, displayName (v.union(v.string(), v.null())), clerkInvitationId, status (v.union of 'pending'|'accepted'|'revoked'|'expired'), sentAt, acceptedAt (v.union(v.number(), v.null())), createdAt",
@@ -96,7 +96,7 @@
       "id": 7,
       "category": "foundation",
       "description": "Install @convex-dev/persistent-text-streaming, @blocknote/core, @blocknote/mantine, mammoth, turndown, svix, @tanstack/react-table, react-hook-form, zod, react-markdown, remark-gfm packages and wire streaming component into convex.config.ts",
-      "specRef": "specs/ui-client-chat-interface.md",
+      "specRef": "docs/specs/ui-client-chat-interface.md",
       "steps": [
         "npm install @convex-dev/persistent-text-streaming @blocknote/core @blocknote/mantine @mantine/core @mantine/hooks mammoth turndown svix @tanstack/react-table react-hook-form @hookform/resolvers react-markdown remark-gfm --legacy-peer-deps exits 0",
         "npm install --save-dev @types/mammoth @types/turndown vitest convex-test --legacy-peer-deps exits 0; package.json 'test' script updated to 'vitest run' (replaces 'echo No tests configured')",
@@ -111,7 +111,7 @@
       "id": 8,
       "category": "foundation",
       "description": "Create Clerk middleware at src/middleware.ts with route protection, TEST_MODE bypass, and onboarding redirect logic for client users",
-      "specRef": "specs/ui-auth-and-routing.md",
+      "specRef": "docs/specs/ui-auth-and-routing.md",
       "steps": [
         "src/middleware.ts exports default clerkMiddleware; config.matcher excludes _next/static, _next/image, favicon.ico",
         "Public routes: /, /sign-in(.*), /sign-up(.*), /api/webhooks/(.*), /oauth/(.*)",
@@ -129,7 +129,7 @@
       "id": 9,
       "category": "foundation",
       "description": "Create auth layout at src/app/(auth)/layout.tsx — centered full-screen container for sign-in/sign-up pages",
-      "specRef": "specs/ui-auth-and-routing.md",
+      "specRef": "docs/specs/ui-auth-and-routing.md",
       "steps": [
         "File src/app/(auth)/layout.tsx exists and exports a default React component",
         "Layout renders a full-screen centered container with classes including min-h-screen, items-center, justify-center",
@@ -144,7 +144,7 @@
       "id": 10,
       "category": "functional",
       "description": "Create root page (src/app/page.tsx) with role-based redirect: unauthenticated to /sign-in, consultants/admins to /dashboard, others to /app",
-      "specRef": "specs/ui-auth-and-routing.md",
+      "specRef": "docs/specs/ui-auth-and-routing.md",
       "steps": [
         "src/app/page.tsx is a server component using async/await",
         "Calls await auth() from @clerk/nextjs/server to get userId",
@@ -160,7 +160,7 @@
       "id": 11,
       "category": "functional",
       "description": "Implement conversations CRUD in convex/conversations.ts: listConversations, getConversation, createConversation — all with multi-tenancy enforcement",
-      "specRef": "specs/ui-client-chat-interface.md",
+      "specRef": "docs/specs/ui-client-chat-interface.md",
       "steps": [
         "listConversations calls requireAuth(), resolves userId from JWT, returns conversations ordered by lastMessageAt DESC with limit 20, scoped by caller's tenantId",
         "A query with tenant A's JWT cannot return tenant B's conversations",
@@ -175,7 +175,7 @@
       "id": 12,
       "category": "functional",
       "description": "Implement messages CRUD in convex/messages.ts: listMessages and createUserMessage with conversation ownership validation",
-      "specRef": "specs/ui-client-chat-interface.md",
+      "specRef": "docs/specs/ui-client-chat-interface.md",
       "steps": [
         "listMessages accepts { conversationId }, calls requireAuth(), validates caller owns the conversation, returns messages ordered by createdAt ASC",
         "listMessages with a conversationId owned by a different user returns null or throws auth error",
@@ -190,7 +190,7 @@
       "id": 13,
       "category": "functional",
       "description": "Implement POST /api/chat/stream HTTP action with SSE streaming via persistent-text-streaming and orchestrator routing",
-      "specRef": "specs/ui-client-chat-interface.md",
+      "specRef": "docs/specs/ui-client-chat-interface.md",
       "steps": [
         "convex/execution/chatStream.ts exports an HTTP action handler; route POST /api/chat/stream registered in convex/http.ts",
         "Handler validates Clerk JWT from Authorization header — returns 401 for invalid token",
@@ -207,7 +207,7 @@
       "id": 14,
       "category": "functional",
       "description": "Implement orchestratorRoute internal action that dynamically routes to sub-agents based on tenant's deployed agentConfigs",
-      "specRef": "specs/ui-client-chat-interface.md",
+      "specRef": "docs/specs/ui-client-chat-interface.md",
       "steps": [
         "convex/execution/orchestrator.ts exports internalAction named orchestratorRoute accepting { conversationId, userMessage, tenantId, userId }",
         "Action queries tenant's deployed agentConfigs to build orchestrator system prompt dynamically — no hardcoded agent capabilities",
@@ -223,7 +223,7 @@
       "id": 15,
       "category": "functional",
       "description": "Implement document CRUD in convex/documents.ts: listDocuments, getDocument, createDocument, updateDocument, saveAgentDocument (internal)",
-      "specRef": "specs/ui-document-store.md",
+      "specRef": "docs/specs/ui-document-store.md",
       "steps": [
         "listDocuments query accepts optional sortBy ('createdAt'|'updatedAt'|'title'), calls requireAuth, scopes by tenantId, returns limit 50",
         "getDocument query validates document.tenantId matches caller's tenantId; returns null on mismatch; includes signed URL if storageId is set",
@@ -239,7 +239,7 @@
       "id": 16,
       "category": "functional",
       "description": "Implement exportToGoogleDocs action and importFromDocx action in convex/documents.ts",
-      "specRef": "specs/ui-document-store.md",
+      "specRef": "docs/specs/ui-document-store.md",
       "steps": [
         "exportToGoogleDocs action accepts { documentId }, validates tenant ownership, calls createGoogleDoc from googleDocs.ts, updates googleDocUrl on document",
         "exportToGoogleDocs throws recognizable error code (CREDENTIAL_EXPIRED or CREDENTIAL_MISSING) when Google credential is missing",
@@ -254,7 +254,7 @@
       "id": 17,
       "category": "functional",
       "description": "Add provisionStarterAgent mutation to convex/agentConfigs.ts — idempotent per tenant, client-role only",
-      "specRef": "specs/ui-client-onboarding.md",
+      "specRef": "docs/specs/ui-client-onboarding.md",
       "steps": [
         "provisionStarterAgent checks for existing agentConfig with templateId matching 'general-assistant' for caller's tenant; creates one if absent",
         "Second call returns same agentConfigId (idempotency)",
@@ -270,7 +270,7 @@
       "id": 18,
       "category": "functional",
       "description": "Create completeOnboarding server action and onboarding redirect middleware logic",
-      "specRef": "specs/ui-client-onboarding.md",
+      "specRef": "docs/specs/ui-client-onboarding.md",
       "steps": [
         "src/app/(client)/app/onboarding/_actions.ts exists with 'use server' directive",
         "completeOnboarding() calls clerkClient().users.updateUser with publicMetadata.onboardingComplete = true",
@@ -284,7 +284,7 @@
       "id": 19,
       "category": "functional",
       "description": "Create convex/invitations.ts with createInvitation/updateInvitationStatus internal mutations and listInvitations query",
-      "specRef": "specs/ui-consultant-user-management.md",
+      "specRef": "docs/specs/ui-consultant-user-management.md",
       "steps": [
         "createInvitation is internalMutation accepting { tenantId, consultantId, email, displayName?, clerkInvitationId }, returns Id<'invitations'>",
         "updateInvitationStatus is internalMutation accepting { clerkInvitationId, status, acceptedAt? }",
@@ -299,7 +299,7 @@
       "id": 20,
       "category": "functional",
       "description": "Add missing backend mutations, expand existing mutations, update validators, and seed data for UI sprint prerequisites",
-      "specRef": "specs/ui-consultant-redesign.md",
+      "specRef": "docs/specs/ui-consultant-redesign.md",
       "steps": [
         "convex/coachingCallReports.ts exports a markReviewed mutation that accepts { reportId }, calls requireAuth, validates consultant ownership, sets status to 'reviewed' and updatedAt to Date.now()",
         "convex/tenants.ts exports an updateTenant mutation that accepts { tenantId, businessName?, ownerName?, ownerEmail?, website?, vertical?, notes? }, calls requireAuth, validates consultant ownership of tenant, patches fields and sets updatedAt",
@@ -316,7 +316,7 @@
       "id": 21,
       "category": "functional",
       "description": "Create server actions for inviteUser, resendInvitation, and revokeInvitation at src/app/(consultant)/clients/[tenantId]/_actions.ts",
-      "specRef": "specs/ui-consultant-user-management.md",
+      "specRef": "docs/specs/ui-consultant-user-management.md",
       "steps": [
         "File src/app/(consultant)/clients/[tenantId]/_actions.ts exists with 'use server' directive",
         "inviteUser server action validates email with Zod z.string().email(), checks for existing user, retrieves clerkOrgId — returns { success: false, error } for invalid email, missing clerkOrgId, or existing user",
@@ -332,7 +332,7 @@
       "id": 22,
       "category": "ui",
       "description": "Create design system visual reference page at /design-system (dev-only) displaying all installed shadcn components with Plinth tokens",
-      "specRef": "specs/ui-design-system-foundation.md",
+      "specRef": "docs/specs/ui-design-system-foundation.md",
       "userStory": "As a developer, when I navigate to /design-system in development mode, I see all shadcn components rendered with Plinth's color palette, typography, and spacing tokens.",
       "steps": [
         "http://localhost:3000/design-system renders without 404 or errors",
@@ -349,7 +349,7 @@
       "id": 23,
       "category": "ui",
       "description": "Create sign-in and sign-up pages with Clerk components styled with Plinth brand",
-      "specRef": "specs/ui-auth-and-routing.md",
+      "specRef": "docs/specs/ui-auth-and-routing.md",
       "userStory": "As an unauthenticated visitor, when I navigate to /sign-in or /sign-up, I see centered Clerk forms styled with Plinth brand colors and Plus Jakarta Sans font.",
       "steps": [
         "src/app/(auth)/sign-in/[[...sign-in]]/page.tsx renders <SignIn /> with appearance.variables.colorPrimary='#6366F1' and fontFamily='var(--font-plus-jakarta-sans)'; afterSignInUrl='/'",
@@ -365,7 +365,7 @@
       "id": 24,
       "category": "ui",
       "description": "Add role guard to consultant layout and wire UserButton in both consultant and client layouts",
-      "specRef": "specs/ui-auth-and-routing.md",
+      "specRef": "docs/specs/ui-auth-and-routing.md",
       "userStory": "As a consultant, I see a UserButton for profile/sign-out; as a client trying to access /dashboard, I am redirected to /app.",
       "steps": [
         "Consultant layout calls await auth() — if role is 'client' or absent, redirects to /app",
@@ -382,7 +382,7 @@
       "id": 25,
       "category": "ui",
       "description": "Build custom 404 page, root error boundary, and route-group error boundaries",
-      "specRef": "specs/ui-shared-polish.md",
+      "specRef": "docs/specs/ui-shared-polish.md",
       "userStory": "As a user who navigates to a non-existent URL or encounters a runtime error, I see a friendly page with recovery options.",
       "steps": [
         "src/app/not-found.tsx renders '404', h1 'Page not found', and 'Go home' button linking to /",
@@ -398,7 +398,7 @@
       "id": 26,
       "category": "ui",
       "description": "Install and configure Sonner toast, mount <Toaster /> once in root layout, and create SkipToContent accessibility component",
-      "specRef": "specs/ui-shared-polish.md",
+      "specRef": "docs/specs/ui-shared-polish.md",
       "userStory": "As a user performing actions, I see toast notifications; as a keyboard user, I can skip to main content with Tab+Enter.",
       "steps": [
         "<Toaster position='bottom-right' richColors /> rendered once in src/app/layout.tsx body — grep '<Toaster' returns exactly one result",
@@ -415,7 +415,7 @@
       "id": 27,
       "category": "ui",
       "description": "Add prefers-reduced-motion CSS, touch target minimums, and create reusable PageBreadcrumb component",
-      "specRef": "specs/ui-shared-polish.md",
+      "specRef": "docs/specs/ui-shared-polish.md",
       "userStory": "As a user who prefers reduced motion, all animations are instant; as a mobile user, all touch targets are at least 44x44px.",
       "steps": [
         "globals.css contains @media (prefers-reduced-motion: reduce) block setting animation-duration/transition-duration to 0.01ms on *, *::before, *::after",
@@ -432,7 +432,7 @@
       "id": 28,
       "category": "ui",
       "description": "Create route-group loading fallbacks and LoadingPage shared component with skeleton layouts",
-      "specRef": "specs/ui-shared-polish.md",
+      "specRef": "docs/specs/ui-shared-polish.md",
       "userStory": "As a user navigating pages, I see skeleton placeholders during data fetch instead of blank screens.",
       "steps": [
         "src/app/(consultant)/loading.tsx renders Skeleton for page title, 4 stat cards grid, and table area",
@@ -448,7 +448,7 @@
       "id": 29,
       "category": "ui",
       "description": "Build ChatInterface root layout with sidebar + main area, ConversationSidebar with New Chat, agent list, and recent conversations",
-      "specRef": "specs/ui-client-chat-interface.md",
+      "specRef": "docs/specs/ui-client-chat-interface.md",
       "userStory": "As a client, when I navigate to /app, I see a chat layout with a 260px sidebar showing agents and recent conversations, and a main chat area.",
       "steps": [
         "src/components/chat/ChatInterface.tsx renders full-screen flex layout; sidebar is 260px on desktop (>= 768px), hidden on mobile with Sheet hamburger toggle",
@@ -466,7 +466,7 @@
       "id": 30,
       "category": "ui",
       "description": "Build MessageList, MessageBubble, AgentAvatar, TypingIndicator, EmptyState, and MessageInput chat components",
-      "specRef": "specs/ui-client-chat-interface.md",
+      "specRef": "docs/specs/ui-client-chat-interface.md",
       "userStory": "As a client, I see my messages right-aligned in indigo bubbles, agent messages left-aligned with avatars and markdown rendering, and I can type/send messages with Enter.",
       "steps": [
         "MessageList.tsx renders scrollable list of MessageBubble components, auto-scrolls on new messages",
@@ -485,7 +485,7 @@
       "id": 31,
       "category": "ui",
       "description": "Wire up /app and /app/[conversationId] pages to ChatInterface, handle routing edge cases",
-      "specRef": "specs/ui-client-chat-interface.md",
+      "specRef": "docs/specs/ui-client-chat-interface.md",
       "userStory": "As a client, when I navigate to /app I see the empty state, and when I navigate to a conversation URL I see that conversation's messages.",
       "steps": [
         "src/app/(client)/app/page.tsx renders ChatInterface with EmptyState",
@@ -502,7 +502,7 @@
       "id": 32,
       "category": "ui",
       "description": "Build OnboardingWizard with 3 steps (Welcome, WhatYouCanDo, Ready) and wire to /app/onboarding page",
-      "specRef": "specs/ui-client-onboarding.md",
+      "specRef": "docs/specs/ui-client-onboarding.md",
       "userStory": "As a new client, when I arrive at /app/onboarding, I step through a 3-step wizard in a centered card, and clicking 'Start chatting' provisions my starter agent and takes me to the chat interface.",
       "steps": [
         "OnboardingWizard.tsx is 'use client' component managing step state (1-3); card is bg-card rounded-2xl shadow-lg p-8 max-w-[480px] centered; progress indicator shows 3 dots filled by --color-primary",
@@ -519,7 +519,7 @@
       "id": 33,
       "category": "ui",
       "description": "Rename Integrations page to Connections with 301 redirect, update sidebar nav and all copy",
-      "specRef": "specs/ui-client-onboarding.md",
+      "specRef": "docs/specs/ui-client-onboarding.md",
       "userStory": "As a client, 'Connections' replaces 'Integrations' in the sidebar; the old URL redirects; page copy uses friendly language.",
       "steps": [
         "Sidebar nav reads 'Connections' not 'Integrations'",
@@ -536,7 +536,7 @@
       "id": 34,
       "category": "ui",
       "description": "Build consultant sidebar layout with SidebarProvider, collapsible nav, Sheet drawer on mobile, and Clerk UserButton",
-      "specRef": "specs/ui-consultant-redesign.md",
+      "specRef": "docs/specs/ui-consultant-redesign.md",
       "userStory": "As a consultant, when I open any consultant page on mobile, I see a hamburger button; clicking it opens the navigation drawer with all nav items.",
       "steps": [
         "Consultant layout at src/app/(consultant)/layout.tsx wraps in <SidebarProvider>; <main> element has id='main-content' and tabIndex={-1}",
@@ -554,7 +554,7 @@
       "id": 35,
       "category": "ui",
       "description": "Build consultant dashboard page with time-aware greeting, 4 stat cards, recent clients table, and recent draft reports",
-      "specRef": "specs/ui-consultant-redesign.md",
+      "specRef": "docs/specs/ui-consultant-redesign.md",
       "userStory": "As a consultant, when I navigate to the dashboard, I see my 4 key stats and recent clients without horizontal scrolling.",
       "steps": [
         "Greeting reads 'Good morning/afternoon/evening, {firstName}' based on time of day",
@@ -571,7 +571,7 @@
       "id": 36,
       "category": "ui",
       "description": "Build clients list page with TanStack Table (6 columns, search, status filter, pagination, kebab menu) and empty state with Add Client dialog",
-      "specRef": "specs/ui-consultant-redesign.md",
+      "specRef": "docs/specs/ui-consultant-redesign.md",
       "userStory": "As a consultant, when I click a column header the table sorts, and when I type in the search field the table filters in real-time.",
       "steps": [
         "TanStack Table with columns: Business name (link), Owner, Status (badge), Agents (count), Last run (relative date), Actions",
@@ -589,7 +589,7 @@
       "id": 37,
       "category": "ui",
       "description": "Build client detail page shell: breadcrumb, heading with status badge, 4-tab container (Agent Configs, Run History, Reports, Client Settings)",
-      "specRef": "specs/ui-consultant-redesign.md",
+      "specRef": "docs/specs/ui-consultant-redesign.md",
       "userStory": "As a consultant, when I open a client detail page, I see tabbed content and can switch between tabs.",
       "steps": [
         "Breadcrumb reads 'Clients / {businessName}'; heading shows businessName with status badge",
@@ -606,7 +606,7 @@
       "id": 38,
       "category": "ui",
       "description": "Build client detail tab content: Agent Configs tab (table + deploy dialog) and Run History tab (table + agent filter)",
-      "specRef": "specs/ui-consultant-redesign.md",
+      "specRef": "docs/specs/ui-consultant-redesign.md",
       "userStory": "As a consultant on the Agent Configs tab, I can see deployed agents and deploy new ones from the template library.",
       "steps": [
         "Agent Configs tab: table with Name, Status, Template, Deployed, Version, Actions (Configure/Pause/Deploy); 'Add agent config' opens Dialog with template select; empty state 'Deploy your first agent'",
@@ -621,7 +621,7 @@
       "id": 39,
       "category": "ui",
       "description": "Build client detail tab content: Reports tab (table) and Client Settings tab (Zod-validated form calling updateTenant)",
-      "specRef": "specs/ui-consultant-redesign.md",
+      "specRef": "docs/specs/ui-consultant-redesign.md",
       "userStory": "As a consultant on the Reports tab, I can see reports; on Settings tab, I can edit client details with validation.",
       "steps": [
         "Reports tab: table with Date, Coach, Score, Status, Actions; 'Review' navigates to report detail; scoped to tenantId",
@@ -636,7 +636,7 @@
       "id": 40,
       "category": "ui",
       "description": "Build agent templates library page with category filter tabs and responsive card grid with 'Deploy to client' dialog",
-      "specRef": "specs/ui-consultant-redesign.md",
+      "specRef": "docs/specs/ui-consultant-redesign.md",
       "userStory": "As a consultant, when I click 'Deploy to client' on a template card, a dialog opens to select a client and confirm deployment.",
       "steps": [
         "Heading 'Agent Library' with category tabs: All, Marketing, Sales, Operations, Coaching",
@@ -651,7 +651,7 @@
       "id": 41,
       "category": "ui",
       "description": "Build reports list page with TanStack Table (8 columns, status/score/flagged filters, color-coded score badges)",
-      "specRef": "specs/ui-consultant-redesign.md",
+      "specRef": "docs/specs/ui-consultant-redesign.md",
       "userStory": "As a consultant, when I filter by 'Low' score range, only reports with scores below 70 remain.",
       "steps": [
         "Heading 'Reports' with count badge; TanStack Table columns: Date, Client, Coach, Student, Call #, Score (badge), Status (badge), Actions",
@@ -667,7 +667,7 @@
       "id": 42,
       "category": "ui",
       "description": "Build report detail page with two-panel layout: scores/metadata on left, editable narrative + action buttons on right",
-      "specRef": "specs/ui-consultant-redesign.md",
+      "specRef": "docs/specs/ui-consultant-redesign.md",
       "userStory": "As a consultant, I can read the narrative, edit it, release it to the coach, and mark it as reviewed.",
       "steps": [
         "Breadcrumb 'Reports / {coachName} - Call {callNumber}'; left panel (1/3): overall score (colored by tier), dimension scorecards, call metadata, flagged badge",
@@ -683,7 +683,7 @@
       "id": 43,
       "category": "ui",
       "description": "Build settings page with Profile, Theme, and Billing tabs — including hex color validation, live preview, and logo upload",
-      "specRef": "specs/ui-consultant-redesign.md",
+      "specRef": "docs/specs/ui-consultant-redesign.md",
       "userStory": "As a consultant, when I update my primary color in Theme settings, I see a live preview before saving.",
       "steps": [
         "3 tabs: Profile, Theme, Billing",
@@ -700,7 +700,7 @@
       "id": 44,
       "category": "ui",
       "description": "Build run detail page for consultant: run header, step timeline with status icons, and output section with Google Doc links",
-      "specRef": "specs/ui-consultant-redesign.md",
+      "specRef": "docs/specs/ui-consultant-redesign.md",
       "userStory": "As a consultant, when I view a run detail page, I see the step-by-step timeline with status icons and final output.",
       "steps": [
         "Breadcrumb 'Clients / {clientName} / Runs / {runId short}'; header card: agent name, status badge, trigger type, start time, duration, cost",
@@ -715,7 +715,7 @@
       "id": 45,
       "category": "ui",
       "description": "Add 'Documents' nav item to client sidebar, build document list page with sort controls, DocumentList table, and EmptyDocuments state",
-      "specRef": "specs/ui-document-store.md",
+      "specRef": "docs/specs/ui-document-store.md",
       "userStory": "As a client, when I navigate to /app/documents, I see my documents in a table with sort options, or an empty state with a 'Create document' button.",
       "steps": [
         "Client sidebar includes { href: '/app/documents', label: 'Documents', icon: 'FileText' } between Agents and Connections; active state highlights on /app/documents and /app/documents/[id]",
@@ -732,7 +732,7 @@
       "id": 46,
       "category": "ui",
       "description": "Build DocumentEditor (BlockNote with auto-save), DocumentToolbar (editable title, export, import), and document editor page",
-      "specRef": "specs/ui-document-store.md",
+      "specRef": "docs/specs/ui-document-store.md",
       "userStory": "As a client, when I open a document, I see a breadcrumb, toolbar with title/export/import, and a full-height BlockNote editor that auto-saves.",
       "steps": [
         "DocumentEditor.tsx: 'use client', BlockNote initialized with markdownToBlocks; changes debounce 1000ms then call updateDocument; shows 'Saving...' then 'Saved'",
@@ -748,7 +748,7 @@
       "id": 47,
       "category": "ui",
       "description": "Build UsersTab for client detail page: InviteUserForm dialog, InvitationsTable with resend/revoke, ActiveUsersTable",
-      "specRef": "specs/ui-consultant-user-management.md",
+      "specRef": "docs/specs/ui-consultant-user-management.md",
       "userStory": "As a consultant on the Users tab, I see active users and pending invitations, and can invite new users via a dialog form.",
       "steps": [
         "InviteUserForm: email (required, Zod validated), display name (optional), disabled role select showing 'Client'; Loader2 spinner on submit; toast 'Invitation sent to {email}'; inline error on failure",
@@ -763,7 +763,7 @@
       "id": 48,
       "category": "ui",
       "description": "Wire UsersTab as 5th tab on client detail page with count badge and Invite user button",
-      "specRef": "specs/ui-consultant-user-management.md",
+      "specRef": "docs/specs/ui-consultant-user-management.md",
       "userStory": "As a consultant, when I click the 'Users' tab on a client detail page, I see active users and pending invitations.",
       "steps": [
         "UsersTab composes ActiveUsersTable, InvitationsTable, and InviteUserForm components from Item 47",
@@ -779,7 +779,7 @@
       "id": 49,
       "category": "integration",
       "description": "Wire agentWorkflow.ts to call saveAgentDocument when agent output contains document-type content",
-      "specRef": "specs/ui-document-store.md",
+      "specRef": "docs/specs/ui-document-store.md",
       "steps": [
         "Read the existing convex/execution/agentWorkflow.ts file to understand current structure before making changes",
         "agentWorkflow.ts checks agent output for type: 'document' or outputType: 'document'",
@@ -794,7 +794,7 @@
       "id": 50,
       "category": "integration",
       "description": "Create Clerk webhook handler for organizationMembership.created and organizationInvitation.expired events, register in http.ts",
-      "specRef": "specs/ui-consultant-user-management.md",
+      "specRef": "docs/specs/ui-consultant-user-management.md",
       "steps": [
         "convex/webhooks/clerk.ts verifies svix-id, svix-timestamp, svix-signature headers — returns 400 for invalid",
         "organizationMembership.created: resolves consultantId from clerkOrgId, resolves tenantId from invitation by email, creates users record (idempotent by clerkUserId), sets Clerk publicMetadata { role: 'client', tenantId: string }",
@@ -810,7 +810,7 @@
       "id": 51,
       "category": "test-backend",
       "description": "Unit/integration tests for conversations.ts and messages.ts: CRUD operations and multi-tenancy enforcement",
-      "specRef": "specs/ui-client-chat-interface.md",
+      "specRef": "docs/specs/ui-client-chat-interface.md",
       "steps": [
         "createConversation with valid client JWT inserts conversation with correct tenantId/userId from JWT",
         "listConversations with client A's JWT does not return client B's conversations",
@@ -827,7 +827,7 @@
       "id": 52,
       "category": "test-backend",
       "description": "Unit/integration tests for documents.ts: listDocuments, getDocument, createDocument, updateDocument, saveAgentDocument — tenant isolation and idempotency",
-      "specRef": "specs/ui-document-store.md",
+      "specRef": "docs/specs/ui-document-store.md",
       "steps": [
         "listDocuments: tenant A cannot see tenant B's documents; sortBy 'createdAt' returns newest first; sortBy 'title' returns alphabetical; max 50 returned",
         "getDocument: valid doc returns document; wrong tenant returns null; doc with storageId includes signedUrl; non-existent returns null",
@@ -843,7 +843,7 @@
       "id": 53,
       "category": "test-backend",
       "description": "Unit/integration tests for exportToGoogleDocs, importFromDocx, provisionStarterAgent, and completeOnboarding",
-      "specRef": "specs/ui-document-store.md",
+      "specRef": "docs/specs/ui-document-store.md",
       "steps": [
         "exportToGoogleDocs: valid doc + credential calls createGoogleDoc and updates googleDocUrl; missing credential throws CREDENTIAL_MISSING",
         "importFromDocx: valid .docx storageId creates document with source 'user' and markdown content; returns new documentId",
@@ -858,7 +858,7 @@
       "id": 54,
       "category": "test-backend",
       "description": "Unit/integration tests for invitations.ts and invitation server actions: CRUD, validation, multi-tenancy, and Clerk API integration",
-      "specRef": "specs/ui-consultant-user-management.md",
+      "specRef": "docs/specs/ui-consultant-user-management.md",
       "steps": [
         "createInvitation inserts and returns Id; updateInvitationStatus updates matching record; non-existent clerkInvitationId does not throw",
         "listInvitations returns only invitations for specified tenantId ordered by sentAt DESC; different consultant gets auth error",
@@ -874,7 +874,7 @@
       "id": 55,
       "category": "test-backend",
       "description": "Backend tests for Clerk webhook handler: signature verification, event handling, idempotency",
-      "specRef": "specs/ui-consultant-user-management.md",
+      "specRef": "docs/specs/ui-consultant-user-management.md",
       "steps": [
         "Request without valid svix headers returns HTTP 400",
         "organizationMembership.created creates user with correct tenantId, consultantId, role; duplicate clerkUserId does not create second record",
@@ -889,7 +889,7 @@
       "id": 56,
       "category": "test-e2e",
       "description": "E2E tests for design system foundation: font loading, CSS variables, and component rendering on /design-system page",
-      "specRef": "specs/ui-design-system-foundation.md",
+      "specRef": "docs/specs/ui-design-system-foundation.md",
       "userStory": "As a developer, when I run E2E tests, design system foundation tests confirm fonts load, CSS variables resolve, and shadcn components render with Plinth styles.",
       "steps": [
         "Test file at tests/e2e/design-system.spec.ts",
@@ -906,7 +906,7 @@
       "id": 57,
       "category": "test-e2e",
       "description": "E2E tests for auth flows: unauthenticated redirects, role-based redirects after sign-in, cross-role guard, and sign-out",
-      "specRef": "specs/ui-auth-and-routing.md",
+      "specRef": "docs/specs/ui-auth-and-routing.md",
       "userStory": "As any user, auth redirects work correctly: unauthenticated to /sign-in, consultants to /dashboard, clients to /app, cross-role blocked.",
       "steps": [
         "Test: navigate to / without session — URL contains /sign-in; /dashboard without session — /sign-in; /app without session — /sign-in",
@@ -923,7 +923,7 @@
       "id": 58,
       "category": "test-e2e",
       "description": "E2E tests for chat interface: send message, streaming response, conversation history, sidebar navigation, error cases",
-      "specRef": "specs/ui-client-chat-interface.md",
+      "specRef": "docs/specs/ui-client-chat-interface.md",
       "userStory": "As a client, when I type a message and press Enter, it sends and the agent streams a response; I can resume past conversations from the sidebar.",
       "steps": [
         "Test: /app as client shows EmptyState with suggested prompts",
@@ -941,7 +941,7 @@
       "id": 59,
       "category": "test-e2e",
       "description": "E2E tests for onboarding wizard: happy path (3 steps + redirect), skip flow, back navigation",
-      "specRef": "specs/ui-client-onboarding.md",
+      "specRef": "docs/specs/ui-client-onboarding.md",
       "userStory": "As a new client, I complete onboarding or skip it, and I'm taken to the chat interface.",
       "steps": [
         "Test: new client navigating to /app redirected to /app/onboarding; step counter shows 'Step 1 of 3'",
@@ -958,7 +958,7 @@
       "id": 60,
       "category": "test-e2e",
       "description": "E2E test for Connections page rename: redirect from old URL, updated copy",
-      "specRef": "specs/ui-client-onboarding.md",
+      "specRef": "docs/specs/ui-client-onboarding.md",
       "userStory": "As a client, the old /app/integrations URL redirects to /app/connections with updated copy.",
       "steps": [
         "Test: /app/integrations as authenticated client results in final URL /app/connections",
@@ -973,7 +973,7 @@
       "id": 61,
       "category": "test-e2e",
       "description": "E2E tests for document store: create, edit, auto-save, sort, empty state, unsaved changes guard",
-      "specRef": "specs/ui-document-store.md",
+      "specRef": "docs/specs/ui-document-store.md",
       "userStory": "As a client, I can create, edit, and sort documents, with auto-save and unsaved changes protection.",
       "steps": [
         "Test: /app/documents shows heading, 'New document' button; click creates doc and navigates to editor with breadcrumb 'Documents / Untitled document'",
@@ -990,7 +990,7 @@
       "id": 62,
       "category": "test-e2e",
       "description": "E2E tests for consultant sidebar navigation and clients table interactions",
-      "specRef": "specs/ui-consultant-redesign.md",
+      "specRef": "docs/specs/ui-consultant-redesign.md",
       "userStory": "As a consultant, sidebar navigation and clients table sorting/filtering/pagination all work correctly.",
       "steps": [
         "Test: /dashboard renders sidebar with 5 nav items; clicking 'Clients' navigates to /clients with aria-current='page'",
@@ -1007,7 +1007,7 @@
       "id": 63,
       "category": "test-e2e",
       "description": "E2E tests for consultant settings and report detail page",
-      "specRef": "specs/ui-consultant-redesign.md",
+      "specRef": "docs/specs/ui-consultant-redesign.md",
       "userStory": "As a consultant, settings form validation works and report detail editing/actions are reflected in the UI.",
       "steps": [
         "Test: /settings Profile tab — empty Display name shows Zod error; valid data + Save shows success toast",
@@ -1024,7 +1024,7 @@
       "id": 64,
       "category": "test-e2e",
       "description": "E2E tests for user management: invite user, revoke invitation, and no-org error state",
-      "specRef": "specs/ui-consultant-user-management.md",
+      "specRef": "docs/specs/ui-consultant-user-management.md",
       "userStory": "As a consultant, I can invite users, revoke invitations, and see an error when my org is not configured.",
       "steps": [
         "Test: on Users tab, click 'Invite user' — Dialog opens; fill valid email, submit — toast 'Invitation sent to {email}'; email appears in Pending table",
@@ -1040,7 +1040,7 @@
       "id": 65,
       "category": "test-e2e",
       "description": "E2E tests for shared polish: 404 page, skip-to-content accessibility, toast notifications, and responsive no-scroll check",
-      "specRef": "specs/ui-shared-polish.md",
+      "specRef": "docs/specs/ui-shared-polish.md",
       "userStory": "As a user, the 404 page works, skip-to-content is keyboard accessible, toasts appear, and no page has horizontal scroll on mobile.",
       "steps": [
         "Test: /this-page-does-not-exist renders '404' and 'Page not found'; 'Go home' navigates to /",

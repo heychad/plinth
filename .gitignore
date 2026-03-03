@@ -6,5 +6,5 @@ convex/_generated/
 .env.local
 .env.production
 .DS_Store
-test-results/
+tests/results/
 __pycache__/
