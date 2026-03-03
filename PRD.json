@@ -348,8 +348,8 @@
         "syncTemplateFromGit returns status: created | updated | unchanged",
         "Malformed JSON in git causes sync to skip and log error without corrupting existing template"
       ],
-      "passes": false,
-      "notes": "NW-4: Route registered in convex/http.ts added as an explicit step."
+      "passes": true,
+      "notes": "NW-4: Route registered in convex/http.ts added as an explicit step. CYCLE-6: GitHub webhook validates HMAC-SHA256 via Web Crypto API. Parses push events for templates/**/*.json. syncTemplateFromGit fetches from GitHub Contents API, upserts by slug, increments version. Uses Buffer.from for base64 decode."
     },
     {
       "id": 21,
@@ -397,8 +397,8 @@
         "Deliver step does not send notification if not flagged; report saved to DB for admin to view at convenience",
         "Deliver step returns { notificationSent: boolean, notificationChannel: 'email' | null }"
       ],
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "CYCLE-6: formatStep.ts creates Google Doc via existing createGoogleDoc + formatCoachingReport helpers. deliverStep.ts updates report, sends flagged-call email via Resend (non-fatal on failure). docUrl stored in rawAnalysisJson (no dedicated schema field). Steps are standalone internalActions."
     },
     {
       "id": 24,
@@ -520,8 +520,8 @@
         "'Send to Coach' button triggers confirmation modal; on confirm calls sendReportToCoach mutation; report transitions to 'sent' status",
         "Narrative textarea saves on blur via updateReportNarrative mutation; sets status to 'reviewed'"
       ],
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "CYCLE-6: listCoachingReportsForConsultant query added to coachingCallReports.ts with cross-tenant aggregation, all filters, flagged+draft-first sort. Reports list page with 4 filters and 8-column table. Detail page with 60/40 two-panel layout, dimension progress bars, editable narrative (blur-save), Send to Coach modal (50-char min), transcript viewer. View-only mode for sent reports."
     },
     {
       "id": 31,
@@ -538,8 +538,8 @@
         "Invalid hex color input shows inline validation error before save attempt",
         "Notifications tab shows score threshold slider/input per coaching program deployment; save updates agentConfig.config.notificationThreshold"
       ],
-      "passes": false,
-      "notes": "NW-1: /settings/notifications is NOT a separate route \u2014 it is a tab within the /settings page. Builders must not create a separate page at /settings/notifications."
+      "passes": true,
+      "notes": "NW-1: /settings/notifications is NOT a separate route \u2014 it is a tab within the /settings page. CYCLE-6: 3-tab settings page. Profile tab with displayName edit (added updateConsultant mutation). Theme tab: 5 color pickers with hex validation, font dropdown, logo drag-drop upload (2MB max), live preview panel. Notifications tab: per-program threshold input. Consultant nav bar added to layout."
     },
     {
       "id": 32,

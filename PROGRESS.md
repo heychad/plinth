@@ -370,3 +370,49 @@ Sprint log -- append only, never overwrite.
 - Scout maps file ownership, lead cross-references git status before commit
 - Code review by Playwright QA sufficient when no Playwright config exists
 - DOM type globals added proactively (HTMLElement, HTMLTableRowElement, HTMLInputElement, etc.)
+
+## Cycle 6 Complete — 2026-03-03
+
+**Items completed:** 20, 23, 30, 31
+
+**What was built:**
+- Item 20: GitHub template sync webhook — HTTP endpoint validates HMAC-SHA256 (Web Crypto), parses push payload, filters templates/**/*.json, schedules syncTemplateFromGit per slug. Action fetches 3 files from GitHub API, upserts agentTemplate by slug, increments version.
+- Item 23: Pipeline Format + Deliver steps — Format reads analysis results, builds scorecard report, creates Google Doc via createGoogleDoc. Deliver updates coachingCallReport, sends flagged-call email via Resend (non-fatal on failure). Steps are standalone internalActions.
+- Item 30: Consultant reports pages — listCoachingReportsForConsultant query with cross-tenant aggregation, all filters, flagged+draft-first sort. /reports list with 4 filters and 8-column table. /reports/{reportId} two-panel detail (60/40): scorecard with dimension progress bars, editable narrative (blur-save, 50-char min for Send), Send to Coach modal, transcript viewer. View-only mode for sent reports.
+- Item 31: Consultant settings — 3-tab page (Profile/Theme/Notifications). Profile: displayName edit + updateConsultant mutation. Theme: 5 hex-validated color pickers, font dropdown, logo drag-drop upload (2MB max), live preview panel. Notifications: per-program threshold. Consultant nav bar added to layout.
+
+**What was learned:**
+- `atob` is browser-only — Convex actions must use `Buffer.from(str, 'base64').toString()` for base64 decode
+- ESLint needs File/FileReader/FileList in browser globals for drag-drop upload code
+- eslint-disable comments for unconfigured plugins (react-hooks, @next/next) cause "Definition for rule not found" errors — remove them if plugins aren't installed
+- TypeScript strict mode requires explicit types on .map() callback params when query return type is opaque
+- builder-31 needed updateConsultant mutation that didn't exist — lead added it to convex/consultants.ts
+
+**Files changed:**
+- builder-20: convex/webhooks/github.ts (new), convex/http.ts (route added)
+- builder-23: convex/execution/formatStep.ts (new), convex/execution/deliverStep.ts (new)
+- builder-30: convex/coachingCallReports.ts (query added), src/app/(consultant)/reports/page.tsx (new), src/app/(consultant)/reports/[reportId]/page.tsx (new)
+- builder-31: src/app/(consultant)/settings/page.tsx (new), src/app/(consultant)/layout.tsx (nav bar)
+- Lead fixes: convex/consultants.ts (updateConsultant mutation), eslint.config.mjs (File globals), QA error fixes
+
+**PRD status:** 38/40 items passing
+
+**Next priority items:**
+- Item 40 (Template propagation: syncAgentConfigWithTemplate + "Update Available" UI) — specs/agent-config-system.md, depends on Item 20 (now done)
+- Item 39 (E2E QA verification scenario) — specs/coaching-call-analyzer.md, QA-only item, depends on Items 23+30 (now done)
+
+**Active Signs:**
+- SIGN-1: Convex codegen — use `(internal as any).module.fn`
+- SIGN-7: Builders NEVER run git — lead is sole operator
+- SIGN-11: httpAction uses Web Crypto API only (atob also blocked — use Buffer.from)
+- SIGN-13: ESLint browser/node globals split — now includes File/FileReader/FileList
+- SIGN-14: Convex ES target rejects Error cause syntax
+- SIGN-15: ConvexClientProvider Clerk fallback
+- SIGN-16 (NEW): eslint-disable comments for unconfigured plugins cause errors — don't reference react-hooks or @next/next rules
+- SIGN-17 (NEW): Convex action base64 decode must use Buffer.from, not atob
+
+**Decisions in effect:**
+- docUrl stored in rawAnalysisJson (no dedicated schema field) — acceptable for now
+- Coach filter uses coachId string input, not name dropdown — matches spec
+- updateConsultant mutation added by lead (not in original scope)
+- Consultant nav bar added to layout by builder-31 (was in scout scope)
