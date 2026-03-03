@@ -76,6 +76,16 @@ export default [
         // Node.js globals (for middleware and env vars)
         process: "readonly",
         console: "readonly",
+        // DOM element types (used in TypeScript type casts)
+        HTMLElement: "readonly",
+        HTMLTableRowElement: "readonly",
+        HTMLInputElement: "readonly",
+        HTMLSelectElement: "readonly",
+        HTMLTextAreaElement: "readonly",
+        HTMLButtonElement: "readonly",
+        HTMLDivElement: "readonly",
+        HTMLFormElement: "readonly",
+        HTMLAnchorElement: "readonly",
         // React JSX
         React: "readonly",
         JSX: "readonly",
