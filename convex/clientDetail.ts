@@ -61,6 +61,7 @@ export const getClientDetail = query({
           ...config,
           templateDisplayName: template?.displayName ?? "Unknown Template",
           templateCategory: template?.category ?? null,
+          templateVersion: template?.version ?? null,
           integrationSlots: template?.integrationSlots ?? [],
           lastRunAt,
           runCountThisMonth,

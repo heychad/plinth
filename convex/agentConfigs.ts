@@ -404,6 +404,110 @@ export const getAgentConfigForClient = query({
   },
 });
 
+export const syncAgentConfigWithTemplate = mutation({
+  args: {
+    agentConfigId: v.id("agentConfigs"),
+  },
+  handler: async (ctx, args) => {
+    const auth = await requireAuth(ctx);
+
+    // Auth: must be consultant
+    if (auth.role !== "consultant") {
+      throw new Error("Only consultants can sync agent configs with templates");
+    }
+
+    const agentConfig = await ctx.db.get(args.agentConfigId);
+    if (!agentConfig) {
+      throw new Error("Agent config not found");
+    }
+
+    // Verify consultant owns the tenant that owns this agentConfig
+    const tenant = await ctx.db.get(agentConfig.tenantId);
+    if (!tenant || tenant.consultantId !== auth.consultantId) {
+      throw new Error("Not authorized");
+    }
+
+    const template = await ctx.db.get(agentConfig.templateId);
+    if (!template) {
+      throw new Error("Agent template not found");
+    }
+
+    // Version check
+    if (agentConfig.version >= template.version) {
+      throw new Error("Already at latest version");
+    }
+
+    // Build the merged config:
+    // - Locked fields: overwrite with template defaultConfig values
+    // - Customizable fields: preserve current values from agentConfig.config
+    // - New fields in template defaultConfig (not in either list): include from template
+    const templateDefault =
+      template.defaultConfig &&
+      typeof template.defaultConfig === "object" &&
+      !Array.isArray(template.defaultConfig)
+        ? (template.defaultConfig as Record<string, unknown>)
+        : {};
+    const currentConfig =
+      agentConfig.config &&
+      typeof agentConfig.config === "object" &&
+      !Array.isArray(agentConfig.config)
+        ? (agentConfig.config as Record<string, unknown>)
+        : {};
+
+    const lockedSet = new Set(agentConfig.lockedFields);
+    const customizableSet = new Set(agentConfig.customizableFields);
+
+    // Start with all template default fields (new fields get template values)
+    const mergedConfig: Record<string, unknown> = { ...templateDefault };
+
+    // For locked fields: always overwrite with template default (already done above)
+    // For customizable fields: preserve current values
+    for (const field of Object.keys(mergedConfig)) {
+      if (customizableSet.has(field) && !lockedSet.has(field)) {
+        // Preserve current customizable value if it exists
+        if (field in currentConfig) {
+          mergedConfig[field] = currentConfig[field];
+        }
+        // If not in current config, keep the template default (already set)
+      }
+      // Locked fields keep template default value (already set from templateDefault spread)
+    }
+
+    // Count for summary
+    const lockedFieldsUpdated = agentConfig.lockedFields.filter(
+      (f) => f in templateDefault
+    ).length;
+    const customizableFieldsPreserved = agentConfig.customizableFields.filter(
+      (f) => f in currentConfig
+    ).length;
+
+    const changeSummary = `Synced to template v${template.version}: ${lockedFieldsUpdated} locked field${lockedFieldsUpdated !== 1 ? "s" : ""} updated, ${customizableFieldsPreserved} customizable field${customizableFieldsPreserved !== 1 ? "s" : ""} preserved`;
+
+    const previousConfig = agentConfig.config;
+    const now = Date.now();
+
+    // Patch the agentConfig
+    await ctx.db.patch(args.agentConfigId, {
+      config: mergedConfig,
+      version: template.version,
+      updatedByType: "template_sync",
+      updatedAt: now,
+    });
+
+    // Write audit trail
+    await ctx.db.insert("agentConfigHistory", {
+      agentConfigId: args.agentConfigId,
+      tenantId: agentConfig.tenantId,
+      changedByUserId: undefined,
+      changedByType: "template_sync",
+      previousConfig,
+      newConfig: mergedConfig,
+      changeSummary,
+      createdAt: now,
+    });
+  },
+});
+
 // Internal query used by the execution engine to fetch the raw agentConfig + templateSlug
 export const getConfigById = internalQuery({
   args: {
