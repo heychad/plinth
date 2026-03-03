@@ -1,11 +1,9 @@
 "use node";
 
-import { internalAction, internalMutation, internalQuery } from "../_generated/server";
+import { internalAction } from "../_generated/server";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { createDecipheriv, createCipheriv, randomBytes } from "crypto";
-import { workflowManager } from "../execution/agentWorkflow";
-import { simpleWorkflowManager } from "../execution/simpleWorkflow";
 
 // ─── Encryption Helpers ───────────────────────────────────────────────────────
 // Must match the format used by zoomCredentials.ts (builder-38):
@@ -170,147 +168,6 @@ export function computeCoachTalkPercent(
   return null;
 }
 
-// ─── Internal Queries ────────────────────────────────────────────────────────
-
-export const getProcessedEventByMeeting = internalQuery({
-  args: {
-    zoomMeetingId: v.string(),
-    tenantId: v.id("tenants"),
-  },
-  handler: async (ctx, args) => {
-    const events = await ctx.db
-      .query("zoomWebhookEvents")
-      .withIndex("by_zoomMeetingId", (q) =>
-        q.eq("zoomMeetingId", args.zoomMeetingId)
-      )
-      .collect();
-
-    return (
-      events.find(
-        (e) => e.tenantId === args.tenantId && e.processed === true
-      ) ?? null
-    );
-  },
-});
-
-export const getDeployedAnalyzerConfigs = internalQuery({
-  args: {
-    tenantId: v.id("tenants"),
-  },
-  handler: async (ctx, args) => {
-    // Get all deployed agent configs for this tenant
-    const configs = await ctx.db
-      .query("agentConfigs")
-      .withIndex("by_tenantId", (q) => q.eq("tenantId", args.tenantId))
-      .filter((q) => q.eq(q.field("status"), "deployed"))
-      .collect();
-
-    // Filter to coaching-call-analyzer template slug
-    const results = [];
-    for (const config of configs) {
-      const template = await ctx.db.get(config.templateId);
-      if (template && template.slug === "coaching-call-analyzer") {
-        results.push({ config, template });
-      }
-    }
-    return results;
-  },
-});
-
-// ─── Internal Mutations ───────────────────────────────────────────────────────
-
-export const markEventProcessed = internalMutation({
-  args: {
-    webhookEventId: v.id("zoomWebhookEvents"),
-    agentRunId: v.optional(v.id("agentRuns")),
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.patch(args.webhookEventId, {
-      processed: true,
-      processedAt: Date.now(),
-      agentRunId: args.agentRunId,
-    });
-  },
-});
-
-export const markEventError = internalMutation({
-  args: {
-    webhookEventId: v.id("zoomWebhookEvents"),
-    error: v.string(),
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.patch(args.webhookEventId, {
-      error: args.error,
-    });
-  },
-});
-
-/**
- * Internal mutation: create an agentRun record and start the appropriate workflow.
- * This is the internal (no-auth) counterpart to the public triggerAgentRun mutation,
- * used when a webhook (not a user) triggers an agent run.
- */
-export const createWebhookAgentRun = internalMutation({
-  args: {
-    agentConfigId: v.id("agentConfigs"),
-    tenantId: v.id("tenants"),
-    input: v.any(),
-  },
-  handler: async (ctx, args) => {
-    const config = await ctx.db.get(args.agentConfigId);
-    if (!config) {
-      throw new Error("Agent config not found");
-    }
-    if (config.status !== "deployed") {
-      throw new Error("Agent config is not deployed");
-    }
-
-    const template = await ctx.db.get(config.templateId);
-    if (!template) {
-      throw new Error("Agent template not found");
-    }
-
-    const now = Date.now();
-    const runId = await ctx.db.insert("agentRuns", {
-      agentConfigId: args.agentConfigId,
-      tenantId: args.tenantId,
-      status: "queued",
-      triggerType: "webhook",
-      triggeredBy: undefined,
-      input: args.input,
-      workflowId: undefined,
-      totalTokensIn: 0,
-      totalTokensOut: 0,
-      totalCostUsd: 0,
-      queuedAt: now,
-      createdAt: now,
-      updatedAt: now,
-    });
-
-    // Start the appropriate workflow and store its ID on the run record
-    let workflowId: string;
-    if (template.executionMode === "simple") {
-      workflowId = await simpleWorkflowManager.start(
-        ctx,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (internal as any).execution.simpleWorkflow.simpleWorkflow,
-        { runId }
-      );
-    } else {
-      workflowId = await workflowManager.start(
-        ctx,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (internal as any).execution.agentWorkflow.agentWorkflow,
-        { runId }
-      );
-    }
-
-    await ctx.db.patch(runId, { workflowId });
-
-    return runId;
-  },
-});
-
 // ─── getOrRefreshZoomToken ────────────────────────────────────────────────────
 
 /**
@@ -326,7 +183,7 @@ export const getOrRefreshZoomToken = internalAction({
     // Use builder-38's query since it already owns zoomCredentials
     const cred = await ctx.runQuery(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (internal as any).zoomCredentials.getZoomCredentialsByTenantId,
+      (internal as any).zoomCredentialsDb.getZoomCredentialsByTenantId,
       { tenantId: args.tenantId }
     );
 
@@ -383,7 +240,7 @@ export const getOrRefreshZoomToken = internalAction({
 
     await ctx.runMutation(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (internal as any).zoomCredentials.updateZoomToken,
+      (internal as any).zoomCredentialsDb.updateZoomToken,
       {
         tenantId: args.tenantId,
         accessToken: encryptedToken,
@@ -419,7 +276,7 @@ export const processZoomTranscript = internalAction({
     // 1. Dedup check (SIGN-8): if already processed for this tenantId + zoomMeetingId, skip
     const alreadyProcessed = await ctx.runQuery(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (internal as any).integrations.zoom.getProcessedEventByMeeting,
+      (internal as any).integrations.zoomHelpers.getProcessedEventByMeeting,
       { zoomMeetingId, tenantId }
     );
 
@@ -446,7 +303,7 @@ export const processZoomTranscript = internalAction({
       // No transcript file — mark as processed (no-op) and exit
       await ctx.runMutation(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (internal as any).integrations.zoom.markEventProcessed,
+        (internal as any).integrations.zoomHelpers.markEventProcessed,
         { webhookEventId: eventId }
       );
       console.log(`[zoom] No TRANSCRIPT file for meeting ${zoomMeetingId} — skipping`);
@@ -468,7 +325,7 @@ export const processZoomTranscript = internalAction({
       const msg = err instanceof Error ? err.message : String(err);
       await ctx.runMutation(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (internal as any).integrations.zoom.markEventError,
+        (internal as any).integrations.zoomHelpers.markEventError,
         { webhookEventId: eventId, error: `Token error: ${msg}` }
       );
       throw err;
@@ -516,7 +373,7 @@ export const processZoomTranscript = internalAction({
       const errorMsg = `VTT download failed after 3 attempts: ${lastDownloadError}`;
       await ctx.runMutation(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (internal as any).integrations.zoom.markEventError,
+        (internal as any).integrations.zoomHelpers.markEventError,
         { webhookEventId: eventId, error: errorMsg }
       );
       throw new Error(errorMsg);
@@ -533,7 +390,7 @@ export const processZoomTranscript = internalAction({
     // 6. Find deployed coaching-call-analyzer configs for this tenant
     const deployedEntries = await ctx.runQuery(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (internal as any).integrations.zoom.getDeployedAnalyzerConfigs,
+      (internal as any).integrations.zoomHelpers.getDeployedAnalyzerConfigs,
       { tenantId }
     );
 
@@ -543,7 +400,7 @@ export const processZoomTranscript = internalAction({
     for (const { config } of deployedEntries) {
       const runId = await ctx.runMutation(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (internal as any).integrations.zoom.createWebhookAgentRun,
+        (internal as any).integrations.zoomHelpers.createWebhookAgentRun,
         {
           agentConfigId: config._id,
           tenantId,
@@ -562,7 +419,7 @@ export const processZoomTranscript = internalAction({
     // 8. Mark the webhook event as processed
     await ctx.runMutation(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (internal as any).integrations.zoom.markEventProcessed,
+      (internal as any).integrations.zoomHelpers.markEventProcessed,
       {
         webhookEventId: eventId,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

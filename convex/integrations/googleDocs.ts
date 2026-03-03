@@ -1,11 +1,7 @@
 "use node";
 
 import { v } from "convex/values";
-import {
-  internalAction,
-  internalQuery,
-  internalMutation,
-} from "../_generated/server";
+import { internalAction } from "../_generated/server";
 import { Composio } from "composio-core";
 import { internal } from "../_generated/api";
 
@@ -29,35 +25,6 @@ export class ComposioToolError extends Error {
     this.name = "ComposioToolError";
   }
 }
-
-// ─── Internal query: resolve credentials for a tenant + slotName ──────────────
-
-export const getCredentialBySlot = internalQuery({
-  args: {
-    tenantId: v.id("tenants"),
-    slotName: v.string(),
-  },
-  handler: async (ctx, { tenantId, slotName }) => {
-    return await ctx.db
-      .query("credentials")
-      .withIndex("by_tenantId_slotName", (q) =>
-        q.eq("tenantId", tenantId).eq("slotName", slotName)
-      )
-      .unique();
-  },
-});
-
-// ─── Internal mutation: touch lastUsedAt on credential ───────────────────────
-
-export const touchCredentialLastUsed = internalMutation({
-  args: { credentialId: v.id("credentials") },
-  handler: async (ctx, { credentialId }) => {
-    await ctx.db.patch(credentialId, {
-      lastUsedAt: Date.now(),
-      updatedAt: Date.now(),
-    });
-  },
-});
 
 // ─── Helper: format a coaching call report as a document string ───────────────
 
@@ -199,7 +166,7 @@ export const createGoogleDoc = internalAction({
   ): Promise<{ docId: string; docUrl: string }> => {
     // 1. Resolve credentials for slotName "google_docs"
     const credential = await ctx.runQuery(
-      (internal as any).integrations.googleDocs.getCredentialBySlot,
+      (internal as any).integrations.googleDocsHelpers.getCredentialBySlot,
       { tenantId, slotName: "google_docs" }
     );
 
@@ -266,7 +233,7 @@ export const createGoogleDoc = internalAction({
 
     // 6. Update credential.lastUsedAt
     await ctx.runMutation(
-      (internal as any).integrations.googleDocs.touchCredentialLastUsed,
+      (internal as any).integrations.googleDocsHelpers.touchCredentialLastUsed,
       { credentialId: credential._id }
     );
 

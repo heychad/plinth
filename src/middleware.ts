@@ -1,5 +1,7 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+
+const isTestMode = process.env.NEXT_PUBLIC_TEST_MODE === "true";
 
 const isPublicRoute = createRouteMatcher([
   "/",
@@ -19,7 +21,11 @@ const isConsultantOnlyRoute = createRouteMatcher([
   "/settings(.*)",
 ]);
 
-export default clerkMiddleware(async (auth, req) => {
+function testModeMiddleware(_req: NextRequest) {
+  return NextResponse.next();
+}
+
+export default isTestMode ? testModeMiddleware : clerkMiddleware(async (auth, req) => {
   if (isPublicRoute(req)) {
     return NextResponse.next();
   }

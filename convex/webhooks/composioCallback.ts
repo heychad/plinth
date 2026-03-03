@@ -1,7 +1,4 @@
-"use node";
-
-import { httpAction, internalMutation } from "../_generated/server";
-import { v } from "convex/values";
+import { httpAction } from "../_generated/server";
 import { internal } from "../_generated/api";
 import { Id } from "../_generated/dataModel";
 
@@ -42,7 +39,7 @@ export const composioCallback = httpAction(async (ctx, request) => {
       const tenantId = entityId.replace("plinth_tenant_", "") as Id<"tenants">;
       try {
         await ctx.runMutation(
-          (internal as any).webhooks.composioCallback.setCredentialStatus,
+          (internal as any).webhooks.composioCallbackHelpers.setCredentialStatus,
           {
             tenantId,
             slotName,
@@ -93,7 +90,7 @@ export const composioCallback = httpAction(async (ctx, request) => {
 
   try {
     await ctx.runMutation(
-      (internal as any).webhooks.composioCallback.setCredentialStatus,
+      (internal as any).webhooks.composioCallbackHelpers.setCredentialStatus,
       {
         tenantId,
         slotName,
@@ -122,59 +119,4 @@ export const composioCallback = httpAction(async (ctx, request) => {
     status: 302,
     headers: { Location: redirect.toString() },
   });
-});
-
-/**
- * Internal mutation: create or update a credential record from an OAuth callback.
- * Used exclusively by composioCallback httpAction.
- */
-export const setCredentialStatus = internalMutation({
-  args: {
-    tenantId: v.id("tenants"),
-    slotName: v.string(),
-    provider: v.string(),
-    composioEntityId: v.optional(v.string()),
-    status: v.union(
-      v.literal("pending"),
-      v.literal("active"),
-      v.literal("expired"),
-      v.literal("revoked"),
-      v.literal("error")
-    ),
-    connectedAt: v.optional(v.number()),
-    errorMessage: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    const now = Date.now();
-
-    const existing = await ctx.db
-      .query("credentials")
-      .withIndex("by_tenantId_slotName", (q) =>
-        q.eq("tenantId", args.tenantId).eq("slotName", args.slotName)
-      )
-      .unique();
-
-    if (existing) {
-      await ctx.db.patch(existing._id, {
-        provider: args.provider,
-        composioEntityId: args.composioEntityId ?? existing.composioEntityId,
-        status: args.status,
-        connectedAt: args.connectedAt ?? existing.connectedAt,
-        errorMessage: args.errorMessage,
-        updatedAt: now,
-      });
-    } else {
-      await ctx.db.insert("credentials", {
-        tenantId: args.tenantId,
-        slotName: args.slotName,
-        provider: args.provider,
-        composioEntityId: args.composioEntityId,
-        status: args.status,
-        connectedAt: args.connectedAt,
-        errorMessage: args.errorMessage,
-        createdAt: now,
-        updatedAt: now,
-      });
-    }
-  },
 });

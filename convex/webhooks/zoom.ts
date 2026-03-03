@@ -57,7 +57,7 @@ export const zoomWebhook = httpAction(async (ctx, request) => {
     }
 
     // Get the webhook secret from DB (first available credential record)
-    const secretToken = await ctx.runQuery(
+    const secretToken = await ctx.runAction(
       (internal as any).zoomCredentials.getChallengeSecret,
       {}
     );
@@ -87,7 +87,7 @@ export const zoomWebhook = httpAction(async (ctx, request) => {
   }
 
   // Look up the decrypted zoomCredentials for this accountId
-  const zoomCred = await ctx.runQuery(
+  const zoomCred = await ctx.runAction(
     (internal as any).zoomCredentials.getDecryptedCredByAccountId,
     { accountId: zoomAccountId }
   );

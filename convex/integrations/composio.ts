@@ -1,6 +1,6 @@
 "use node";
 
-import { action, internalQuery } from "../_generated/server";
+import { action } from "../_generated/server";
 import { v } from "convex/values";
 import { internal } from "../_generated/api";
 import { Composio } from "composio-core";
@@ -26,7 +26,7 @@ export const initiateComposioOAuth = action({
     }
 
     const authInfo = await ctx.runQuery(
-      (internal as any).integrations.composio.getAuthInfoForAction,
+      (internal as any).integrations.composioHelpers.getAuthInfoForAction,
       { clerkUserId: identity.subject, tenantId: args.tenantId }
     );
 
@@ -68,36 +68,3 @@ export const initiateComposioOAuth = action({
   },
 });
 
-/**
- * Internal query to resolve auth context for the initiateComposioOAuth action.
- * Checks whether the caller (identified by clerkUserId) has access to the given tenant.
- */
-export const getAuthInfoForAction = internalQuery({
-  args: {
-    clerkUserId: v.string(),
-    tenantId: v.id("tenants"),
-  },
-  handler: async (ctx, args): Promise<{ authorized: boolean }> => {
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_clerkUserId", (q) => q.eq("clerkUserId", args.clerkUserId))
-      .unique();
-
-    if (!user) {
-      return { authorized: false };
-    }
-
-    if (user.role === "client") {
-      return { authorized: user.tenantId === args.tenantId };
-    }
-
-    if (user.role === "consultant") {
-      const tenant = await ctx.db.get(args.tenantId);
-      if (!tenant) return { authorized: false };
-      return { authorized: tenant.consultantId === user.consultantId };
-    }
-
-    // platform_admin
-    return { authorized: true };
-  },
-});

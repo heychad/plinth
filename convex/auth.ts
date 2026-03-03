@@ -14,6 +14,23 @@ export async function requireAuth(
 ): Promise<AuthResult> {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) {
+    // TEST_MODE bypass: look up test user when no auth identity is present
+    if (process.env.TEST_MODE === "true") {
+      const testUser = await ctx.db
+        .query("users")
+        .withIndex("by_clerkUserId", (q) =>
+          q.eq("clerkUserId", "test_consultant_001")
+        )
+        .unique();
+      if (testUser) {
+        return {
+          clerkUserId: testUser.clerkUserId,
+          role: testUser.role,
+          tenantId: testUser.tenantId,
+          consultantId: testUser.consultantId,
+        };
+      }
+    }
     throw new Error("Not authenticated");
   }
 
