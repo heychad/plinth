@@ -4,6 +4,12 @@ Sprint log -- append only, never overwrite.
 
 ---
 
+## 2026-03-03 — Cycle: Item 9 (Auth Layout)
+
+- **Item 9** (foundation): Created `src/app/(auth)/layout.tsx` — centered full-screen container with `min-h-screen items-center justify-center bg-background`. Backpressure green.
+
+---
+
 ## 2026-03-02 — Sprint Review + PRD Fix Cycle
 
 **Sprint planner applied reviewer findings to PRD.json. 33 items → 39 items after fixes.**

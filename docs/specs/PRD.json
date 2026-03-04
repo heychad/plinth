@@ -137,7 +137,7 @@
         "Layout accepts and renders {children}",
         "npx tsc --noEmit passes"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "Depends on design-system-foundation for CSS variables."
     },
     {
