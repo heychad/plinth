@@ -614,7 +614,7 @@
         "When no agent configs exist, tab shows empty state: 'Deploy your first agent' button",
         "When no runs exist, tab shows empty state message"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "Depends on client detail page shell (Item 37). Split from original combined tab content item."
     },
     {

@@ -4,6 +4,12 @@ Sprint log -- append only, never overwrite.
 
 ---
 
+## 2026-03-04 — Cycle: Item 38 (Client Detail Tab Content: Agent Configs + Run History)
+
+- **Item 38** (ui): Built AgentConfigsTab and RunHistoryTab as co-located components under `[tenantId]/_components/`. AgentConfigsTab: TanStack Table with 6 columns (Name, Status, Template, Deployed, Version, Actions), sortable headers, shadcn Badge status indicators, dropdown menu actions (Configure/Pause/Resume), sync-to-latest button for outdated versions, deploy dialog with template list using shadcn Dialog, empty state with "Deploy your first agent" CTA. RunHistoryTab: TanStack Table with 7 columns (Agent, Status, Triggered, Duration, Cost, Started, Actions), sortable headers, agent dropdown filter using shadcn Select, clickable rows navigate to run detail, empty state message. Updated ClientDetailTabs to import new co-located components instead of old inline-style ones from `src/components/`. All tables have TableCaption, th scope="col", Badge role="status" with aria-label, 44px min touch targets. Backpressure green.
+
+---
+
 ## 2026-03-03 — Cycle: Item 40 (Agent Templates Library Page)
 
 - **Item 40** (ui): Rebuilt agent templates library page at `src/app/(consultant)/agents/page.tsx` with shadcn/ui components. Replaced inline styles with Tailwind classes. Page heading "Agent Library" with shadcn Tabs for category filtering (All, Marketing, Sales, Operations, Coaching). Responsive card grid: 3 columns desktop (lg), 2 tablet (md), 1 mobile. Created `_components/TemplateCard.tsx` using shadcn Card with CardHeader/CardContent/CardFooter, category Badge (color-coded per category), 2-line truncated description via `line-clamp-2`, Active/Pipeline status badges, and "Deploy to client" Button. Created `_components/DeployToClientDialog.tsx` using shadcn Dialog with client Select dropdown and optional display name Input. Deploy calls `deployAgentConfig` mutation (not createAgentConfig). Success toast via sonner: "Agent deployed to {clientName}". Error handling for duplicate deployments. Skeleton loading state with 6 skeleton cards matching card layout. Empty state with dashed border and category-aware message. All interactive elements have 44px minimum touch targets. Backpressure green.

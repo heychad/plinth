@@ -4,11 +4,9 @@ import { useState } from "react";
 import { Id } from "../../../../../../convex/_generated/dataModel";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AgentsTab } from "@/components/AgentsTab";
-import { RecentRunsTab } from "@/components/RecentRunsTab";
-import { ReportsTab } from "@/components/ReportsTab";
+import { AgentConfigsTab } from "./AgentConfigsTab";
+import { RunHistoryTab } from "./RunHistoryTab";
 
-// Accept the data exactly as returned by clientDetail.getClientDetail
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface ClientDetailTabsProps {
   tenantId: Id<"tenants">;
@@ -71,7 +69,7 @@ export function ClientDetailTabs({
       </TabsList>
 
       <TabsContent value="agent-configs" className="mt-6">
-        <AgentsTab
+        <AgentConfigsTab
           key={refreshKey}
           tenantId={tenantId}
           agentConfigs={agentConfigs}
@@ -80,12 +78,18 @@ export function ClientDetailTabs({
       </TabsContent>
 
       <TabsContent value="run-history" className="mt-6">
-        <RecentRunsTab tenantId={tenantId} recentRuns={recentRuns} />
+        <RunHistoryTab
+          tenantId={tenantId}
+          recentRuns={recentRuns}
+          agentConfigs={agentConfigs}
+        />
       </TabsContent>
 
       <TabsContent value="reports" className="mt-6">
         {reports.length > 0 ? (
-          <ReportsTab reports={reports} />
+          <p className="text-sm text-muted-foreground">
+            Reports tab content pending (Item 39).
+          </p>
         ) : (
           <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
             <p className="text-sm">No reports yet for this client.</p>
