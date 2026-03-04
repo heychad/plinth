@@ -596,4 +596,28 @@ Sprint log -- append only, never overwrite.
 
 **PRD status:** 3/65 items passing
 
-**Next priority items:** Items 4-6 (schema tables), Item 7 (package installs), Items 8-9 (middleware + auth layout)
+**Next priority items:** Items 5-6 (schema tables), Item 7 (package installs), Items 8-9 (middleware + auth layout)
+
+---
+
+## UI Sprint Cycle 4 — 2026-03-03
+
+**Items completed:** 4 (conversations + messages schema tables)
+
+**What was built:**
+- **Item 4:** Added `conversations` and `messages` tables to `convex/schema.ts`
+  - conversations: tenantId, userId, agentConfigId (nullable), title, lastMessageAt, messageCount, platform, status (active/archived), createdAt
+  - conversations indexes: by_userId_lastMessageAt, by_tenantId_userId
+  - messages: conversationId, tenantId, role (user/assistant/system), content, streamingToken (nullable), isStreaming, agentConfigId (nullable), agentRunId (nullable), metadata (optional), createdAt
+  - messages indexes: by_conversationId, by_conversationId_createdAt
+
+**Files modified:**
+- convex/schema.ts
+
+**Verification:**
+- `npx tsc --noEmit` — PASS
+- `bash scripts/kessel-run/backpressure.sh` — ALL GREEN
+
+**PRD status:** 4/65 items passing
+
+**Next priority items:** Items 5-6 (documents + invitations schema), Item 7 (package installs), Items 8-9 (middleware + auth layout)

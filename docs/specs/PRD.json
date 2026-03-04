@@ -62,7 +62,7 @@
         "messages table has indexes: by_conversationId on [conversationId] and by_conversationId_createdAt on [conversationId, createdAt]",
         "npx tsc --noEmit passes with no type errors"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "Foundation for all chat features. Must be completed before any conversations/messages API items."
     },
     {

@@ -265,6 +265,41 @@ export default defineSchema({
     createdAt: v.number(),
   }).index("by_runId", ["runId"]),
 
+  // ─── UI Sprint Item 4: conversations + messages ─────────────────────────
+
+  conversations: defineTable({
+    tenantId: v.id("tenants"),
+    userId: v.id("users"),
+    agentConfigId: v.union(v.id("agentConfigs"), v.null()),
+    title: v.string(),
+    lastMessageAt: v.number(),
+    messageCount: v.number(),
+    platform: v.string(),
+    status: v.union(v.literal("active"), v.literal("archived")),
+    createdAt: v.number(),
+  })
+    .index("by_userId_lastMessageAt", ["userId", "lastMessageAt"])
+    .index("by_tenantId_userId", ["tenantId", "userId"]),
+
+  messages: defineTable({
+    conversationId: v.id("conversations"),
+    tenantId: v.id("tenants"),
+    role: v.union(
+      v.literal("user"),
+      v.literal("assistant"),
+      v.literal("system")
+    ),
+    content: v.string(),
+    streamingToken: v.union(v.string(), v.null()),
+    isStreaming: v.boolean(),
+    agentConfigId: v.union(v.id("agentConfigs"), v.null()),
+    agentRunId: v.union(v.id("agentRuns"), v.null()),
+    metadata: v.optional(v.any()),
+    createdAt: v.number(),
+  })
+    .index("by_conversationId", ["conversationId"])
+    .index("by_conversationId_createdAt", ["conversationId", "createdAt"]),
+
   // ─── Item 12: coaching-call-analyzer ──────────────────────────────────────
 
   coachingCallReports: defineTable({
