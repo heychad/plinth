@@ -8,3 +8,6 @@ convex/_generated/
 .DS_Store
 tests/results/
 __pycache__/
+
+# kessel-run
+.claude/worktrees/

@@ -104,6 +104,9 @@ npm run build
 
 # Deploy Convex
 npx convex deploy
+
+# Backpressure (all quality checks)
+bash scripts/kessel-run/backpressure.sh
 ```
 
 ## Multi-Tenancy Rules (CRITICAL)
