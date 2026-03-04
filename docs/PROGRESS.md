@@ -4,6 +4,12 @@ Sprint log -- append only, never overwrite.
 
 ---
 
+## 2026-03-03 — Cycle: Item 22 (Design System Visual Reference Page)
+
+- **Item 22** (ui): Created `/design-system` route as a dev-only visual reference page. Page component at `src/app/design-system/page.tsx` calls `notFound()` in production (NODE_ENV=production). Client component at `src/app/design-system/_components/DesignSystemContent.tsx` renders all installed shadcn/ui components with Plinth tokens: Buttons in all 6 variants (default, secondary, destructive, outline, ghost, link) plus size variants and disabled state. Card with --card (#FFFFFF) background and --border (#E2E8F0). Badge in all 4 variants. Input with label, disabled, and icon-prefixed variants. Select, Checkbox (unchecked/checked/disabled), Textarea with labels. Avatar with fallback initials. Breadcrumb navigation example. Tabs with 3 panels. Table with Badge status cells. Tooltip on icon buttons. Skeleton loading patterns. Color palette swatches showing all 8 Plinth tokens. Typography scale from 4xl to xs. Spacing token visual blocks (xs through 3xl). Shadow token cards (sm through xl). Combined "Create Agent" example form showing components working together. All text renders in Plus Jakarta Sans. Backpressure green.
+
+---
+
 ## 2026-03-03 — Cycle: Item 36 (Clients List Page with TanStack Table)
 
 - **Item 36** (ui): Rebuilt `src/app/(consultant)/clients/page.tsx` — replaced inline-styled old page with shadcn/ui-based layout. Created `_components/ClientsTable.tsx` using TanStack React Table with 6 columns: Business Name (sortable link to client detail), Owner (sortable), Status (badge with filter), Agents (count badge, sortable), Last Run (relative date, sortable), Actions (View button + kebab menu with Pause/Edit/Archive). Search input filters client-side by business name or owner name. Status Select filters by active/paused/churned/all. 25 rows per page with Previous/Next pagination controls. Accessible table with `<caption>`, `<th scope="col">`, `aria-sort` on sortable columns, `role="status"` and `aria-label` on status badges. Skeleton loading states for 5 rows. Empty state: "No clients yet" with "Add client" button. Created `_components/AddClientDialog.tsx` — shadcn Dialog form with Business name, Owner name, Owner email fields; calls `createTenant` mutation; success toast with client name; error handling. Long business names truncated with `text-ellipsis` and hover tooltip. At 375px, table container is horizontally scrollable. Backpressure green.

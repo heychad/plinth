@@ -342,7 +342,7 @@
         "All text renders in Plus Jakarta Sans",
         "Page returns 404 or redirects in production build (NODE_ENV=production)"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "Developer reference page only, not user-facing."
     },
     {
