@@ -8,7 +8,7 @@ import { UserButton } from "@clerk/nextjs";
 const NAV_ITEMS = [
   { href: "/app", label: "Home", exact: true },
   { href: "/app/agents", label: "Agents" },
-  { href: "/app/integrations", label: "Integrations" },
+  { href: "/app/connections", label: "Connections" },
   { href: "/app/reports", label: "Reports" },
 ];
 

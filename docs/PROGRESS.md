@@ -821,3 +821,9 @@ Sprint log -- append only, never overwrite.
 - **Item 28** (ui): Created `src/components/LoadingPage.tsx` — shared loading component with `variant` prop accepting `'dashboard' | 'list' | 'detail' | 'default'`. Dashboard variant renders page title skeleton, 4 stat card grid (responsive: 1/2/4 cols), and table area skeleton. List variant renders title, search bar, and 8 row skeletons. Detail variant renders breadcrumb, heading, tab bar, and content area skeletons. Created `src/app/(consultant)/loading.tsx` — renders page title skeleton, 4 stat card grid with responsive columns, and table area skeleton using `Skeleton` from `@/components/ui/skeleton`. Created `src/app/(client)/app/loading.tsx` — renders 3 message bubble skeletons (2 agent with avatar circles, 1 user right-aligned) and input area skeleton at bottom with border-top divider. All files use default exports (Next.js requirement). Backpressure green.
 
 **PRD status:** 20/65 items passing
+
+---
+
+## 2026-03-03 — Cycle: Item 33 (Rename Integrations to Connections)
+
+- **Item 33** (ui): Renamed `/app/integrations` to `/app/connections` with 301 redirect. Updated client sidebar nav label from "Integrations" to "Connections" and href to `/app/connections`. Created new `connections/page.tsx` with shadcn Card, Badge, Button, and Skeleton components replacing inline styles. Page heading: "Link your apps"; subtitle: "Connect the tools your agents need to work their magic." Section heading: "Connected apps". Buttons: "Link account" / "Unlink". Empty state: "No apps needed yet. Your consultant will let you know when you need to link something." Status badges: emerald (bg-accent) for Connected, secondary for Not Connected. Old `/app/integrations/page.tsx` now uses `permanentRedirect()` for 301 to `/app/connections`. Backpressure green.

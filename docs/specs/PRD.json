@@ -529,7 +529,7 @@
         "Empty state: 'No apps needed yet. Your consultant will let you know when you need to link something.'",
         "Status badges use Badge variant='default' (emerald) for connected, variant='secondary' for unconnected"
       ],
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
