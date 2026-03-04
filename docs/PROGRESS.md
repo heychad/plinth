@@ -4,6 +4,12 @@ Sprint log -- append only, never overwrite.
 
 ---
 
+## 2026-03-03 — Cycle: Item 11 (Conversations CRUD)
+
+- **Item 11** (functional): Created `convex/conversations.ts` with `listConversations`, `getConversation`, and `createConversation`. All three functions call `requireAuth()`, resolve the Convex user `_id` from `clerkUserId`, and scope data by userId. `listConversations` returns up to 20 conversations ordered by `lastMessageAt` DESC. `getConversation` validates `userId` matches caller. `createConversation` accepts optional `agentConfigId`, sets `tenantId`/`userId` from JWT. Backpressure green.
+
+---
+
 ## 2026-03-03 — Cycle: Item 10 (Root Page Redirect)
 
 - **Item 10** (functional): Replaced static `src/app/page.tsx` with async server component that calls `await auth()` from Clerk — redirects unauthenticated users to `/sign-in`, consultant/platform_admin roles to `/dashboard`, all others to `/app`. Backpressure green.

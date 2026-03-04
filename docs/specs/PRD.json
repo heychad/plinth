@@ -168,7 +168,7 @@
         "createConversation accepts optional { agentConfigId }, inserts conversation with tenantId/userId from JWT, returns Id<'conversations'>",
         "npx tsc --noEmit passes"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "Depends on conversations table in schema (Item 4)."
     },
     {
