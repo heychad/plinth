@@ -644,7 +644,7 @@
         "'Deploy to client' button opens Dialog with client Select and display name input; confirm calls deployAgentConfig (NOT createAgentConfig \u2014 use the existing mutation name); toast 'Agent deployed to {clientName}'",
         "Templates fetched via Convex agentTemplates query; skeleton cards during loading"
       ],
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

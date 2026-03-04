@@ -4,6 +4,12 @@ Sprint log -- append only, never overwrite.
 
 ---
 
+## 2026-03-03 — Cycle: Item 40 (Agent Templates Library Page)
+
+- **Item 40** (ui): Rebuilt agent templates library page at `src/app/(consultant)/agents/page.tsx` with shadcn/ui components. Replaced inline styles with Tailwind classes. Page heading "Agent Library" with shadcn Tabs for category filtering (All, Marketing, Sales, Operations, Coaching). Responsive card grid: 3 columns desktop (lg), 2 tablet (md), 1 mobile. Created `_components/TemplateCard.tsx` using shadcn Card with CardHeader/CardContent/CardFooter, category Badge (color-coded per category), 2-line truncated description via `line-clamp-2`, Active/Pipeline status badges, and "Deploy to client" Button. Created `_components/DeployToClientDialog.tsx` using shadcn Dialog with client Select dropdown and optional display name Input. Deploy calls `deployAgentConfig` mutation (not createAgentConfig). Success toast via sonner: "Agent deployed to {clientName}". Error handling for duplicate deployments. Skeleton loading state with 6 skeleton cards matching card layout. Empty state with dashed border and category-aware message. All interactive elements have 44px minimum touch targets. Backpressure green.
+
+---
+
 ## 2026-03-03 — Cycle: Item 37 (Client Detail Page Shell)
 
 - **Item 37** (ui): Rebuilt client detail page at `src/app/(consultant)/clients/[tenantId]/page.tsx` with shadcn/ui components. Replaced inline styles with Tailwind classes. Added shadcn Breadcrumb ("Clients / {businessName}"), heading with Badge for status (active=emerald, paused=amber, churned=muted), owner name subtitle. Created `_components/ClientDetailTabs.tsx` with shadcn Tabs containing 4 tabs: Agent Configs, Run History, Reports, Client Settings. Tabs use underline style (border-b-2, transparent→primary on active). Existing tab content components (AgentsTab, RecentRunsTab, ReportsTab) wired into first 3 tabs. Client Settings tab shows skeleton placeholder (content in Item 39). Full skeleton loading state (ClientDetailSkeleton) renders while Convex query loads — breadcrumb skeleton, heading skeleton, 4 tab skeletons, and tab content skeleton rows. Convex query `clientDetail.getClientDetail` already scopes by consultantId. Backpressure green.

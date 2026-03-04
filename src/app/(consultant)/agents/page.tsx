@@ -3,102 +3,111 @@
 import { useState } from "react";
 import { usePaginatedQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
-import { TemplateCard } from "@/components/TemplateCard";
-import { ClientPickerModal } from "@/components/ClientPickerModal";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { TemplateCard, type TemplateData } from "./_components/TemplateCard";
+import { DeployToClientDialog } from "./_components/DeployToClientDialog";
 
-type Template = {
-  _id: string;
-  displayName: string;
-  category: string;
-  description?: string;
-  integrationSlots: string[];
-};
+const CATEGORIES = [
+  { value: "all", label: "All" },
+  { value: "marketing", label: "Marketing" },
+  { value: "sales", label: "Sales" },
+  { value: "operations", label: "Operations" },
+  { value: "coaching", label: "Coaching" },
+] as const;
+
+type CategoryFilter = (typeof CATEGORIES)[number]["value"];
+
+function SkeletonCard() {
+  return (
+    <Card className="flex flex-col">
+      <CardHeader className="pb-2">
+        <div className="flex items-start justify-between gap-2">
+          <Skeleton className="h-5 w-3/5" />
+          <Skeleton className="h-5 w-16 rounded-full" />
+        </div>
+      </CardHeader>
+      <CardContent className="flex-1 pb-3">
+        <Skeleton className="h-4 w-full mb-2" />
+        <Skeleton className="h-4 w-4/5" />
+      </CardContent>
+      <CardFooter className="pt-0">
+        <Skeleton className="h-11 w-full rounded-md" />
+      </CardFooter>
+    </Card>
+  );
+}
 
 export default function AgentTemplatesPage() {
-  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+  const [category, setCategory] = useState<CategoryFilter>("all");
+  const [deployTemplate, setDeployTemplate] = useState<TemplateData | null>(null);
+
+  const categoryArg = category === "all" ? undefined : category;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { results, status, loadMore } = usePaginatedQuery(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (api as any).agentTemplates.listAgentTemplates,
-    {},
+    { category: categoryArg },
     { initialNumItems: 50 }
   );
 
   const isLoading = status === "LoadingFirstPage";
   const canLoadMore = status === "CanLoadMore";
 
-  function handleDeploy(templateId: string) {
-    const template = results.find((t: Template) => t._id === templateId);
-    if (template) {
-      setSelectedTemplate(template as Template);
-    }
-  }
-
   return (
-    <main id="main-content" tabIndex={-1} style={{ padding: "32px", maxWidth: "1200px", margin: "0 auto" }}>
-      <h1
-        style={{
-          fontSize: "1.5rem",
-          fontWeight: 700,
-          color: "#111827",
-          marginBottom: "8px",
-        }}
+    <main id="main-content" tabIndex={-1} className="p-6 md:p-8 max-w-7xl mx-auto">
+      <h1 className="text-2xl font-bold text-foreground mb-6">Agent Library</h1>
+
+      <Tabs
+        value={category}
+        onValueChange={(v) => setCategory(v as CategoryFilter)}
+        className="mb-6"
       >
-        Agent Templates
-      </h1>
-      <p style={{ color: "#6b7280", marginBottom: "32px" }}>
-        Browse available templates and deploy them to your clients.
-      </p>
+        <TabsList>
+          {CATEGORIES.map((cat) => (
+            <TabsTrigger
+              key={cat.value}
+              value={cat.value}
+              className="min-h-[44px] px-4"
+            >
+              {cat.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+      </Tabs>
 
       {isLoading ? (
-        <div style={{ padding: "60px", textAlign: "center", color: "#9ca3af" }}>
-          Loading templates...
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
         </div>
       ) : results.length === 0 ? (
-        <div
-          style={{
-            padding: "60px",
-            textAlign: "center",
-            color: "#6b7280",
-            border: "1px dashed #d1d5db",
-            borderRadius: "10px",
-          }}
-        >
-          No agent templates available yet.
+        <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed rounded-lg">
+          <p className="text-muted-foreground">
+            No agent templates available
+            {category !== "all" ? ` in ${category}` : ""}.
+          </p>
         </div>
       ) : (
         <>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-              gap: "20px",
-            }}
-          >
-            {results.map((template: Template) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {results.map((template: TemplateData) => (
               <TemplateCard
                 key={template._id}
                 template={template}
-                onDeploy={handleDeploy}
+                onDeploy={setDeployTemplate}
               />
             ))}
           </div>
 
           {canLoadMore && (
-            <div style={{ marginTop: "32px", textAlign: "center" }}>
+            <div className="mt-8 text-center">
               <button
                 onClick={() => loadMore(50)}
-                style={{
-                  padding: "10px 28px",
-                  background: "var(--color-primary, #4f46e5)",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "6px",
-                  fontSize: "0.875rem",
-                  fontWeight: 500,
-                  cursor: "pointer",
-                }}
+                className="px-6 py-2 text-sm font-medium text-primary hover:underline"
               >
                 Load more
               </button>
@@ -107,14 +116,10 @@ export default function AgentTemplatesPage() {
         </>
       )}
 
-      {selectedTemplate && (
-        <ClientPickerModal
-          templateId={selectedTemplate._id}
-          templateName={selectedTemplate.displayName}
-          onClose={() => setSelectedTemplate(null)}
-          onSuccess={() => setSelectedTemplate(null)}
-        />
-      )}
+      <DeployToClientDialog
+        template={deployTemplate}
+        onClose={() => setDeployTemplate(null)}
+      />
     </main>
   );
 }
