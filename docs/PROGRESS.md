@@ -621,3 +621,22 @@ Sprint log -- append only, never overwrite.
 **PRD status:** 4/65 items passing
 
 **Next priority items:** Items 5-6 (documents + invitations schema), Item 7 (package installs), Items 8-9 (middleware + auth layout)
+
+---
+
+## UI Sprint Cycle 5 — 2026-03-03
+
+**Items completed:** 5 (documents table schema)
+
+**What was built:**
+- **Item 5:** Added `documents` table to `convex/schema.ts` with all required fields: tenantId, userId, title, content (nullable), storageId (nullable), mimeType, source (user|agent), agentRunId (nullable), agentConfigId (nullable), googleDocUrl (nullable), wordCount (nullable), createdAt, updatedAt. Three indexes: by_tenantId_createdAt, by_tenantId_userId, by_agentRunId.
+
+**Files modified:**
+- convex/schema.ts
+
+**Verification:**
+- `bash scripts/kessel-run/backpressure.sh` — ALL GREEN
+
+**PRD status:** 5/65 items passing
+
+**Next priority items:** Item 6 (invitations + clerkOrgId), Item 7 (package installs), Items 8-9 (middleware + auth layout)

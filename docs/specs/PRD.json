@@ -75,7 +75,7 @@
         "Three indexes: by_tenantId_createdAt on ['tenantId', 'createdAt'], by_tenantId_userId on ['tenantId', 'userId'], by_agentRunId on ['agentRunId']",
         "npx tsc --noEmit passes with no schema errors"
       ],
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

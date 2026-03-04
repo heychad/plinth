@@ -300,6 +300,27 @@ export default defineSchema({
     .index("by_conversationId", ["conversationId"])
     .index("by_conversationId_createdAt", ["conversationId", "createdAt"]),
 
+  // ─── UI Sprint Item 5: documents ───────────────────────────────────────
+
+  documents: defineTable({
+    tenantId: v.id("tenants"),
+    userId: v.id("users"),
+    title: v.string(),
+    content: v.union(v.string(), v.null()),
+    storageId: v.union(v.string(), v.null()),
+    mimeType: v.string(),
+    source: v.union(v.literal("user"), v.literal("agent")),
+    agentRunId: v.union(v.id("agentRuns"), v.null()),
+    agentConfigId: v.union(v.id("agentConfigs"), v.null()),
+    googleDocUrl: v.union(v.string(), v.null()),
+    wordCount: v.union(v.number(), v.null()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index("by_tenantId_createdAt", ["tenantId", "createdAt"])
+    .index("by_tenantId_userId", ["tenantId", "userId"])
+    .index("by_agentRunId", ["agentRunId"]),
+
   // ─── Item 12: coaching-call-analyzer ──────────────────────────────────────
 
   coachingCallReports: defineTable({
