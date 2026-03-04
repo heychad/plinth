@@ -391,7 +391,7 @@
         "Navigating to /nonexistent-page renders the 404 component",
         "npx tsc --noEmit passes"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "Consolidated root + route-group error boundaries into one item."
     },
     {

@@ -749,3 +749,11 @@ Sprint log -- append only, never overwrite.
 - `bash scripts/kessel-run/backpressure.sh` — ALL GREEN
 
 **PRD status:** 8/65 items passing
+
+---
+
+## 2026-03-03 — Cycle: Item 25 (Custom 404 + Error Boundaries)
+
+- **Item 25** (ui): Created custom 404 page at `src/app/not-found.tsx` — renders "404", h1 "Page not found", descriptive text, and "Go home" button linking to `/`. Created root error boundary at `src/app/error.tsx` with `"use client"` directive — accepts `error` and `reset` props, renders "Try again" (calls `reset`) and "Go home" buttons, logs error to console via `useEffect`. Created matching route-group error boundaries at `src/app/(consultant)/error.tsx` and `src/app/(client)/app/error.tsx` with identical contract. All components use shadcn `Button` and Plinth design system CSS variables. Backpressure green.
+
+**PRD status:** 16/65 items passing
