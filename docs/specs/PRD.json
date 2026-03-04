@@ -547,7 +547,7 @@
         "Active nav item has bg-sidebar-accent and aria-current='page'",
         "<nav> has role='navigation' and aria-label='Consultant navigation'"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "WARNING: src/app/(consultant)/layout.tsx already exists with an inline nav bar from Cycle 6. Read the existing file first, then replace entirely with SidebarProvider pattern. Do not append to the existing layout. Files: src/app/(consultant)/layout.tsx, src/components/consultant/ConsultantSidebar.tsx. OMISSION fix: id='main-content' and tabIndex={-1} on main element."
     },
     {

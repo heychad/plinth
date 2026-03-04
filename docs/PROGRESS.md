@@ -4,6 +4,12 @@ Sprint log -- append only, never overwrite.
 
 ---
 
+## 2026-03-03 — Cycle: Item 34 (Consultant Sidebar Layout)
+
+- **Item 34** (ui): Fully replaced `src/app/(consultant)/layout.tsx` — removed inline top nav bar, replaced with `<SidebarProvider>` wrapping `<ConsultantSidebar />` + `<SidebarInset>`. Main element has `id="main-content"` and `tabIndex={-1}`. Mobile header with `SidebarTrigger` (44x44px min touch target) shown only below `md` breakpoint. Created `src/components/consultant/ConsultantSidebar.tsx` — uses shadcn `Sidebar` with `collapsible="icon"`, 5 nav items (Dashboard, Clients, Agents, Reports, Settings) with Lucide icons, `aria-label="Consultant navigation"`, active state detection via `usePathname()` with `aria-current="page"`, `SidebarRail` for drag-to-collapse, footer with Clerk `<UserButton afterSignOutUrl="/sign-in" />`. Backpressure green.
+
+---
+
 ## 2026-03-03 — Cycle: Item 19 (Invitations CRUD)
 
 - **Item 19** (functional): Created `convex/invitations.ts` with three exports. `createInvitation` is an `internalMutation` accepting `{ tenantId, consultantId, email, displayName?, clerkInvitationId }` — sets status to `"pending"`, sentAt/createdAt to now, acceptedAt to null. `updateInvitationStatus` is an `internalMutation` accepting `{ clerkInvitationId, status, acceptedAt? }` — looks up invitation by `by_clerkInvitationId` index, throws if not found, patches status and optionally acceptedAt. `listInvitations` is a `query` accepting `{ tenantId }` — calls `requireAuth`, `requireRole("consultant")`, verifies consultant owns the tenant (returns `[]` if not), queries by `by_tenantId_status` index, sorts by sentAt DESC. Backpressure green.
