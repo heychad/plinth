@@ -629,7 +629,7 @@
         "Submit with empty Business name shows Zod error 'Business name is required' inline",
         "Submit with valid data calls updateTenant mutation (Item 20); success toast confirms save"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "Depends on client detail page shell (Item 37) and updateTenant mutation (Item 20). Split from original combined tab content item."
     },
     {

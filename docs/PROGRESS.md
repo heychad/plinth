@@ -4,6 +4,12 @@ Sprint log -- append only, never overwrite.
 
 ---
 
+## 2026-03-04 — Cycle: Item 39 (Client Detail Tab Content: Reports + Client Settings)
+
+- **Item 39** (ui): Built ReportsTab and ClientSettingsTab as co-located components under `[tenantId]/_components/`. ReportsTab: TanStack Table with 5 columns (Date, Coach, Score, Status, Actions), sortable headers, score color badges (emerald >= 80, amber 70-79, red < 70), status badges, "Review" button navigates to `/reports/{id}`, empty state. ClientSettingsTab: react-hook-form + Zod-validated form with 6 editable fields (Business name required, Owner name required, Owner email validated, Website URL validated, Vertical select dropdown, Notes textarea) + 3 read-only fields (Consultant ID, Tenant ID, Created date). Submit calls `updateTenant` mutation with sonner toast on success/error. Updated ClientDetailTabs to accept `tenant` prop and wire both new tabs. Updated page.tsx to pass `tenant` down. Backpressure green.
+
+---
+
 ## 2026-03-04 — Cycle: Item 38 (Client Detail Tab Content: Agent Configs + Run History)
 
 - **Item 38** (ui): Built AgentConfigsTab and RunHistoryTab as co-located components under `[tenantId]/_components/`. AgentConfigsTab: TanStack Table with 6 columns (Name, Status, Template, Deployed, Version, Actions), sortable headers, shadcn Badge status indicators, dropdown menu actions (Configure/Pause/Resume), sync-to-latest button for outdated versions, deploy dialog with template list using shadcn Dialog, empty state with "Deploy your first agent" CTA. RunHistoryTab: TanStack Table with 7 columns (Agent, Status, Triggered, Duration, Cost, Started, Actions), sortable headers, agent dropdown filter using shadcn Select, clickable rows navigate to run detail, empty state message. Updated ClientDetailTabs to import new co-located components instead of old inline-style ones from `src/components/`. All tables have TableCaption, th scope="col", Badge role="status" with aria-label, 44px min touch targets. Backpressure green.

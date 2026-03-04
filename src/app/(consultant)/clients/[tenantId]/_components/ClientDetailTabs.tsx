@@ -6,10 +6,14 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AgentConfigsTab } from "./AgentConfigsTab";
 import { RunHistoryTab } from "./RunHistoryTab";
+import { ReportsTab } from "./ReportsTab";
+import { ClientSettingsTab } from "./ClientSettingsTab";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 interface ClientDetailTabsProps {
   tenantId: Id<"tenants">;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  tenant: any;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   agentConfigs: any[];
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -33,6 +37,7 @@ function TabSkeleton() {
 
 export function ClientDetailTabs({
   tenantId,
+  tenant,
   agentConfigs,
   recentRuns,
   reports,
@@ -86,19 +91,11 @@ export function ClientDetailTabs({
       </TabsContent>
 
       <TabsContent value="reports" className="mt-6">
-        {reports.length > 0 ? (
-          <p className="text-sm text-muted-foreground">
-            Reports tab content pending (Item 39).
-          </p>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-            <p className="text-sm">No reports yet for this client.</p>
-          </div>
-        )}
+        <ReportsTab tenantId={tenantId} reports={reports} />
       </TabsContent>
 
       <TabsContent value="client-settings" className="mt-6">
-        <TabSkeleton />
+        <ClientSettingsTab tenantId={tenantId} tenant={tenant} />
       </TabsContent>
     </Tabs>
   );

@@ -125,6 +125,7 @@ export default function ClientDetailPage() {
 
       <ClientDetailTabs
         tenantId={tenantId}
+        tenant={tenant}
         agentConfigs={agentConfigs}
         recentRuns={recentRuns}
         reports={reports}
