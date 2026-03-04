@@ -4,6 +4,12 @@ Sprint log -- append only, never overwrite.
 
 ---
 
+## 2026-03-03 — Cycle: Item 17 (provisionStarterAgent)
+
+- **Item 17** (functional): Added `provisionStarterAgent` mutation to `convex/agentConfigs.ts` — no args, client-role only. Looks up `general-assistant` template by slug, returns `null` if not found. Checks for existing agentConfig via `by_tenantId_templateId` index for idempotency — returns existing `_id` if found. Otherwise creates a new agentConfig with template defaults (`displayName`, `defaultConfig`, `defaultLockedFields`, `defaultCustomizableFields`), status `"deployed"`, version 1. Uses caller's `tenantId` from JWT. Backpressure green.
+
+---
+
 ## 2026-03-03 — Cycle: Item 20 (Missing Backend Mutations + Seed Data)
 
 - **Item 20** (functional): Added `markReviewed` mutation to `convex/coachingCallReports.ts` — accepts `{ reportId }`, calls `requireAuth`, validates consultant ownership via `isAdminForTenant`, sets status to `"reviewed"` and updatedAt. Added `updateTenant` mutation to `convex/tenants.ts` — accepts `{ tenantId, businessName?, ownerName?, ownerEmail?, website?, vertical?, notes? }`, validates consultant ownership, patches fields (maps `website` arg to `websiteUrl` schema field). Expanded `updateConsultant` in `convex/consultants.ts` to accept `{ displayName?, businessName?, supportEmail? }` (added `businessName` and `supportEmail` optional args). Added `supportEmail` as `v.optional(v.string())` to consultants table in `convex/schema.ts`. Updated `VALID_FONT_FAMILIES` in `convex/themes.ts` to include `"Plus Jakarta Sans"`. Added `v.literal("general")` to agentTemplates category union in schema. Created idempotent `general-assistant` seed in `convex/seed.ts` — checks for existing slug before insert, standalone `seedGeneralAssistant` internal mutation also available. Added `vitest.config.ts` to exclude Playwright tests from vitest runner (pre-existing conflict). Backpressure green (tsc + eslint + convex typecheck + next build + vitest + playwright).

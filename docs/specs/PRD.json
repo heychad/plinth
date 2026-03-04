@@ -263,7 +263,7 @@
         "Created agentConfig tenantId matches caller's tenantId from JWT",
         "npx tsc --noEmit passes"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "Depends on general-assistant seed data (Item 20)."
     },
     {

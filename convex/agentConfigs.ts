@@ -508,6 +508,79 @@ export const syncAgentConfigWithTemplate = mutation({
   },
 });
 
+/**
+ * Idempotent mutation for client users: provisions the "general-assistant" starter agent
+ * for the caller's tenant. Returns the existing or new agentConfigId, or null if the
+ * general-assistant template doesn't exist.
+ */
+export const provisionStarterAgent = mutation({
+  args: {},
+  handler: async (ctx) => {
+    const auth = await requireAuth(ctx);
+
+    if (auth.role !== "client") {
+      throw new Error("Only client users can provision a starter agent");
+    }
+
+    const tenantId = auth.tenantId;
+    if (!tenantId) {
+      throw new Error("Client user has no tenant");
+    }
+
+    // Find the general-assistant template
+    const template = await ctx.db
+      .query("agentTemplates")
+      .withIndex("by_slug", (q) => q.eq("slug", "general-assistant"))
+      .first();
+
+    if (!template) {
+      return null;
+    }
+
+    // Idempotency: check if a config already exists for this template + tenant
+    const existing = await ctx.db
+      .query("agentConfigs")
+      .withIndex("by_tenantId_templateId", (q) =>
+        q.eq("tenantId", tenantId).eq("templateId", template._id)
+      )
+      .unique();
+
+    if (existing) {
+      return existing._id;
+    }
+
+    // Create new agentConfig with defaults from the template
+    const defaultConfig =
+      template.defaultConfig &&
+      typeof template.defaultConfig === "object" &&
+      !Array.isArray(template.defaultConfig)
+        ? template.defaultConfig
+        : {};
+
+    const now = Date.now();
+    const configId = await ctx.db.insert("agentConfigs", {
+      tenantId,
+      templateId: template._id,
+      displayName: template.displayName,
+      status: "deployed",
+      config: defaultConfig,
+      lockedFields: template.defaultLockedFields,
+      customizableFields: template.defaultCustomizableFields,
+      modelOverride: undefined,
+      scheduleCron: undefined,
+      scheduleTimezone: "UTC",
+      deployedAt: now,
+      deployedBy: undefined,
+      version: 1,
+      updatedByType: "admin",
+      createdAt: now,
+      updatedAt: now,
+    });
+
+    return configId;
+  },
+});
+
 // Internal query used by the execution engine to fetch the raw agentConfig + templateSlug
 export const getConfigById = internalQuery({
   args: {
