@@ -104,7 +104,7 @@
         "npx convex dev --once (or equivalent type generation) shows no component errors",
         "npx tsc --noEmit reports no missing module errors for any of these packages"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "Consolidates package installs from chat-interface, document-store, and user-management specs. zod is already installed (v4) \u2014 no-op for that package. @mantine/core and @mantine/hooks are peer deps of @blocknote/mantine. @hookform/resolvers@^4 supports Zod v4."
     },
     {

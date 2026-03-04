@@ -658,3 +658,28 @@ Sprint log -- append only, never overwrite.
 - `bash scripts/kessel-run/backpressure.sh` — ALL GREEN
 
 **PRD status:** 6/65 items passing
+
+---
+
+## UI Sprint Cycle 7 — 2026-03-03
+
+**Items completed:** 7 (Package installs + streaming component)
+
+**What was built:**
+- **Item 7:** Installed all required packages for chat interface, document store, and user management
+  - Runtime: @convex-dev/persistent-text-streaming, @blocknote/core, @blocknote/mantine, @mantine/core, @mantine/hooks, mammoth, turndown, svix, @tanstack/react-table, react-markdown, remark-gfm
+  - Dev: @types/turndown, vitest, convex-test (@types/mammoth doesn't exist — mammoth ships own types)
+  - Already installed (no-op): react-hook-form, @hookform/resolvers, zod
+  - Wired persistent-text-streaming component into convex/convex.config.ts
+  - Updated package.json test script from "echo No tests configured" to "vitest run"
+
+**Files modified:**
+- package.json (test script + new dependencies)
+- package-lock.json
+- convex/convex.config.ts (persistent-text-streaming component added)
+
+**Verification:**
+- `npx tsc --noEmit` — PASS
+- `bash scripts/kessel-run/backpressure.sh` — ALL GREEN
+
+**PRD status:** 7/65 items passing
