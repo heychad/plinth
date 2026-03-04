@@ -153,7 +153,7 @@
         "Authenticated users with any other role redirected to /app",
         "npx tsc --noEmit passes"
       ],
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {

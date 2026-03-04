@@ -4,6 +4,12 @@ Sprint log -- append only, never overwrite.
 
 ---
 
+## 2026-03-03 — Cycle: Item 10 (Root Page Redirect)
+
+- **Item 10** (functional): Replaced static `src/app/page.tsx` with async server component that calls `await auth()` from Clerk — redirects unauthenticated users to `/sign-in`, consultant/platform_admin roles to `/dashboard`, all others to `/app`. Backpressure green.
+
+---
+
 ## 2026-03-03 — Cycle: Item 9 (Auth Layout)
 
 - **Item 9** (foundation): Created `src/app/(auth)/layout.tsx` — centered full-screen container with `min-h-screen items-center justify-center bg-background`. Backpressure green.
