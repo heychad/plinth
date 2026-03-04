@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: var(--font-plus-jakarta-sans), sans-serif;
+  --radius: 0.5rem;
+}
+
+:root {
+  --background: oklch(0.967 0.014 293.4);
+  --foreground: oklch(0.197 0.051 281.3);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.197 0.051 281.3);
+  --primary: oklch(0.551 0.215 272.1);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.647 0.184 274.5);
+  --secondary-foreground: oklch(0.197 0.051 281.3);
+  --accent: oklch(0.696 0.17 162.5);
+  --accent-foreground: oklch(1 0 0);
+  --muted: oklch(0.935 0.027 293.4);
+  --muted-foreground: oklch(0.497 0.014 264.4);
+  --destructive: oklch(0.577 0.215 27.3);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.907 0.011 254.1);
+  --input: oklch(0.907 0.011 254.1);
+  --ring: oklch(0.551 0.215 272.1);
+
+  --color-primary: #6366F1;
+  --color-secondary: #818CF8;
+  --color-cta: #10B981;
+  --color-background: #F5F3FF;
+  --color-text: #1E1B4B;
+
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+  --shadow-xl: 0 20px 25px rgba(0,0,0,0.15);
+}
+
+[data-theme="dark"] {
+  --background: oklch(0.197 0.051 281.3);
+  --foreground: oklch(0.967 0.014 293.4);
+  --card: oklch(0.265 0.04 281.3);
+  --card-foreground: oklch(0.967 0.014 293.4);
+  --primary: oklch(0.551 0.215 272.1);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.647 0.184 274.5);
+  --secondary-foreground: oklch(0.967 0.014 293.4);
+  --accent: oklch(0.696 0.17 162.5);
+  --accent-foreground: oklch(1 0 0);
+  --muted: oklch(0.333 0.04 281.3);
+  --muted-foreground: oklch(0.697 0.014 264.4);
+  --destructive: oklch(0.577 0.215 27.3);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.373 0.04 281.3);
+  --input: oklch(0.373 0.04 281.3);
+  --ring: oklch(0.647 0.184 274.5);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+}

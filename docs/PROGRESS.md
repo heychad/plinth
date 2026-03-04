@@ -511,3 +511,38 @@ Sprint log -- append only, never overwrite.
 - Status: Ready for building
 - Replaces previous backend sprint PRD.json entirely (IDs restart at 1)
 - Reviewer fixes applied: 2 blockers fixed, 3 omissions added, 3 items split, 1 warning addressed (65 items, was 61)
+
+---
+
+## UI Sprint Cycle 1 — 2026-03-03
+
+**Items completed:** 1 (shadcn/ui + Tailwind v4 foundation)
+
+**What was built:**
+- **Item 1:** shadcn/ui initialized with Tailwind v4 CSS-first config
+  - `components.json` at project root with style=default, rsc=true, tsx=true, iconLibrary=lucide
+  - `src/lib/utils.ts` with `cn()` utility (clsx + tailwind-merge)
+  - `src/app/globals.css` with `@import "tailwindcss"`, @theme directive, 18 shadcn OKLCH variables, Plinth-specific tokens (colors, spacing, shadows), dark theme stub
+  - `postcss.config.mjs` with @tailwindcss/postcss plugin
+  - `src/app/layout.tsx` updated with Plus Jakarta Sans font variable, globals.css import, font-sans + antialiased + bg-background + text-foreground body classes
+  - No tailwind.config.js/ts — pure CSS-first Tailwind v4
+
+**Packages installed:**
+- tailwindcss, @tailwindcss/postcss, postcss (Tailwind v4 core)
+- class-variance-authority, clsx, tailwind-merge (shadcn utilities)
+- lucide-react (icon library)
+
+**Files created:**
+- components.json, postcss.config.mjs, src/app/globals.css, src/lib/utils.ts
+
+**Files modified:**
+- src/app/layout.tsx, package.json, package-lock.json
+
+**Verification:**
+- `npx tsc --noEmit` — PASS
+- `npm run build` — PASS
+- `bash scripts/kessel-run/backpressure.sh` — ALL GREEN
+
+**PRD status:** 1/65 items passing
+
+**Next priority items:** Item 2 (CSS variable palette — already partially done in globals.css), Item 3 (font + shadcn components install), Items 4-7 (schema + packages)

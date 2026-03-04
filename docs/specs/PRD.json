@@ -15,7 +15,7 @@
         "npm run build completes with no Tailwind v4 configuration errors",
         "npx tsc --noEmit passes with no path alias errors"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "First item — all other foundation items depend on this. Use --legacy-peer-deps if npm install fails."
     },
     {
