@@ -789,3 +789,11 @@ Sprint log -- append only, never overwrite.
 - **Item 27** (ui): Added `@media (prefers-reduced-motion: reduce)` block to `globals.css` — sets `animation-duration`, `animation-iteration-count`, and `transition-duration` to `0.01ms !important` on `*, *::before, *::after`. Updated `button.tsx` base CVA styles with `min-h-11` (44px) for all sizes, and added `min-w-11 min-h-11` to `icon` variant to meet 44x44px touch target minimum. Created `src/components/PageBreadcrumb.tsx` — accepts `items: Array<{ label: string; href?: string }>`, renders shadcn `Breadcrumb` components, truncates labels > 40 chars with `…` and shows full label via `title` attribute. WCAG AA contrast verified: `#1E1B4B` on `#F5F3FF` ≈ 8.5:1 (passes AAA); `#FFFFFF` on `#6366F1` ≈ 4.5:1 (passes AA). Backpressure green.
 
 **PRD status:** 19/65 items passing
+
+---
+
+## 2026-03-03 — Cycle: Item 28 (Loading Fallbacks + LoadingPage Component)
+
+- **Item 28** (ui): Created `src/components/LoadingPage.tsx` — shared loading component with `variant` prop accepting `'dashboard' | 'list' | 'detail' | 'default'`. Dashboard variant renders page title skeleton, 4 stat card grid (responsive: 1/2/4 cols), and table area skeleton. List variant renders title, search bar, and 8 row skeletons. Detail variant renders breadcrumb, heading, tab bar, and content area skeletons. Created `src/app/(consultant)/loading.tsx` — renders page title skeleton, 4 stat card grid with responsive columns, and table area skeleton using `Skeleton` from `@/components/ui/skeleton`. Created `src/app/(client)/app/loading.tsx` — renders 3 message bubble skeletons (2 agent with avatar circles, 1 user right-aligned) and input area skeleton at bottom with border-top divider. All files use default exports (Next.js requirement). Backpressure green.
+
+**PRD status:** 20/65 items passing

@@ -441,7 +441,7 @@
         "Both loading files use Skeleton from @/components/ui/skeleton",
         "npx tsc --noEmit passes"
       ],
-      "passes": false,
+      "passes": true,
       "notes": ""
     },
     {
