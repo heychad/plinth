@@ -375,7 +375,7 @@
         "Clicking Sign out from either layout redirects to /sign-in",
         "npx tsc --noEmit passes"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "Depends on consultant and client layouts existing."
     },
     {

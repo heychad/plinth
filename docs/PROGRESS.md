@@ -4,6 +4,12 @@ Sprint log -- append only, never overwrite.
 
 ---
 
+## 2026-03-03 — Cycle: Item 24 (Role Guard + UserButton Wiring)
+
+- **Item 24** (ui): Added server-side role guard to `src/app/(consultant)/layout.tsx` — layout is now an async server component that calls `await auth()` from `@clerk/nextjs/server`, reads `publicMetadata.role` from session claims, and redirects to `/app` if role is not `consultant` or `platform_admin`. Respects `NEXT_PUBLIC_TEST_MODE=true` bypass for automated tests. Added `<UserButton afterSignOutUrl="/sign-in" />` to `src/app/(client)/app/layout.tsx` sidebar footer with "Account" label, matching the consultant sidebar pattern. Consultant sidebar (`ConsultantSidebar.tsx`) already had UserButton from Item 34. Backpressure green.
+
+---
+
 ## 2026-03-03 — Cycle: Item 35 (Consultant Dashboard Page)
 
 - **Item 35** (ui): Rebuilt `src/app/(consultant)/dashboard/page.tsx` — replaced inline-styled old dashboard with shadcn/ui-based layout. Time-aware greeting ("Good morning/afternoon/evening, {firstName}") using Clerk `useUser()`. Created `_components/StatCards.tsx` — 4 stat cards (Total Clients, Active Agents, Runs This Month, Cost This Month) using shadcn `Card` with Lucide icons, responsive grid (4-col desktop, 2-col tablet, stacked mobile), skeleton loading states. Created `_components/RecentClientsTable.tsx` — shadcn `Table` showing max 5 clients with name, status badge, agent count, last run date; "View all clients" link; empty state with "Add your first client" CTA; skeleton loading. Created `_components/DraftReports.tsx` — shows max 3 draft coaching reports with client name, score badge (color-coded: emerald ≥80, amber 70-79, red <70), coach name, "Review" button linking to report detail; empty state. Layout uses `lg:grid-cols-3` with clients table spanning 2 cols and draft reports in 1 col. No horizontal scroll at 375px. Uses existing queries: `api.dashboard.getConsultantDashboard`, `api.dashboard.listClientsForConsultant`, `api.coachingCallReports.listCoachingReportsForConsultant`. Backpressure green.

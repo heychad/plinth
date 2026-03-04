@@ -3,6 +3,7 @@
 import { ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { UserButton } from "@clerk/nextjs";
 
 const NAV_ITEMS = [
   { href: "/app", label: "Home", exact: true },
@@ -40,7 +41,7 @@ export default function ClientAppLayout({ children }: { children: ReactNode }) {
           </span>
         </div>
 
-        <ul style={{ listStyle: "none", margin: 0, padding: "0 12px" }}>
+        <ul style={{ listStyle: "none", margin: 0, padding: "0 12px", flex: 1 }}>
           {NAV_ITEMS.map((item) => {
             const isActive = item.exact
               ? pathname === item.href
@@ -72,6 +73,20 @@ export default function ClientAppLayout({ children }: { children: ReactNode }) {
             );
           })}
         </ul>
+
+        {/* Account */}
+        <div
+          style={{
+            padding: "16px 20px",
+            borderTop: "1px solid #f3f4f6",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px",
+          }}
+        >
+          <UserButton afterSignOutUrl="/sign-in" />
+          <span style={{ fontSize: "0.875rem", color: "#374151" }}>Account</span>
+        </div>
       </nav>
 
       {/* Main content */}

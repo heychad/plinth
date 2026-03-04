@@ -1,9 +1,21 @@
 import { ReactNode } from "react";
+import { auth } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { ConsultantSidebar } from "@/components/consultant/ConsultantSidebar";
 
-export default function ConsultantLayout({ children }: { children: ReactNode }) {
+export default async function ConsultantLayout({ children }: { children: ReactNode }) {
+  // Role guard: only consultants and platform admins can access consultant routes
+  if (process.env.NEXT_PUBLIC_TEST_MODE !== "true") {
+    const { sessionClaims } = await auth();
+    const role = (sessionClaims?.publicMetadata as { role?: string } | undefined)?.role;
+
+    if (role !== "consultant" && role !== "platform_admin") {
+      redirect("/app");
+    }
+  }
+
   return (
     <SidebarProvider defaultOpen={true}>
       <ConsultantSidebar />
