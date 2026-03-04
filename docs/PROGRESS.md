@@ -4,6 +4,12 @@ Sprint log -- append only, never overwrite.
 
 ---
 
+## 2026-03-03 — Cycle: Item 36 (Clients List Page with TanStack Table)
+
+- **Item 36** (ui): Rebuilt `src/app/(consultant)/clients/page.tsx` — replaced inline-styled old page with shadcn/ui-based layout. Created `_components/ClientsTable.tsx` using TanStack React Table with 6 columns: Business Name (sortable link to client detail), Owner (sortable), Status (badge with filter), Agents (count badge, sortable), Last Run (relative date, sortable), Actions (View button + kebab menu with Pause/Edit/Archive). Search input filters client-side by business name or owner name. Status Select filters by active/paused/churned/all. 25 rows per page with Previous/Next pagination controls. Accessible table with `<caption>`, `<th scope="col">`, `aria-sort` on sortable columns, `role="status"` and `aria-label` on status badges. Skeleton loading states for 5 rows. Empty state: "No clients yet" with "Add client" button. Created `_components/AddClientDialog.tsx` — shadcn Dialog form with Business name, Owner name, Owner email fields; calls `createTenant` mutation; success toast with client name; error handling. Long business names truncated with `text-ellipsis` and hover tooltip. At 375px, table container is horizontally scrollable. Backpressure green.
+
+---
+
 ## 2026-03-03 — Cycle: Item 24 (Role Guard + UserButton Wiring)
 
 - **Item 24** (ui): Added server-side role guard to `src/app/(consultant)/layout.tsx` — layout is now an async server component that calls `await auth()` from `@clerk/nextjs/server`, reads `publicMetadata.role` from session claims, and redirects to `/app` if role is not `consultant` or `platform_admin`. Respects `NEXT_PUBLIC_TEST_MODE=true` bypass for automated tests. Added `<UserButton afterSignOutUrl="/sign-in" />` to `src/app/(client)/app/layout.tsx` sidebar footer with "Account" label, matching the consultant sidebar pattern. Consultant sidebar (`ConsultantSidebar.tsx`) already had UserButton from Item 34. Backpressure green.

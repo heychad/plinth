@@ -582,7 +582,7 @@
         "Empty state: 'No clients yet' with 'Add client' button opening Dialog form",
         "At 375px, table renders as stacked cards or is horizontally scrollable"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "Requires @tanstack/react-table."
     },
     {
