@@ -683,3 +683,27 @@ Sprint log -- append only, never overwrite.
 - `bash scripts/kessel-run/backpressure.sh` — ALL GREEN
 
 **PRD status:** 7/65 items passing
+
+---
+
+## UI Sprint Cycle 8 — 2026-03-03
+
+**Items completed:** 8 (Clerk middleware with auth.protect + onboarding redirects)
+
+**What was built:**
+- **Item 8:** Updated `src/middleware.ts` with full Clerk middleware implementation
+  - Added `/api/webhooks/(.*)` and `/oauth/(.*)` to public routes
+  - Added `auth.protect()` call for all non-public routes — unauthenticated users redirected to /sign-in
+  - Added onboarding redirect logic: client users without `onboardingComplete` on /app routes redirected to /app/onboarding; users with onboardingComplete on /app/onboarding redirected to /app
+  - Consultant and platform_admin users exempt from onboarding logic
+  - TEST_MODE bypass preserved via `NEXT_PUBLIC_TEST_MODE` env var
+
+**Files modified:**
+- src/middleware.ts
+
+**Verification:**
+- `npx tsc --noEmit` — PASS
+- `npm run build` — PASS
+- `bash scripts/kessel-run/backpressure.sh` — ALL GREEN
+
+**PRD status:** 8/65 items passing

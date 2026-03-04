@@ -122,7 +122,7 @@
         "Consultant users are not affected by onboarding redirect logic",
         "npx tsc --noEmit passes"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "Consolidates middleware from auth-and-routing and client-onboarding specs."
     },
     {

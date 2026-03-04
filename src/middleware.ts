@@ -7,6 +7,8 @@ const isPublicRoute = createRouteMatcher([
   "/",
   "/sign-in(.*)",
   "/sign-up(.*)",
+  "/api/webhooks/(.*)",
+  "/oauth/(.*)",
 ]);
 
 const isClientOnlyRoute = createRouteMatcher([
@@ -25,28 +27,54 @@ function testModeMiddleware(_req: NextRequest) {
   return NextResponse.next();
 }
 
-export default isTestMode ? testModeMiddleware : clerkMiddleware(async (auth, req) => {
-  if (isPublicRoute(req)) {
-    return NextResponse.next();
-  }
+export default isTestMode
+  ? testModeMiddleware
+  : clerkMiddleware(async (auth, req) => {
+      if (isPublicRoute(req)) {
+        return NextResponse.next();
+      }
 
-  const { sessionClaims } = await auth();
-  const role =
-    (sessionClaims?.metadata as { role?: string } | undefined)?.role ??
-    (sessionClaims?.publicMetadata as { role?: string } | undefined)?.role;
+      // Protect all non-public routes — redirects unauthenticated users to /sign-in
+      await auth.protect();
 
-  // Consultant trying to access client routes → redirect to /dashboard
-  if (role === "consultant" && isClientOnlyRoute(req)) {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
-  }
+      const { sessionClaims } = await auth();
+      const role =
+        (sessionClaims?.metadata as { role?: string } | undefined)?.role ??
+        (sessionClaims?.publicMetadata as { role?: string } | undefined)?.role;
 
-  // Client trying to access consultant routes → redirect to /app
-  if (role === "client" && isConsultantOnlyRoute(req)) {
-    return NextResponse.redirect(new URL("/app", req.url));
-  }
+      // Consultant trying to access client routes → redirect to /dashboard
+      if (role === "consultant" && isClientOnlyRoute(req)) {
+        return NextResponse.redirect(new URL("/dashboard", req.url));
+      }
 
-  return NextResponse.next();
-});
+      // Client trying to access consultant routes → redirect to /app
+      if (role === "client" && isConsultantOnlyRoute(req)) {
+        return NextResponse.redirect(new URL("/app", req.url));
+      }
+
+      // Onboarding redirect logic for client users
+      const pathname = req.nextUrl.pathname;
+      const isClientRoute = pathname.startsWith("/app");
+      const isOnboardingRoute = pathname.startsWith("/app/onboarding");
+
+      if (role !== "consultant" && role !== "platform_admin" && isClientRoute) {
+        const onboardingComplete =
+          (sessionClaims?.metadata as { onboardingComplete?: boolean } | undefined)
+            ?.onboardingComplete ??
+          (sessionClaims?.publicMetadata as { onboardingComplete?: boolean } | undefined)
+            ?.onboardingComplete;
+
+        if (!isOnboardingRoute && !onboardingComplete) {
+          return NextResponse.redirect(new URL("/app/onboarding", req.url));
+        }
+
+        if (isOnboardingRoute && onboardingComplete) {
+          return NextResponse.redirect(new URL("/app", req.url));
+        }
+      }
+
+      return NextResponse.next();
+    });
 
 export const config = {
   matcher: [
