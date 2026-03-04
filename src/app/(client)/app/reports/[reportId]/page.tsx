@@ -81,7 +81,7 @@ export default function CoachReportDetailPage() {
 
   if (report === undefined) {
     return (
-      <main style={{ padding: "40px 32px", maxWidth: "900px", margin: "0 auto" }}>
+      <main id="main-content" tabIndex={-1} style={{ padding: "40px 32px", maxWidth: "900px", margin: "0 auto" }}>
         <p style={{ color: "#6b7280" }}>Loading report...</p>
       </main>
     );
@@ -89,7 +89,7 @@ export default function CoachReportDetailPage() {
 
   if (report === null) {
     return (
-      <main style={{ padding: "40px 32px", maxWidth: "900px", margin: "0 auto" }}>
+      <main id="main-content" tabIndex={-1} style={{ padding: "40px 32px", maxWidth: "900px", margin: "0 auto" }}>
         <button
           onClick={() => router.push("/app/reports")}
           style={{
@@ -118,7 +118,7 @@ export default function CoachReportDetailPage() {
   const dimensionEntries = Object.entries(report.dimensionScores ?? {});
 
   return (
-    <main style={{ padding: "32px", maxWidth: "900px", margin: "0 auto" }}>
+    <main id="main-content" tabIndex={-1} style={{ padding: "32px", maxWidth: "900px", margin: "0 auto" }}>
       {/* Back nav */}
       <button
         onClick={() => router.push("/app/reports")}

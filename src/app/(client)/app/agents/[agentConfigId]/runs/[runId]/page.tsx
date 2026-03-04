@@ -156,7 +156,7 @@ export default function ClientRunDetailPage() {
 
   if (data === undefined) {
     return (
-      <main style={{ padding: "24px", color: "var(--color-foreground, #111827)" }}>
+      <main id="main-content" tabIndex={-1} style={{ padding: "24px", color: "var(--color-foreground, #111827)" }}>
         <p style={{ color: "#6b7280" }}>Loading run details...</p>
       </main>
     );
@@ -164,7 +164,7 @@ export default function ClientRunDetailPage() {
 
   if (data === null) {
     return (
-      <main style={{ padding: "24px", color: "var(--color-foreground, #111827)" }}>
+      <main id="main-content" tabIndex={-1} style={{ padding: "24px", color: "var(--color-foreground, #111827)" }}>
         <p style={{ color: "#991b1b" }}>Run not found.</p>
         <a
           href={`/app/agents/${agentConfigId}`}
@@ -184,7 +184,7 @@ export default function ClientRunDetailPage() {
   const statusStyle = statusConfig[run.status as RunStatus] ?? statusConfig.queued;
 
   return (
-    <main style={{ maxWidth: "1024px", margin: "0 auto", padding: "0 0 48px 0" }}>
+    <main id="main-content" tabIndex={-1} style={{ maxWidth: "1024px", margin: "0 auto", padding: "0 0 48px 0" }}>
       {/* Run header */}
       <div
         style={{

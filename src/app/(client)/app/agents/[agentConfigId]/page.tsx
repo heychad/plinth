@@ -166,7 +166,7 @@ export default function AgentDetailPage() {
 
   if (isLoading) {
     return (
-      <main style={{ padding: "40px 32px", maxWidth: "900px", margin: "0 auto" }}>
+      <main id="main-content" tabIndex={-1} style={{ padding: "40px 32px", maxWidth: "900px", margin: "0 auto" }}>
         <p style={{ color: "#6b7280" }}>Loading...</p>
       </main>
     );
@@ -174,7 +174,7 @@ export default function AgentDetailPage() {
 
   if (agentData === null) {
     return (
-      <main style={{ padding: "40px 32px", maxWidth: "900px", margin: "0 auto" }}>
+      <main id="main-content" tabIndex={-1} style={{ padding: "40px 32px", maxWidth: "900px", margin: "0 auto" }}>
         <p style={{ color: "#991b1b" }}>Agent not found or access denied.</p>
       </main>
     );
@@ -196,7 +196,7 @@ export default function AgentDetailPage() {
   const statusBadge = statusBadgeStyle[status] ?? { bg: "#f3f4f6", color: "#6b7280", label: status };
 
   return (
-    <main style={{ padding: "32px", maxWidth: "900px", margin: "0 auto" }}>
+    <main id="main-content" tabIndex={-1} style={{ padding: "32px", maxWidth: "900px", margin: "0 auto" }}>
       {/* Back link */}
       <Link
         href="/app/agents"

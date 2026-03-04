@@ -23,7 +23,7 @@ export default function ClientDetailPage() {
 
   if (data === undefined) {
     return (
-      <main style={{ padding: "40px 32px", maxWidth: "1100px", margin: "0 auto" }}>
+      <main id="main-content" tabIndex={-1} style={{ padding: "40px 32px", maxWidth: "1100px", margin: "0 auto" }}>
         <p style={{ color: "#6b7280" }}>Loading...</p>
       </main>
     );
@@ -31,7 +31,7 @@ export default function ClientDetailPage() {
 
   if (data === null) {
     return (
-      <main style={{ padding: "40px 32px", maxWidth: "1100px", margin: "0 auto" }}>
+      <main id="main-content" tabIndex={-1} style={{ padding: "40px 32px", maxWidth: "1100px", margin: "0 auto" }}>
         <p style={{ color: "#991b1b" }}>Client not found or access denied.</p>
       </main>
     );
@@ -48,7 +48,7 @@ export default function ClientDetailPage() {
   ];
 
   return (
-    <main style={{ padding: "24px 32px", maxWidth: "1100px", margin: "0 auto" }}>
+    <main id="main-content" tabIndex={-1} style={{ padding: "24px 32px", maxWidth: "1100px", margin: "0 auto" }}>
       <ClientDetailHeader
         businessName={tenant.businessName}
         ownerName={tenant.ownerName}

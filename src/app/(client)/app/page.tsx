@@ -69,7 +69,7 @@ export default function ClientHomePage() {
   const lastRunAgentName = homeData?.lastRunAgentName;
 
   return (
-    <main style={{ padding: "32px", maxWidth: "1200px", margin: "0 auto" }}>
+    <main id="main-content" tabIndex={-1} style={{ padding: "32px", maxWidth: "1200px", margin: "0 auto" }}>
       {/* Branded header */}
       <div
         style={{

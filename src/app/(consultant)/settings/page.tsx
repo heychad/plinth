@@ -769,7 +769,7 @@ export default function SettingsPage() {
   ];
 
   return (
-    <main style={{ padding: "32px", maxWidth: "1100px", margin: "0 auto" }}>
+    <main id="main-content" tabIndex={-1} style={{ padding: "32px", maxWidth: "1100px", margin: "0 auto" }}>
       <h1
         style={{
           fontSize: "1.5rem",

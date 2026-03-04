@@ -408,7 +408,7 @@
         "All <main> elements have id='main-content' and tabIndex={-1}",
         "npx tsc --noEmit passes"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "Toaster must NOT be duplicated in route-group layouts."
     },
     {

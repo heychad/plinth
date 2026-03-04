@@ -4,6 +4,12 @@ Sprint log -- append only, never overwrite.
 
 ---
 
+## 2026-03-03 — Cycle: Item 26 (Sonner Toast + SkipToContent)
+
+- **Item 26** (ui): Mounted `<Toaster position="bottom-right" richColors />` once in root layout.tsx — grep returns exactly 1 result. Removed `next-themes` dependency from shadcn sonner.tsx since project uses custom ThemeProvider (hardcoded `theme="light"`). Created `src/components/SkipToContent.tsx` — anchor with `href="#main-content"`, sr-only classes that become visible on focus, styled with primary bg/text. Mounted as first child inside `<body>`. Added `id="main-content"` and `tabIndex={-1}` to all 28 `<main>` elements across 16 page files. Backpressure green.
+
+---
+
 ## 2026-03-03 — Cycle: Item 17 (provisionStarterAgent)
 
 - **Item 17** (functional): Added `provisionStarterAgent` mutation to `convex/agentConfigs.ts` — no args, client-role only. Looks up `general-assistant` template by slug, returns `null` if not found. Checks for existing agentConfig via `by_tenantId_templateId` index for idempotency — returns existing `_id` if found. Otherwise creates a new agentConfig with template defaults (`displayName`, `defaultConfig`, `defaultLockedFields`, `defaultCustomizableFields`), status `"deployed"`, version 1. Uses caller's `tenantId` from JWT. Backpressure green.

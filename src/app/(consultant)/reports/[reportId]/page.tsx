@@ -194,7 +194,7 @@ export default function ReportDetailPage() {
 
   if (report === undefined) {
     return (
-      <main style={{ padding: "40px 32px", maxWidth: "1400px", margin: "0 auto" }}>
+      <main id="main-content" tabIndex={-1} style={{ padding: "40px 32px", maxWidth: "1400px", margin: "0 auto" }}>
         <p style={{ color: "#6b7280" }}>Loading report...</p>
       </main>
     );
@@ -202,7 +202,7 @@ export default function ReportDetailPage() {
 
   if (report === null) {
     return (
-      <main style={{ padding: "40px 32px", maxWidth: "1400px", margin: "0 auto" }}>
+      <main id="main-content" tabIndex={-1} style={{ padding: "40px 32px", maxWidth: "1400px", margin: "0 auto" }}>
         <p style={{ color: "#991b1b" }}>Report not found or access denied.</p>
       </main>
     );
@@ -232,7 +232,7 @@ export default function ReportDetailPage() {
         />
       )}
 
-      <main style={{ padding: "24px 32px", maxWidth: "1400px", margin: "0 auto" }}>
+      <main id="main-content" tabIndex={-1} style={{ padding: "24px 32px", maxWidth: "1400px", margin: "0 auto" }}>
         {/* Back nav */}
         <button
           onClick={() => router.back()}

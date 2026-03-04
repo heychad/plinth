@@ -2,6 +2,8 @@ import React from "react";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import { ConvexClientProvider } from "@/components/ConvexClientProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { SkipToContent } from "@/components/SkipToContent";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
@@ -24,9 +26,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={plusJakartaSans.variable}>
       <body className="font-sans antialiased bg-background text-foreground">
+        <SkipToContent />
         <ConvexClientProvider>
           <ThemeProvider>{children}</ThemeProvider>
         </ConvexClientProvider>
+        <Toaster position="bottom-right" richColors />
       </body>
     </html>
   );
