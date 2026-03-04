@@ -4,6 +4,12 @@ Sprint log -- append only, never overwrite.
 
 ---
 
+## 2026-03-03 — Cycle: Item 35 (Consultant Dashboard Page)
+
+- **Item 35** (ui): Rebuilt `src/app/(consultant)/dashboard/page.tsx` — replaced inline-styled old dashboard with shadcn/ui-based layout. Time-aware greeting ("Good morning/afternoon/evening, {firstName}") using Clerk `useUser()`. Created `_components/StatCards.tsx` — 4 stat cards (Total Clients, Active Agents, Runs This Month, Cost This Month) using shadcn `Card` with Lucide icons, responsive grid (4-col desktop, 2-col tablet, stacked mobile), skeleton loading states. Created `_components/RecentClientsTable.tsx` — shadcn `Table` showing max 5 clients with name, status badge, agent count, last run date; "View all clients" link; empty state with "Add your first client" CTA; skeleton loading. Created `_components/DraftReports.tsx` — shows max 3 draft coaching reports with client name, score badge (color-coded: emerald ≥80, amber 70-79, red <70), coach name, "Review" button linking to report detail; empty state. Layout uses `lg:grid-cols-3` with clients table spanning 2 cols and draft reports in 1 col. No horizontal scroll at 375px. Uses existing queries: `api.dashboard.getConsultantDashboard`, `api.dashboard.listClientsForConsultant`, `api.coachingCallReports.listCoachingReportsForConsultant`. Backpressure green.
+
+---
+
 ## 2026-03-03 — Cycle: Item 23 (Sign-In / Sign-Up Pages)
 
 - **Item 23** (ui): Created `src/app/(auth)/sign-in/[[...sign-in]]/page.tsx` with Clerk `<SignIn />` component branded with `colorPrimary="#6366F1"` and `fontFamily="var(--font-plus-jakarta-sans)"`, `afterSignInUrl="/"`. Created `src/app/(auth)/sign-up/[[...sign-up]]/page.tsx` with matching `<SignUp />` component. Both use catch-all route segments for Clerk sub-route resolution. Auth layout (already existing) centers the components. Backpressure green.

@@ -564,7 +564,7 @@
         "Skeleton loading states for stat cards and clients table; empty state card with 'Add your first client' CTA when no clients exist",
         "No horizontal scroll at 375px viewport"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "Depends on ConsultantSidebar (Item 34). Use existing queries: api.dashboard.getConsultantDashboard (stat data) and api.dashboard.listClientsForConsultant (recent clients table). Do NOT create new queries."
     },
     {
