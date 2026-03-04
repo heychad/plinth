@@ -599,7 +599,7 @@
         "Convex query scopes by consultantId \u2014 consultant cannot access another consultant's client",
         "npx tsc --noEmit passes"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "BLOCKER-2 fix: 4 tabs initially; Users tab wired as 5th tab by Item 48. Tab content in Items 38, 39."
     },
     {

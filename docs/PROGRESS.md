@@ -4,6 +4,12 @@ Sprint log -- append only, never overwrite.
 
 ---
 
+## 2026-03-03 — Cycle: Item 37 (Client Detail Page Shell)
+
+- **Item 37** (ui): Rebuilt client detail page at `src/app/(consultant)/clients/[tenantId]/page.tsx` with shadcn/ui components. Replaced inline styles with Tailwind classes. Added shadcn Breadcrumb ("Clients / {businessName}"), heading with Badge for status (active=emerald, paused=amber, churned=muted), owner name subtitle. Created `_components/ClientDetailTabs.tsx` with shadcn Tabs containing 4 tabs: Agent Configs, Run History, Reports, Client Settings. Tabs use underline style (border-b-2, transparent→primary on active). Existing tab content components (AgentsTab, RecentRunsTab, ReportsTab) wired into first 3 tabs. Client Settings tab shows skeleton placeholder (content in Item 39). Full skeleton loading state (ClientDetailSkeleton) renders while Convex query loads — breadcrumb skeleton, heading skeleton, 4 tab skeletons, and tab content skeleton rows. Convex query `clientDetail.getClientDetail` already scopes by consultantId. Backpressure green.
+
+---
+
 ## 2026-03-03 — Cycle: Item 22 (Design System Visual Reference Page)
 
 - **Item 22** (ui): Created `/design-system` route as a dev-only visual reference page. Page component at `src/app/design-system/page.tsx` calls `notFound()` in production (NODE_ENV=production). Client component at `src/app/design-system/_components/DesignSystemContent.tsx` renders all installed shadcn/ui components with Plinth tokens: Buttons in all 6 variants (default, secondary, destructive, outline, ghost, link) plus size variants and disabled state. Card with --card (#FFFFFF) background and --border (#E2E8F0). Badge in all 4 variants. Input with label, disabled, and icon-prefixed variants. Select, Checkbox (unchecked/checked/disabled), Textarea with labels. Avatar with fallback initials. Breadcrumb navigation example. Tabs with 3 panels. Table with Badge status cells. Tooltip on icon buttons. Skeleton loading patterns. Color palette swatches showing all 8 Plinth tokens. Typography scale from 4xl to xs. Spacing token visual blocks (xs through 3xl). Shadow token cards (sm through xl). Combined "Create Agent" example form showing components working together. All text renders in Plus Jakarta Sans. Backpressure green.
