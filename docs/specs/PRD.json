@@ -183,7 +183,7 @@
         "createUserMessage returns Id<'messages'>",
         "npx tsc --noEmit passes"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "Depends on messages table (Item 4) and conversations.ts for ownership check."
     },
     {

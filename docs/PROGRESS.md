@@ -4,6 +4,12 @@ Sprint log -- append only, never overwrite.
 
 ---
 
+## 2026-03-03 — Cycle: Item 12 (Messages CRUD)
+
+- **Item 12** (functional): Created `convex/messages.ts` with `listMessages` and `createUserMessage`. `listMessages` accepts `conversationId`, calls `requireAuth()`, resolves Convex userId, validates caller owns the conversation (returns null on mismatch), returns messages ordered by `createdAt` ASC via `by_conversationId_createdAt` index. `createUserMessage` accepts `{ conversationId, content }`, validates ownership, inserts message with role `'user'`, `isStreaming: false`, `tenantId` from JWT, returns `Id<"messages">`. Also updates conversation `lastMessageAt`, `messageCount`, and auto-generates title from first message (truncated to 60 chars). Backpressure green.
+
+---
+
 ## 2026-03-03 — Cycle: Item 11 (Conversations CRUD)
 
 - **Item 11** (functional): Created `convex/conversations.ts` with `listConversations`, `getConversation`, and `createConversation`. All three functions call `requireAuth()`, resolve the Convex user `_id` from `clerkUserId`, and scope data by userId. `listConversations` returns up to 20 conversations ordered by `lastMessageAt` DESC. `getConversation` validates `userId` matches caller. `createConversation` accepts optional `agentConfigId`, sets `tenantId`/`userId` from JWT. Backpressure green.
