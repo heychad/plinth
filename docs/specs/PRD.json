@@ -8,15 +8,15 @@
       "description": "Initialize shadcn/ui, configure Tailwind v4 CSS-first in globals.css, and set up path aliases in tsconfig.json",
       "specRef": "docs/specs/ui-design-system-foundation.md",
       "steps": [
-        "Run `npx shadcn@latest init` — components.json exists at project root with style=default, rsc=true, tsx=true, tailwind.css=src/app/globals.css, cssVariables=true, iconLibrary=lucide",
+        "Run `npx shadcn@latest init` \u2014 components.json exists at project root with style=default, rsc=true, tsx=true, tailwind.css=src/app/globals.css, cssVariables=true, iconLibrary=lucide",
         "src/lib/utils.ts exists and exports cn() utility function",
         "tsconfig.json has path aliases: @/components, @/lib/utils, @/components/ui, @/lib, @/hooks",
-        "src/app/globals.css starts with `@import \"tailwindcss\";` — no tailwind.config.js or tailwind.config.ts exists at project root",
+        "src/app/globals.css starts with `@import \"tailwindcss\";` \u2014 no tailwind.config.js or tailwind.config.ts exists at project root",
         "npm run build completes with no Tailwind v4 configuration errors",
         "npx tsc --noEmit passes with no path alias errors"
       ],
       "passes": true,
-      "notes": "First item — all other foundation items depend on this. Use --legacy-peer-deps if npm install fails."
+      "notes": "First item \u2014 all other foundation items depend on this. Use --legacy-peer-deps if npm install fails."
     },
     {
       "id": 2,
@@ -30,7 +30,7 @@
         "[data-theme=\"dark\"] block exists in globals.css (stubbed)",
         "In browser devtools, --primary CSS variable resolves to an indigo color"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "shadcn with Tailwind v4 uses OKLCH color space. Convert hex to OKLCH equivalents."
     },
     {
@@ -105,7 +105,7 @@
         "npx tsc --noEmit reports no missing module errors for any of these packages"
       ],
       "passes": false,
-      "notes": "Consolidates package installs from chat-interface, document-store, and user-management specs. zod is already installed (v4) — no-op for that package. @mantine/core and @mantine/hooks are peer deps of @blocknote/mantine. @hookform/resolvers@^4 supports Zod v4."
+      "notes": "Consolidates package installs from chat-interface, document-store, and user-management specs. zod is already installed (v4) \u2014 no-op for that package. @mantine/core and @mantine/hooks are peer deps of @blocknote/mantine. @hookform/resolvers@^4 supports Zod v4."
     },
     {
       "id": 8,
@@ -115,8 +115,8 @@
       "steps": [
         "src/middleware.ts exports default clerkMiddleware; config.matcher excludes _next/static, _next/image, favicon.ico",
         "Public routes: /, /sign-in(.*), /sign-up(.*), /api/webhooks/(.*), /oauth/(.*)",
-        "Non-public routes call auth.protect() — visiting /dashboard while unauthenticated redirects to /sign-in",
-        "When process.env.NEXT_PUBLIC_TEST_MODE === 'true', auth checks are skipped entirely (use NEXT_PUBLIC_TEST_MODE, not TEST_MODE — must be accessible in Edge Runtime)",
+        "Non-public routes call auth.protect() \u2014 visiting /dashboard while unauthenticated redirects to /sign-in",
+        "When process.env.NEXT_PUBLIC_TEST_MODE === 'true', auth checks are skipped entirely (use NEXT_PUBLIC_TEST_MODE, not TEST_MODE \u2014 must be accessible in Edge Runtime)",
         "Client user hitting /app route (excluding /app/onboarding) with onboardingComplete absent/false: redirects 302 to /app/onboarding",
         "Client user on /app/onboarding with onboardingComplete: true: redirects 302 to /app",
         "Consultant users are not affected by onboarding redirect logic",
@@ -128,7 +128,7 @@
     {
       "id": 9,
       "category": "foundation",
-      "description": "Create auth layout at src/app/(auth)/layout.tsx — centered full-screen container for sign-in/sign-up pages",
+      "description": "Create auth layout at src/app/(auth)/layout.tsx \u2014 centered full-screen container for sign-in/sign-up pages",
       "specRef": "docs/specs/ui-auth-and-routing.md",
       "steps": [
         "File src/app/(auth)/layout.tsx exists and exports a default React component",
@@ -159,7 +159,7 @@
     {
       "id": 11,
       "category": "functional",
-      "description": "Implement conversations CRUD in convex/conversations.ts: listConversations, getConversation, createConversation — all with multi-tenancy enforcement",
+      "description": "Implement conversations CRUD in convex/conversations.ts: listConversations, getConversation, createConversation \u2014 all with multi-tenancy enforcement",
       "specRef": "docs/specs/ui-client-chat-interface.md",
       "steps": [
         "listConversations calls requireAuth(), resolves userId from JWT, returns conversations ordered by lastMessageAt DESC with limit 20, scoped by caller's tenantId",
@@ -193,7 +193,7 @@
       "specRef": "docs/specs/ui-client-chat-interface.md",
       "steps": [
         "convex/execution/chatStream.ts exports an HTTP action handler; route POST /api/chat/stream registered in convex/http.ts",
-        "Handler validates Clerk JWT from Authorization header — returns 401 for invalid token",
+        "Handler validates Clerk JWT from Authorization header \u2014 returns 401 for invalid token",
         "Handler creates assistant message with isStreaming: true and streamingToken before streaming",
         "Handler uses createTextStreamer from @convex-dev/persistent-text-streaming to write chunks",
         "Response is text/event-stream content type with SSE chunks",
@@ -210,7 +210,7 @@
       "specRef": "docs/specs/ui-client-chat-interface.md",
       "steps": [
         "convex/execution/orchestrator.ts exports internalAction named orchestratorRoute accepting { conversationId, userMessage, tenantId, userId }",
-        "Action queries tenant's deployed agentConfigs to build orchestrator system prompt dynamically — no hardcoded agent capabilities",
+        "Action queries tenant's deployed agentConfigs to build orchestrator system prompt dynamically \u2014 no hardcoded agent capabilities",
         "If no agentConfigs deployed, returns 'Your consultant hasn't set up any agents yet.' without empty tool list",
         "Uses claude-sonnet-4-6 via Agent SDK as primary execution mode",
         "When user message names an agent, routes via tool call; when ambiguous, asks clarifying question; when no match, responds directly",
@@ -229,7 +229,7 @@
         "getDocument query validates document.tenantId matches caller's tenantId; returns null on mismatch; includes signed URL if storageId is set",
         "createDocument mutation sets tenantId/userId from JWT, mimeType 'text/markdown', createdAt/updatedAt to Date.now(), returns Id<'documents'>",
         "updateDocument mutation validates tenant ownership, throws ConvexError on mismatch, always updates updatedAt",
-        "saveAgentDocument is internalMutation — idempotent per agentRunId (upserts via by_agentRunId index), sets source: 'agent'",
+        "saveAgentDocument is internalMutation \u2014 idempotent per agentRunId (upserts via by_agentRunId index), sets source: 'agent'",
         "npx tsc --noEmit passes"
       ],
       "passes": false,
@@ -253,7 +253,7 @@
     {
       "id": 17,
       "category": "functional",
-      "description": "Add provisionStarterAgent mutation to convex/agentConfigs.ts — idempotent per tenant, client-role only",
+      "description": "Add provisionStarterAgent mutation to convex/agentConfigs.ts \u2014 idempotent per tenant, client-role only",
       "specRef": "docs/specs/ui-client-onboarding.md",
       "steps": [
         "provisionStarterAgent checks for existing agentConfig with templateId matching 'general-assistant' for caller's tenant; creates one if absent",
@@ -303,9 +303,9 @@
       "steps": [
         "convex/coachingCallReports.ts exports a markReviewed mutation that accepts { reportId }, calls requireAuth, validates consultant ownership, sets status to 'reviewed' and updatedAt to Date.now()",
         "convex/tenants.ts exports an updateTenant mutation that accepts { tenantId, businessName?, ownerName?, ownerEmail?, website?, vertical?, notes? }, calls requireAuth, validates consultant ownership of tenant, patches fields and sets updatedAt",
-        "convex/consultants.ts updateConsultant mutation expanded to accept { displayName?, businessName?, supportEmail? } — currently only accepts displayName. Add businessName and supportEmail as v.optional(v.string()) args",
+        "convex/consultants.ts updateConsultant mutation expanded to accept { displayName?, businessName?, supportEmail? } \u2014 currently only accepts displayName. Add businessName and supportEmail as v.optional(v.string()) args",
         "convex/themes.ts VALID_FONT_FAMILIES updated to include 'Plus Jakarta Sans': [\"Inter\", \"Poppins\", \"Lato\", \"Montserrat\", \"Open Sans\", \"Plus Jakarta Sans\"]",
-        "Add v.literal('general') to the agentTemplates category union in convex/schema.ts. convex/seed.ts includes a 'general-assistant' agentTemplate entry with slug 'general-assistant', category 'general', executionMode 'autonomous', isActive true — seed is idempotent (checks for existing slug before insert)",
+        "Add v.literal('general') to the agentTemplates category union in convex/schema.ts. convex/seed.ts includes a 'general-assistant' agentTemplate entry with slug 'general-assistant', category 'general', executionMode 'autonomous', isActive true \u2014 seed is idempotent (checks for existing slug before insert)",
         "Existing mutations are NOT modified: sendReportToCoach (line ~277) and markNoAction (line ~308) remain as-is",
         "npx tsc --noEmit passes"
       ],
@@ -319,7 +319,7 @@
       "specRef": "docs/specs/ui-consultant-user-management.md",
       "steps": [
         "File src/app/(consultant)/clients/[tenantId]/_actions.ts exists with 'use server' directive",
-        "inviteUser server action validates email with Zod z.string().email(), checks for existing user, retrieves clerkOrgId — returns { success: false, error } for invalid email, missing clerkOrgId, or existing user",
+        "inviteUser server action validates email with Zod z.string().email(), checks for existing user, retrieves clerkOrgId \u2014 returns { success: false, error } for invalid email, missing clerkOrgId, or existing user",
         "inviteUser calls clerkClient().organizations.createOrganizationInvitation with role 'org:client' and saves record via createInvitation internal mutation",
         "revokeInvitation calls Clerk revoke API then updateInvitationStatus with 'revoked'",
         "resendInvitation revokes old, creates new, updates clerkInvitationId and sentAt",
@@ -368,7 +368,7 @@
       "specRef": "docs/specs/ui-auth-and-routing.md",
       "userStory": "As a consultant, I see a UserButton for profile/sign-out; as a client trying to access /dashboard, I am redirected to /app.",
       "steps": [
-        "Consultant layout calls await auth() — if role is 'client' or absent, redirects to /app",
+        "Consultant layout calls await auth() \u2014 if role is 'client' or absent, redirects to /app",
         "/dashboard as consultant/admin renders without redirect",
         "Consultant layout renders <UserButton afterSignOutUrl='/sign-in' /> in sidebar footer or header",
         "Client layout renders <UserButton afterSignOutUrl='/sign-in' /> in sidebar footer",
@@ -401,7 +401,7 @@
       "specRef": "docs/specs/ui-shared-polish.md",
       "userStory": "As a user performing actions, I see toast notifications; as a keyboard user, I can skip to main content with Tab+Enter.",
       "steps": [
-        "<Toaster position='bottom-right' richColors /> rendered once in src/app/layout.tsx body — grep '<Toaster' returns exactly one result",
+        "<Toaster position='bottom-right' richColors /> rendered once in src/app/layout.tsx body \u2014 grep '<Toaster' returns exactly one result",
         "toast.success('Test') shows green toast in bottom-right; toast.error('Test') shows red toast",
         "src/components/SkipToContent.tsx renders anchor with href='#main-content', sr-only classes that become visible on focus",
         "<SkipToContent /> is first child inside <body> in layout.tsx",
@@ -506,7 +506,7 @@
       "userStory": "As a new client, when I arrive at /app/onboarding, I step through a 3-step wizard in a centered card, and clicking 'Start chatting' provisions my starter agent and takes me to the chat interface.",
       "steps": [
         "OnboardingWizard.tsx is 'use client' component managing step state (1-3); card is bg-card rounded-2xl shadow-lg p-8 max-w-[480px] centered; progress indicator shows 3 dots filled by --color-primary",
-        "Step 1: heading 'Welcome to {platformName}' (fallback 'Plinth'), 'Let's go' CTA (bg-accent), 'Skip setup' link — skip calls completeOnboarding() and redirects to /app",
+        "Step 1: heading 'Welcome to {platformName}' (fallback 'Plinth'), 'Let's go' CTA (bg-accent), 'Skip setup' link \u2014 skip calls completeOnboarding() and redirects to /app",
         "Step 2: heading 'Here's what your AI assistant can do', 3 bullet points, 'Next' CTA, 'Back' link, 'Skip setup' link",
         "Step 3: heading 'You're all set!', 'Start chatting' CTA triggers provisionStarterAgent then completeOnboarding() then redirects to /app; no skip link; toast error on failure",
         "src/app/(client)/app/onboarding/page.tsx renders OnboardingWizard, does NOT render standard app sidebar",
@@ -542,7 +542,7 @@
         "Consultant layout at src/app/(consultant)/layout.tsx wraps in <SidebarProvider>; <main> element has id='main-content' and tabIndex={-1}",
         "ConsultantSidebar has nav items: Dashboard, Clients, Agents, Reports, Settings with Lucide icons",
         "Sidebar header shows Plinth wordmark/logo; footer shows <UserButton afterSignOutUrl='/sign-in' /> and consultant name",
-        "Click SidebarTrigger on desktop — collapses to icon-only; click again — expands",
+        "Click SidebarTrigger on desktop \u2014 collapses to icon-only; click again \u2014 expands",
         "At < 768px, sidebar hidden; hamburger trigger (min 44x44px) opens Sheet drawer",
         "Active nav item has bg-sidebar-accent and aria-current='page'",
         "<nav> has role='navigation' and aria-label='Consultant navigation'"
@@ -575,7 +575,7 @@
       "userStory": "As a consultant, when I click a column header the table sorts, and when I type in the search field the table filters in real-time.",
       "steps": [
         "TanStack Table with columns: Business name (link), Owner, Status (badge), Agents (count), Last run (relative date), Actions",
-        "Click column header — sorts ascending then descending; aria-sort attribute updates",
+        "Click column header \u2014 sorts ascending then descending; aria-sort attribute updates",
         "Search input filters client-side without page reload; status Select filters by paused/active/all",
         "25 rows per page with pagination controls; 'View' navigates to /clients/{tenantId}",
         "Kebab menu shows Pause, Edit, Archive; table has <caption> and <th scope='col'>",
@@ -593,10 +593,10 @@
       "userStory": "As a consultant, when I open a client detail page, I see tabbed content and can switch between tabs.",
       "steps": [
         "Breadcrumb reads 'Clients / {businessName}'; heading shows businessName with status badge",
-        "4 tabs render: Agent Configs, Run History, Reports, Client Settings — Users tab added separately in Item 48",
+        "4 tabs render: Agent Configs, Run History, Reports, Client Settings \u2014 Users tab added separately in Item 48",
         "Clicking each tab switches content without page reload; skeleton loading per tab",
         "ConsultantSidebar is present with 'Clients' highlighted as active",
-        "Convex query scopes by consultantId — consultant cannot access another consultant's client",
+        "Convex query scopes by consultantId \u2014 consultant cannot access another consultant's client",
         "npx tsc --noEmit passes"
       ],
       "passes": false,
@@ -641,7 +641,7 @@
       "steps": [
         "Heading 'Agent Library' with category tabs: All, Marketing, Sales, Operations, Coaching",
         "Card grid: 3 columns desktop, 2 tablet, 1 mobile; TemplateCard shows name, description (2 lines truncated), category badge, Active/Pipeline badges",
-        "'Deploy to client' button opens Dialog with client Select and display name input; confirm calls deployAgentConfig (NOT createAgentConfig — use the existing mutation name); toast 'Agent deployed to {clientName}'",
+        "'Deploy to client' button opens Dialog with client Select and display name input; confirm calls deployAgentConfig (NOT createAgentConfig \u2014 use the existing mutation name); toast 'Agent deployed to {clientName}'",
         "Templates fetched via Convex agentTemplates query; skeleton cards during loading"
       ],
       "passes": false,
@@ -677,19 +677,19 @@
         "At 375px, panels stack vertically; 'No dimension scores available' when no scores exist; skeleton during loading"
       ],
       "passes": false,
-      "notes": "BLOCKER-1 fix: uses actual mutation names — markReviewed (Item 20), sendReportToCoach, markNoAction."
+      "notes": "BLOCKER-1 fix: uses actual mutation names \u2014 markReviewed (Item 20), sendReportToCoach, markNoAction."
     },
     {
       "id": 43,
       "category": "ui",
-      "description": "Build settings page with Profile, Theme, and Billing tabs — including hex color validation, live preview, and logo upload",
+      "description": "Build settings page with Profile, Theme, and Billing tabs \u2014 including hex color validation, live preview, and logo upload",
       "specRef": "docs/specs/ui-consultant-redesign.md",
       "userStory": "As a consultant, when I update my primary color in Theme settings, I see a live preview before saving.",
       "steps": [
         "3 tabs: Profile, Theme, Billing",
         "Profile: Display name (required), Business name (required), Email (read-only), Support email; Zod validation; save calls updateConsultant; success toast",
         "Theme: Platform name, 5 hex color inputs with swatch preview; '#xyz' shows 'Invalid hex color format' inline; save disabled while invalid",
-        "Theme live preview panel updates when valid colors entered; logo upload via Convex generateUploadUrl; 'Save theme' calls upsertTheme (NOT updateTheme — use the existing mutation name); font family field is a Select with valid values from VALID_FONT_FAMILIES: Inter, Poppins, Lato, Montserrat, Open Sans, Plus Jakarta Sans",
+        "Theme live preview panel updates when valid colors entered; logo upload via Convex generateUploadUrl; 'Save theme' calls upsertTheme (NOT updateTheme \u2014 use the existing mutation name); font family field is a Select with valid values from VALID_FONT_FAMILIES: Inter, Poppins, Lato, Montserrat, Open Sans, Plus Jakarta Sans",
         "Billing: read-only plan info + 'Upgrade plan' external link",
         "Tab switching does not reset unsaved form state"
       ],
@@ -757,7 +757,7 @@
         "When clerkOrgId not set on consultant, tab shows 'Organization not configured. Contact support.'"
       ],
       "passes": false,
-      "notes": "Depends on invitation server actions (Item 21) and client detail page shell (Item 37). Components only — wiring as tab in Item 48."
+      "notes": "Depends on invitation server actions (Item 21) and client detail page shell (Item 37). Components only \u2014 wiring as tab in Item 48."
     },
     {
       "id": 48,
@@ -796,7 +796,7 @@
       "description": "Create Clerk webhook handler for organizationMembership.created and organizationInvitation.expired events, register in http.ts",
       "specRef": "docs/specs/ui-consultant-user-management.md",
       "steps": [
-        "convex/webhooks/clerk.ts verifies svix-id, svix-timestamp, svix-signature headers — returns 400 for invalid",
+        "convex/webhooks/clerk.ts verifies svix-id, svix-timestamp, svix-signature headers \u2014 returns 400 for invalid",
         "organizationMembership.created: resolves consultantId from clerkOrgId, resolves tenantId from invitation by email, creates users record (idempotent by clerkUserId), sets Clerk publicMetadata { role: 'client', tenantId: string }",
         "Updates invitation status to 'accepted'; if no invitation found, creates user with tenantId: null",
         "organizationInvitation.expired: updates invitation status to 'expired' via by_clerkInvitationId index",
@@ -804,7 +804,7 @@
         "npx tsc --noEmit passes"
       ],
       "passes": false,
-      "notes": "Depends on invitations.ts (Item 19); svix package (Item 7). IMPORTANT: The existing createUser mutation in users.ts requires platform_admin role — the webhook handler MUST use an internalMutation for user creation (create a new createUserInternal in users.ts), NOT the existing createUser. CLERK_WEBHOOK_SECRET and CLERK_SECRET_KEY must both be set in Convex env vars."
+      "notes": "Depends on invitations.ts (Item 19); svix package (Item 7). IMPORTANT: The existing createUser mutation in users.ts requires platform_admin role \u2014 the webhook handler MUST use an internalMutation for user creation (create a new createUserInternal in users.ts), NOT the existing createUser. CLERK_WEBHOOK_SECRET and CLERK_SECRET_KEY must both be set in Convex env vars."
     },
     {
       "id": 51,
@@ -826,7 +826,7 @@
     {
       "id": 52,
       "category": "test-backend",
-      "description": "Unit/integration tests for documents.ts: listDocuments, getDocument, createDocument, updateDocument, saveAgentDocument — tenant isolation and idempotency",
+      "description": "Unit/integration tests for documents.ts: listDocuments, getDocument, createDocument, updateDocument, saveAgentDocument \u2014 tenant isolation and idempotency",
       "specRef": "docs/specs/ui-document-store.md",
       "steps": [
         "listDocuments: tenant A cannot see tenant B's documents; sortBy 'createdAt' returns newest first; sortBy 'title' returns alphabetical; max 50 returned",
@@ -909,11 +909,11 @@
       "specRef": "docs/specs/ui-auth-and-routing.md",
       "userStory": "As any user, auth redirects work correctly: unauthenticated to /sign-in, consultants to /dashboard, clients to /app, cross-role blocked.",
       "steps": [
-        "Test: navigate to / without session — URL contains /sign-in; /dashboard without session — /sign-in; /app without session — /sign-in",
+        "Test: navigate to / without session \u2014 URL contains /sign-in; /dashboard without session \u2014 /sign-in; /app without session \u2014 /sign-in",
         "Test: /sign-in renders Clerk sign-in form",
-        "Test: sign in as consultant — URL is /dashboard; as client — URL is /app; as platform_admin — /dashboard; as no-role — /app",
-        "Test: authenticated client navigates to /dashboard — redirected to /app; page does NOT show consultant UI",
-        "Test: consultant clicks UserButton Sign out — URL is /sign-in; client clicks Sign out — URL is /sign-in; session cleared",
+        "Test: sign in as consultant \u2014 URL is /dashboard; as client \u2014 URL is /app; as platform_admin \u2014 /dashboard; as no-role \u2014 /app",
+        "Test: authenticated client navigates to /dashboard \u2014 redirected to /app; page does NOT show consultant UI",
+        "Test: consultant clicks UserButton Sign out \u2014 URL is /sign-in; client clicks Sign out \u2014 URL is /sign-in; session cleared",
         "npx playwright test passes"
       ],
       "passes": false,
@@ -927,7 +927,7 @@
       "userStory": "As a client, when I type a message and press Enter, it sends and the agent streams a response; I can resume past conversations from the sidebar.",
       "steps": [
         "Test: /app as client shows EmptyState with suggested prompts",
-        "Test: type message, press Enter — user bubble appears right-aligned; TypingIndicator shows during streaming; agent response renders with markdown",
+        "Test: type message, press Enter \u2014 user bubble appears right-aligned; TypingIndicator shows during streaming; agent response renders with markdown",
         "Test: textarea and send button disabled while streaming; send button disabled when empty",
         "Test: conversation appears in sidebar; clicking it navigates to /app/{conversationId} with messages loaded",
         "Test: '+ New Chat' creates conversation and navigates to new URL",
@@ -977,10 +977,10 @@
       "userStory": "As a client, I can create, edit, and sort documents, with auto-save and unsaved changes protection.",
       "steps": [
         "Test: /app/documents shows heading, 'New document' button; click creates doc and navigates to editor with breadcrumb 'Documents / Untitled document'",
-        "Test: click title, change to 'My Test Document', blur — breadcrumb updates; type in editor — 'Saving...' appears then 'Saved'",
+        "Test: click title, change to 'My Test Document', blur \u2014 breadcrumb updates; type in editor \u2014 'Saving...' appears then 'Saved'",
         "Test: with no documents, empty state shows 'No documents yet' with 'Create document' button",
         "Test: sort controls change list order (Name alphabetical, Date created newest first, Date modified newest first)",
-        "Test: type in editor, click sidebar nav — unsaved changes dialog appears; Cancel stays, Leave navigates away",
+        "Test: type in editor, click sidebar nav \u2014 unsaved changes dialog appears; Cancel stays, Leave navigates away",
         "npx playwright test passes"
       ],
       "passes": false,
@@ -1010,10 +1010,10 @@
       "specRef": "docs/specs/ui-consultant-redesign.md",
       "userStory": "As a consultant, settings form validation works and report detail editing/actions are reflected in the UI.",
       "steps": [
-        "Test: /settings Profile tab — empty Display name shows Zod error; valid data + Save shows success toast",
-        "Test: Theme tab — '#xyz' shows error, save disabled; '#FF5733' clears error, preview updates; Save theme shows toast",
-        "Test: Billing tab — read-only plan info; Upgrade link is anchor not button",
-        "Test: /reports/{reportId} — two-panel layout; edit narrative + Save shows '(edited)' badge; 'Mark Reviewed' updates badge",
+        "Test: /settings Profile tab \u2014 empty Display name shows Zod error; valid data + Save shows success toast",
+        "Test: Theme tab \u2014 '#xyz' shows error, save disabled; '#FF5733' clears error, preview updates; Save theme shows toast",
+        "Test: Billing tab \u2014 read-only plan info; Upgrade link is anchor not button",
+        "Test: /reports/{reportId} \u2014 two-panel layout; edit narrative + Save shows '(edited)' badge; 'Mark Reviewed' updates badge",
         "Test: at 375px panels stack vertically; report with no dimension scores shows placeholder text",
         "npx playwright test passes"
       ],
@@ -1027,9 +1027,9 @@
       "specRef": "docs/specs/ui-consultant-user-management.md",
       "userStory": "As a consultant, I can invite users, revoke invitations, and see an error when my org is not configured.",
       "steps": [
-        "Test: on Users tab, click 'Invite user' — Dialog opens; fill valid email, submit — toast 'Invitation sent to {email}'; email appears in Pending table",
+        "Test: on Users tab, click 'Invite user' \u2014 Dialog opens; fill valid email, submit \u2014 toast 'Invitation sent to {email}'; email appears in Pending table",
         "Test: invalid email shows inline error; no toast",
-        "Test: click 'Revoke' on pending invitation — AlertDialog appears; Cancel closes; Revoke removes/updates row",
+        "Test: click 'Revoke' on pending invitation \u2014 AlertDialog appears; Cancel closes; Revoke removes/updates row",
         "Test: consultant with no clerkOrgId sees 'Organization not configured. Contact support.' on Users tab; Invite button absent/disabled",
         "npx playwright test passes"
       ],

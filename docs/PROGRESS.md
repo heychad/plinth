@@ -546,3 +546,23 @@ Sprint log -- append only, never overwrite.
 **PRD status:** 1/65 items passing
 
 **Next priority items:** Item 2 (CSS variable palette — already partially done in globals.css), Item 3 (font + shadcn components install), Items 4-7 (schema + packages)
+
+---
+
+## UI Sprint Cycle 2 — 2026-03-03
+
+**Items completed:** 2 (CSS variable palette)
+
+**What was built:**
+- **Item 2:** Added `--radius: 0.5rem` to `:root` block in globals.css. All 18 shadcn variables, 5 Plinth-specific tokens, 7 spacing tokens, 4 shadow tokens, and dark theme stub were already in place from Cycle 1 — only --radius was missing from :root (was only in @theme).
+
+**Files modified:**
+- src/app/globals.css (added --radius to :root)
+
+**Verification:**
+- `npx tsc --noEmit` — PASS
+- `npm run build` — PASS
+
+**PRD status:** 2/65 items passing
+
+**Next priority items:** Item 3 (font + 20 shadcn components), Items 4-6 (schema tables), Item 7 (package installs)

@@ -23,6 +23,7 @@
   --border: oklch(0.907 0.011 254.1);
   --input: oklch(0.907 0.011 254.1);
   --ring: oklch(0.551 0.215 272.1);
+  --radius: 0.5rem;
 
   --color-primary: #6366F1;
   --color-secondary: #818CF8;
