@@ -4,6 +4,12 @@ Sprint log -- append only, never overwrite.
 
 ---
 
+## 2026-03-03 — Cycle: Item 15 (Document CRUD)
+
+- **Item 15** (functional): Created `convex/documents.ts` with `listDocuments`, `getDocument`, `createDocument`, `updateDocument`, and `saveAgentDocument`. `listDocuments` accepts optional `sortBy` ('createdAt'|'updatedAt'|'title'), calls `requireAuth()`, scopes by `tenantId`, returns up to 50 docs — uses index for createdAt DESC, in-memory sort for updatedAt/title. `getDocument` validates `tenantId` match, returns null on mismatch, includes signed `contentUrl` via `ctx.storage.getUrl()` when `storageId` is set. `createDocument` sets `tenantId`/`userId` from JWT, `mimeType: 'text/markdown'`, computes `wordCount`, returns `Id<"documents">`. `updateDocument` validates tenant ownership, throws `ConvexError` on mismatch, always updates `updatedAt` and recomputes `wordCount` when content changes. `saveAgentDocument` is `internalMutation` — idempotent per `agentRunId` (upserts via `by_agentRunId` index), sets `source: 'agent'`, looks up first tenant user for `userId`. Backpressure green (tsc + eslint).
+
+---
+
 ## 2026-03-03 — Cycle: Item 12 (Messages CRUD)
 
 - **Item 12** (functional): Created `convex/messages.ts` with `listMessages` and `createUserMessage`. `listMessages` accepts `conversationId`, calls `requireAuth()`, resolves Convex userId, validates caller owns the conversation (returns null on mismatch), returns messages ordered by `createdAt` ASC via `by_conversationId_createdAt` index. `createUserMessage` accepts `{ conversationId, content }`, validates ownership, inserts message with role `'user'`, `isStreaming: false`, `tenantId` from JWT, returns `Id<"messages">`. Also updates conversation `lastMessageAt`, `messageCount`, and auto-generates title from first message (truncated to 60 chars). Backpressure green.

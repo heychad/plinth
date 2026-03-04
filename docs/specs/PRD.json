@@ -232,7 +232,7 @@
         "saveAgentDocument is internalMutation \u2014 idempotent per agentRunId (upserts via by_agentRunId index), sets source: 'agent'",
         "npx tsc --noEmit passes"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "Depends on documents table (Item 5)."
     },
     {
