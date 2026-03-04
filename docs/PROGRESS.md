@@ -4,6 +4,12 @@ Sprint log -- append only, never overwrite.
 
 ---
 
+## 2026-03-03 — Cycle: Item 19 (Invitations CRUD)
+
+- **Item 19** (functional): Created `convex/invitations.ts` with three exports. `createInvitation` is an `internalMutation` accepting `{ tenantId, consultantId, email, displayName?, clerkInvitationId }` — sets status to `"pending"`, sentAt/createdAt to now, acceptedAt to null. `updateInvitationStatus` is an `internalMutation` accepting `{ clerkInvitationId, status, acceptedAt? }` — looks up invitation by `by_clerkInvitationId` index, throws if not found, patches status and optionally acceptedAt. `listInvitations` is a `query` accepting `{ tenantId }` — calls `requireAuth`, `requireRole("consultant")`, verifies consultant owns the tenant (returns `[]` if not), queries by `by_tenantId_status` index, sorts by sentAt DESC. Backpressure green.
+
+---
+
 ## 2026-03-03 — Cycle: Item 26 (Sonner Toast + SkipToContent)
 
 - **Item 26** (ui): Mounted `<Toaster position="bottom-right" richColors />` once in root layout.tsx — grep returns exactly 1 result. Removed `next-themes` dependency from shadcn sonner.tsx since project uses custom ThemeProvider (hardcoded `theme="light"`). Created `src/components/SkipToContent.tsx` — anchor with `href="#main-content"`, sr-only classes that become visible on focus, styled with primary bg/text. Mounted as first child inside `<body>`. Added `id="main-content"` and `tabIndex={-1}` to all 28 `<main>` elements across 16 page files. Backpressure green.

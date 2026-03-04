@@ -292,7 +292,7 @@
         "Calling listInvitations with a tenantId belonging to a different consultant returns empty or throws authorization error",
         "npx tsc --noEmit passes"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "Depends on invitations table in schema (Item 6)."
     },
     {
