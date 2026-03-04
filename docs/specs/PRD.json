@@ -309,7 +309,7 @@
         "Existing mutations are NOT modified: sendReportToCoach (line ~277) and markNoAction (line ~308) remain as-is",
         "npx tsc --noEmit passes"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "BLOCKER-1 fix: markReviewed was missing. updateTenant was missing. updateConsultant needs businessName/supportEmail fields for Settings Profile tab. VALID_FONT_FAMILIES needs Plus Jakarta Sans. general-assistant seed needed for provisionStarterAgent (Item 17)."
     },
     {

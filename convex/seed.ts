@@ -309,6 +309,89 @@ export const seedAll = internalMutation({
       updatedAt: oneHourAgo,
     });
 
+    // 9. General-assistant template (for provisionStarterAgent)
+    await seedGeneralAssistantTemplate(ctx, templateCreatorId);
+
     return { status: "seeded" };
+  },
+});
+
+/**
+ * Idempotent seed for the general-assistant agent template.
+ * Checks for existing slug before insert.
+ */
+async function seedGeneralAssistantTemplate(
+  ctx: { db: import("./_generated/server").MutationCtx["db"] },
+  createdBy: import("./_generated/dataModel").Id<"users">
+) {
+  const existing = await ctx.db
+    .query("agentTemplates")
+    .withIndex("by_slug", (q) => q.eq("slug", "general-assistant"))
+    .first();
+
+  if (existing) {
+    return existing._id;
+  }
+
+  const now = Date.now();
+  return await ctx.db.insert("agentTemplates", {
+    slug: "general-assistant",
+    displayName: "General Assistant",
+    description: "A versatile AI assistant that can help with a wide range of tasks including writing, research, analysis, and problem-solving.",
+    category: "general",
+    version: 1,
+    isActive: true,
+    isPipeline: false,
+    executionMode: "autonomous",
+    systemPrompt: "You are a helpful AI assistant. Answer questions clearly and concisely, help with writing and analysis tasks, and provide actionable recommendations.",
+    integrationSlots: [],
+    inputSchema: {},
+    defaultLockedFields: ["systemPrompt"],
+    defaultCustomizableFields: ["greeting", "persona"],
+    defaultConfig: {
+      greeting: "Hello! How can I help you today?",
+      persona: "professional",
+    },
+    createdBy,
+    createdAt: now,
+    updatedAt: now,
+  });
+}
+
+/**
+ * Standalone idempotent seed for general-assistant template.
+ * Can be called independently of seedAll.
+ */
+export const seedGeneralAssistant = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const existing = await ctx.db
+      .query("agentTemplates")
+      .withIndex("by_slug", (q) => q.eq("slug", "general-assistant"))
+      .first();
+
+    if (existing) {
+      return { status: "already_exists", templateId: existing._id };
+    }
+
+    // Find or create a platform admin user for createdBy
+    let adminUser = await ctx.db
+      .query("users")
+      .withIndex("by_clerkUserId", (q) => q.eq("clerkUserId", "system_seed"))
+      .first();
+
+    if (!adminUser) {
+      const adminId = await ctx.db.insert("users", {
+        clerkUserId: "system_seed",
+        role: "platform_admin",
+        displayName: "System",
+        email: "system@onplinth.ai",
+        createdAt: Date.now(),
+      });
+      adminUser = await ctx.db.get(adminId);
+    }
+
+    const templateId = await seedGeneralAssistantTemplate(ctx, adminUser!._id);
+    return { status: "seeded", templateId };
   },
 });

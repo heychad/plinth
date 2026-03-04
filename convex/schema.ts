@@ -15,6 +15,7 @@ export default defineSchema({
       v.literal("scale")
     ),
     planExpiresAt: v.optional(v.number()),
+    supportEmail: v.optional(v.string()),
     clerkOrgId: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
@@ -115,7 +116,8 @@ export default defineSchema({
       v.literal("marketing"),
       v.literal("sales"),
       v.literal("operations"),
-      v.literal("coaching")
+      v.literal("coaching"),
+      v.literal("general")
     ),
     version: v.number(),
     isActive: v.boolean(),

@@ -3,7 +3,7 @@ import { v } from "convex/values";
 import { requireAuth } from "./auth";
 
 const HEX_COLOR_REGEX = /^#[0-9A-Fa-f]{6}$/;
-const VALID_FONT_FAMILIES = ["Inter", "Poppins", "Lato", "Montserrat", "Open Sans"] as const;
+const VALID_FONT_FAMILIES = ["Inter", "Poppins", "Lato", "Montserrat", "Open Sans", "Plus Jakarta Sans"] as const;
 
 function validateHexColor(value: string, fieldName: string): void {
   if (!HEX_COLOR_REGEX.test(value)) {

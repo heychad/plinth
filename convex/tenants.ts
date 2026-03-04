@@ -88,3 +88,52 @@ export const createTenant = mutation({
     });
   },
 });
+
+export const updateTenant = mutation({
+  args: {
+    tenantId: v.id("tenants"),
+    businessName: v.optional(v.string()),
+    ownerName: v.optional(v.string()),
+    ownerEmail: v.optional(v.string()),
+    website: v.optional(v.string()),
+    vertical: v.optional(
+      v.union(
+        v.literal("spa"),
+        v.literal("course"),
+        v.literal("speaker"),
+        v.literal("consultant"),
+        v.literal("other")
+      )
+    ),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const auth = await requireAuth(ctx);
+
+    if (auth.role !== "consultant" && auth.role !== "platform_admin") {
+      throw new Error("Not authorized");
+    }
+
+    const tenant = await ctx.db.get(args.tenantId);
+    if (!tenant) {
+      throw new Error("Tenant not found");
+    }
+
+    // Validate consultant ownership
+    if (auth.role === "consultant" && tenant.consultantId !== auth.consultantId) {
+      throw new Error("Not authorized");
+    }
+
+    const { tenantId: _tenantId, website, ...rest } = args;
+    const updates: Record<string, unknown> = { updatedAt: Date.now() };
+
+    if (rest.businessName !== undefined) updates.businessName = rest.businessName;
+    if (rest.ownerName !== undefined) updates.ownerName = rest.ownerName;
+    if (rest.ownerEmail !== undefined) updates.ownerEmail = rest.ownerEmail;
+    if (website !== undefined) updates.websiteUrl = website;
+    if (rest.vertical !== undefined) updates.vertical = rest.vertical;
+    if (rest.notes !== undefined) updates.notes = rest.notes;
+
+    await ctx.db.patch(args.tenantId, updates);
+  },
+});

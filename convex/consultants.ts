@@ -22,6 +22,8 @@ export const getConsultant = query({
 export const updateConsultant = mutation({
   args: {
     displayName: v.optional(v.string()),
+    businessName: v.optional(v.string()),
+    supportEmail: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const auth = await requireAuth(ctx);
@@ -38,6 +40,12 @@ export const updateConsultant = mutation({
     const updates: Record<string, unknown> = { updatedAt: Date.now() };
     if (args.displayName !== undefined) {
       updates.displayName = args.displayName;
+    }
+    if (args.businessName !== undefined) {
+      updates.businessName = args.businessName;
+    }
+    if (args.supportEmail !== undefined) {
+      updates.supportEmail = args.supportEmail;
     }
 
     await ctx.db.patch(consultant._id, updates);

@@ -329,6 +329,30 @@ export const markNoAction = mutation({
   },
 });
 
+export const markReviewed = mutation({
+  args: {
+    reportId: v.id("coachingCallReports"),
+  },
+  handler: async (ctx, args) => {
+    const auth = await requireAuth(ctx);
+
+    const report = await ctx.db.get(args.reportId);
+    if (!report) {
+      throw new Error("Report not found");
+    }
+
+    const adminAccess = await isAdminForTenant(ctx, report.tenantId, auth);
+    if (!adminAccess) {
+      throw new Error("Not authorized");
+    }
+
+    await ctx.db.patch(args.reportId, {
+      status: "reviewed",
+      updatedAt: Date.now(),
+    });
+  },
+});
+
 // ─── Internal Mutations (pipeline use) ───────────────────────────────────────
 
 /**

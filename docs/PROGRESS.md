@@ -4,6 +4,12 @@ Sprint log -- append only, never overwrite.
 
 ---
 
+## 2026-03-03 — Cycle: Item 20 (Missing Backend Mutations + Seed Data)
+
+- **Item 20** (functional): Added `markReviewed` mutation to `convex/coachingCallReports.ts` — accepts `{ reportId }`, calls `requireAuth`, validates consultant ownership via `isAdminForTenant`, sets status to `"reviewed"` and updatedAt. Added `updateTenant` mutation to `convex/tenants.ts` — accepts `{ tenantId, businessName?, ownerName?, ownerEmail?, website?, vertical?, notes? }`, validates consultant ownership, patches fields (maps `website` arg to `websiteUrl` schema field). Expanded `updateConsultant` in `convex/consultants.ts` to accept `{ displayName?, businessName?, supportEmail? }` (added `businessName` and `supportEmail` optional args). Added `supportEmail` as `v.optional(v.string())` to consultants table in `convex/schema.ts`. Updated `VALID_FONT_FAMILIES` in `convex/themes.ts` to include `"Plus Jakarta Sans"`. Added `v.literal("general")` to agentTemplates category union in schema. Created idempotent `general-assistant` seed in `convex/seed.ts` — checks for existing slug before insert, standalone `seedGeneralAssistant` internal mutation also available. Added `vitest.config.ts` to exclude Playwright tests from vitest runner (pre-existing conflict). Backpressure green (tsc + eslint + convex typecheck + next build + vitest + playwright).
+
+---
+
 ## 2026-03-03 — Cycle: Item 15 (Document CRUD)
 
 - **Item 15** (functional): Created `convex/documents.ts` with `listDocuments`, `getDocument`, `createDocument`, `updateDocument`, and `saveAgentDocument`. `listDocuments` accepts optional `sortBy` ('createdAt'|'updatedAt'|'title'), calls `requireAuth()`, scopes by `tenantId`, returns up to 50 docs — uses index for createdAt DESC, in-memory sort for updatedAt/title. `getDocument` validates `tenantId` match, returns null on mismatch, includes signed `contentUrl` via `ctx.storage.getUrl()` when `storageId` is set. `createDocument` sets `tenantId`/`userId` from JWT, `mimeType: 'text/markdown'`, computes `wordCount`, returns `Id<"documents">`. `updateDocument` validates tenant ownership, throws `ConvexError` on mismatch, always updates `updatedAt` and recomputes `wordCount` when content changes. `saveAgentDocument` is `internalMutation` — idempotent per `agentRunId` (upserts via `by_agentRunId` index), sets `source: 'agent'`, looks up first tenant user for `userId`. Backpressure green (tsc + eslint).
