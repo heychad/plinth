@@ -11,3 +11,4 @@ __pycache__/
 
 # kessel-run
 .claude/worktrees/
+.kessel-locks/
