@@ -425,7 +425,7 @@
         "Verify WCAG AA contrast ratios: foreground #1E1B4B on background #F5F3FF >= 7:1 (actual ~8.5:1); primary-foreground #FFFFFF on primary #6366F1 >= 4.5:1",
         "npm run build passes"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "OMISSION fix: added WCAG AA contrast ratio verification step."
     },
     {

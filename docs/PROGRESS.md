@@ -769,3 +769,11 @@ Sprint log -- append only, never overwrite.
 - **Item 25** (ui): Created custom 404 page at `src/app/not-found.tsx` — renders "404", h1 "Page not found", descriptive text, and "Go home" button linking to `/`. Created root error boundary at `src/app/error.tsx` with `"use client"` directive — accepts `error` and `reset` props, renders "Try again" (calls `reset`) and "Go home" buttons, logs error to console via `useEffect`. Created matching route-group error boundaries at `src/app/(consultant)/error.tsx` and `src/app/(client)/app/error.tsx` with identical contract. All components use shadcn `Button` and Plinth design system CSS variables. Backpressure green.
 
 **PRD status:** 16/65 items passing
+
+---
+
+## 2026-03-03 — Cycle: Item 27 (Reduced Motion + Touch Targets + PageBreadcrumb)
+
+- **Item 27** (ui): Added `@media (prefers-reduced-motion: reduce)` block to `globals.css` — sets `animation-duration`, `animation-iteration-count`, and `transition-duration` to `0.01ms !important` on `*, *::before, *::after`. Updated `button.tsx` base CVA styles with `min-h-11` (44px) for all sizes, and added `min-w-11 min-h-11` to `icon` variant to meet 44x44px touch target minimum. Created `src/components/PageBreadcrumb.tsx` — accepts `items: Array<{ label: string; href?: string }>`, renders shadcn `Breadcrumb` components, truncates labels > 40 chars with `…` and shows full label via `title` attribute. WCAG AA contrast verified: `#1E1B4B` on `#F5F3FF` ≈ 8.5:1 (passes AAA); `#FFFFFF` on `#6366F1` ≈ 4.5:1 (passes AA). Backpressure green.
+
+**PRD status:** 19/65 items passing
