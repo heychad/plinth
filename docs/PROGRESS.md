@@ -565,4 +565,35 @@ Sprint log -- append only, never overwrite.
 
 **PRD status:** 2/65 items passing
 
-**Next priority items:** Item 3 (font + 20 shadcn components), Items 4-6 (schema tables), Item 7 (package installs)
+**Next priority items:** Items 4-6 (schema tables), Item 7 (package installs), Items 8-9 (middleware + auth layout)
+
+---
+
+## UI Sprint Cycle 3 — 2026-03-03
+
+**Items completed:** 3 (Font + 20 shadcn/ui components)
+
+**What was built:**
+- **Item 3:** Installed all 20 shadcn/ui components (button, card, input, select, badge, dialog, sheet, tabs, avatar, dropdown-menu, skeleton, sidebar, breadcrumb, form, table, textarea, checkbox, separator, tooltip, sonner) plus auto-dependencies (label, use-mobile hook)
+  - Plus Jakarta Sans font already configured from prior cycles (next/font/google, CSS variable, display swap)
+  - Added explicit `font-family: var(--font-plus-jakarta-sans), sans-serif` to body in @layer base
+  - shadcn CLI added sidebar CSS variables (light + dark) and @theme inline block to globals.css
+  - Created `.npmrc` with `legacy-peer-deps=true` to resolve @convex-dev/agent peer dependency conflict
+  - Added missing DOM type globals to eslint.config.mjs (HTMLOListElement, HTMLUListElement, HTMLLIElement, HTMLSpanElement, HTMLParagraphElement, HTMLTableElement, HTMLTableSectionElement, HTMLTableCellElement, HTMLTableCaptionElement, KeyboardEvent)
+
+**Files created:**
+- .npmrc
+- src/components/ui/ (21 files: button, card, input, select, badge, dialog, sheet, tabs, avatar, dropdown-menu, skeleton, sidebar, breadcrumb, form, table, textarea, checkbox, separator, tooltip, sonner, label)
+- src/hooks/use-mobile.tsx
+
+**Files modified:**
+- src/app/globals.css (font-family on body, sidebar CSS variables, @custom-variant dark, @theme inline)
+- eslint.config.mjs (DOM type globals)
+- package.json, package-lock.json (shadcn dependencies)
+
+**Verification:**
+- `bash scripts/kessel-run/backpressure.sh` — ALL GREEN
+
+**PRD status:** 3/65 items passing
+
+**Next priority items:** Items 4-6 (schema tables), Item 7 (package installs), Items 8-9 (middleware + auth layout)

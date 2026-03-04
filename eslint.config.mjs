@@ -86,6 +86,17 @@ export default [
         HTMLDivElement: "readonly",
         HTMLFormElement: "readonly",
         HTMLAnchorElement: "readonly",
+        HTMLOListElement: "readonly",
+        HTMLUListElement: "readonly",
+        HTMLLIElement: "readonly",
+        HTMLSpanElement: "readonly",
+        HTMLParagraphElement: "readonly",
+        HTMLTableElement: "readonly",
+        HTMLTableSectionElement: "readonly",
+        HTMLTableCellElement: "readonly",
+        HTMLTableCaptionElement: "readonly",
+        // Event types
+        KeyboardEvent: "readonly",
         // File API
         File: "readonly",
         FileReader: "readonly",

@@ -47,7 +47,7 @@
         "import './globals.css' is present in layout.tsx; layout exports RootLayout wrapping ConvexClientProvider and ThemeProvider",
         "npm run build passes; browser shows Plus Jakarta Sans font and warm lavender (#F5F3FF) background"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "The --font-plus-jakarta-sans CSS variable must be referenced via className on <html>, not imported in CSS."
     },
     {
