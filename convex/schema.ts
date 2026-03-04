@@ -15,6 +15,7 @@ export default defineSchema({
       v.literal("scale")
     ),
     planExpiresAt: v.optional(v.number()),
+    clerkOrgId: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),
   })
@@ -414,4 +415,25 @@ export default defineSchema({
   })
     .index("by_zoomMeetingId", ["zoomMeetingId"])
     .index("by_tenantId_processed", ["tenantId", "processed"]),
+
+  // ─── UI Sprint Item 6: invitations ────────────────────────────────────
+
+  invitations: defineTable({
+    tenantId: v.id("tenants"),
+    consultantId: v.id("consultants"),
+    email: v.string(),
+    displayName: v.union(v.string(), v.null()),
+    clerkInvitationId: v.string(),
+    status: v.union(
+      v.literal("pending"),
+      v.literal("accepted"),
+      v.literal("revoked"),
+      v.literal("expired")
+    ),
+    sentAt: v.number(),
+    acceptedAt: v.union(v.number(), v.null()),
+    createdAt: v.number(),
+  })
+    .index("by_tenantId_status", ["tenantId", "status"])
+    .index("by_clerkInvitationId", ["clerkInvitationId"]),
 });

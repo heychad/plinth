@@ -639,4 +639,22 @@ Sprint log -- append only, never overwrite.
 
 **PRD status:** 5/65 items passing
 
-**Next priority items:** Item 6 (invitations + clerkOrgId), Item 7 (package installs), Items 8-9 (middleware + auth layout)
+**Next priority items:** Item 7 (package installs), Items 8-9 (middleware + auth layout)
+
+---
+
+## UI Sprint Cycle 6 — 2026-03-03
+
+**Items completed:** 6 (invitations table + clerkOrgId)
+
+**What was built:**
+- **Item 6:** Added `clerkOrgId: v.optional(v.string())` field to consultants table. Added `invitations` table with fields: tenantId, consultantId, email, displayName (v.union(v.string(), v.null())), clerkInvitationId, status (pending|accepted|revoked|expired), sentAt, acceptedAt (v.union(v.number(), v.null())), createdAt. Indexes: by_tenantId_status, by_clerkInvitationId.
+
+**Files modified:**
+- convex/schema.ts
+
+**Verification:**
+- `npx tsc --noEmit` — PASS
+- `bash scripts/kessel-run/backpressure.sh` — ALL GREEN
+
+**PRD status:** 6/65 items passing

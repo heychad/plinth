@@ -89,7 +89,7 @@
         "invitations has indexes: by_tenantId_status on ['tenantId', 'status'] and by_clerkInvitationId on ['clerkInvitationId']",
         "npx tsc --noEmit passes with no type errors"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "Depends on existing consultants schema from prior sprint"
     },
     {
