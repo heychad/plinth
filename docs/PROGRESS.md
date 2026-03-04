@@ -4,6 +4,12 @@ Sprint log -- append only, never overwrite.
 
 ---
 
+## 2026-03-03 — Cycle: Item 23 (Sign-In / Sign-Up Pages)
+
+- **Item 23** (ui): Created `src/app/(auth)/sign-in/[[...sign-in]]/page.tsx` with Clerk `<SignIn />` component branded with `colorPrimary="#6366F1"` and `fontFamily="var(--font-plus-jakarta-sans)"`, `afterSignInUrl="/"`. Created `src/app/(auth)/sign-up/[[...sign-up]]/page.tsx` with matching `<SignUp />` component. Both use catch-all route segments for Clerk sub-route resolution. Auth layout (already existing) centers the components. Backpressure green.
+
+---
+
 ## 2026-03-03 — Cycle: Item 34 (Consultant Sidebar Layout)
 
 - **Item 34** (ui): Fully replaced `src/app/(consultant)/layout.tsx` — removed inline top nav bar, replaced with `<SidebarProvider>` wrapping `<ConsultantSidebar />` + `<SidebarInset>`. Main element has `id="main-content"` and `tabIndex={-1}`. Mobile header with `SidebarTrigger` (44x44px min touch target) shown only below `md` breakpoint. Created `src/components/consultant/ConsultantSidebar.tsx` — uses shadcn `Sidebar` with `collapsible="icon"`, 5 nav items (Dashboard, Clients, Agents, Reports, Settings) with Lucide icons, `aria-label="Consultant navigation"`, active state detection via `usePathname()` with `aria-current="page"`, `SidebarRail` for drag-to-collapse, footer with Clerk `<UserButton afterSignOutUrl="/sign-in" />`. Backpressure green.

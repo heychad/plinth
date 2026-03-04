@@ -358,7 +358,7 @@
         "Navigating to /sign-in and /sign-up while unauthenticated renders the Clerk widgets",
         "npx tsc --noEmit passes"
       ],
-      "passes": false,
+      "passes": true,
       "notes": "Consolidated sign-in and sign-up into one item."
     },
     {
